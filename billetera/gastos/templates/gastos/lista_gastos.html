@@ -17,10 +17,13 @@
             <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
             <span class="gasto-monto">${{ gasto.monto }}</span>
             <span class="gasto-fecha">{{ gasto.fecha }}</span>
+            <a href="{% url 'editar_gasto' gasto.id %}">Editar</a>
+            <a href="{% url 'eliminar_gasto' gasto.id %}">Eliminar</a>
         </li>
         {% empty %}
         <li class="no-gastos">No hay gastos registrados.</li>
         {% endfor %}
     </ul>
+    <a href="{% url 'crear_gasto' %}">Crear Nuevo Gasto</a>
 </body>
 </html>
