@@ -6,11 +6,14 @@ def lista_gastos(request):
     gastos = Gasto.objects.all()
     return render(request, 'gastos/lista_gastos.html', {'gastos': gastos})
 
+from datetime import datetime
 def crear_gasto(request):
     if request.method == 'POST':
         form = GastoForm(request.POST)
         if form.is_valid():
-            form.save()
+            gasto = form.save(commit=False)
+            # Asegúrate de que la fecha esté en el formato correcto (por ejemplo, "2024-01-02").
+            gasto.save()
             return redirect('lista_gastos')
     else:
         form = GastoForm()

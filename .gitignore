@@ -1,2 +1,4 @@
 env/
-staticfiles/
+staticfiles/ 
+.sqlite3
+billetera/gastos/migrations/0002_alter_gasto_fecha.py
