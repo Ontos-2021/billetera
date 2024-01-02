@@ -1,9 +1,46 @@
-/* Estilos generales */
+/* Estilos para la página Lista de Gastos */
+
 body {
     font-family: Arial, sans-serif;
-    background-color: #e80505; /* Color de fondo suave */
+    background-color: #f2f2f2;
     margin: 0;
     padding: 0;
 }
 
+h2 {
+    background-color: #007BFF;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
 
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin: 10px;
+    padding: 10px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+}
+
+.gasto-descripcion {
+    font-weight: bold;
+}
+
+.gasto-monto {
+    color: #007BFF;
+    font-weight: bold;
+}
+
+.gasto-fecha {
+    color: #888;
+}
+
+.no-gastos {
+    font-style: italic;
+    text-align: center;
+}
