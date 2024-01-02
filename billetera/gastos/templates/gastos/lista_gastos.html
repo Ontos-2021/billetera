@@ -1,20 +1,25 @@
+{% load static %} 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Gastos</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
-
+    <link rel="stylesheet" type="text/css" href="{% static 'gastos/style.css' %}">
 </head>
 <body>
     <h2>Lista de Gastos</h2>
 
     <ul>
         {% for gasto in gastos %}
-        <li>{{ gasto.descripcion }} - ${{ gasto.monto }} - {{ gasto.fecha }}</li>
+        <li>
+            <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
+            <span class="gasto-monto">${{ gasto.monto }}</span>
+            <span class="gasto-fecha">{{ gasto.fecha }}</span>
+        </li>
         {% empty %}
-        <li>No hay gastos registrados.</li>
+        <li class="no-gastos">No hay gastos registrados.</li>
         {% endfor %}
     </ul>
 </body>
