@@ -3,4 +3,4 @@ staticfiles/
 *.sqlite3
 billetera/gastos/migrations/
 .DS_Store
-        billetera/.DS_Store
+billetera/.DS_Store
