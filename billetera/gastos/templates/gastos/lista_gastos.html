@@ -23,6 +23,7 @@
                 <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
                 <span class="gasto-monto">${{ gasto.monto }}</span>
                 <span class="gasto-fecha">{{ gasto.fecha }}</span>
+                <span class="gasto-moneda">({{ gasto.moneda }})</span>
                 <a href="{% url 'editar_gasto' gasto.id %}">Editar</a>
                 <a href="{% url 'eliminar_gasto' gasto.id %}">Eliminar</a>
             </li>

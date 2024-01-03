@@ -51,7 +51,7 @@ li {
     font-weight: bold;
 }
 
-.gasto-fecha {
+.gasto-fecha, .gasto-moneda {
     color: #888;
 }
 
