@@ -3,7 +3,7 @@ from .models import Gasto
 from .forms import GastoForm
 
 def lista_gastos(request):
-    gastos = Gasto.objects.all()
+    gastos = Gasto.objects.all().order_by('-fecha')
     return render(request, 'gastos/lista_gastos.html', {'gastos': gastos})
 
 from datetime import datetime
