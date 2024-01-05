@@ -1,0 +1,18 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Gasto</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'gastos/style.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Billetera Virtual</h1>
+        <p>Bienvenido a tu billetera virtual basada en Django.</p>
+    </header>
+    {% block content %}{% endblock %}
+</body>
+</html>

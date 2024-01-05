@@ -1,43 +1,31 @@
+{% extends "base.html" %}
 {% load static %} 
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Billetera Virtual - Lista de Gastos</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'gastos/style.css' %}">
-</head>
-<body>
-    <header>
-        <h1>Billetera Virtual</h1>
-        <p>Bienvenido a tu billetera virtual basada en Django.</p>
-    </header>
 
-    <main>
-        <h2>Lista de Gastos</h2>
+{% block content %}
+<main>
+    <h2>Lista de Gastos</h2>
 
-        <ul>
-            {% for gasto in gastos %}
-            <li>
-                <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
-                <span class="gasto-monto">${{ gasto.monto }}</span>
-                <span class="gasto-fecha">{{ gasto.fecha }}</span>
-                <span class="gasto-moneda">({{ gasto.moneda.codigo }})</span>
-                <span class="gasto-categoria">({{ gasto.categoria }})</span>
-                <a href="{% url 'editar_gasto' gasto.id %}">Editar</a>
-                <a href="{% url 'eliminar_gasto' gasto.id %}">Eliminar</a>
-            </li>
-            {% empty %}
-            <li class="no-gastos">No hay gastos registrados.</li>
-            {% endfor %}
-        </ul>
-        
-        <a href="{% url 'crear_gasto' %}" class="crear-gasto">Crear Nuevo Gasto</a>
-    </main>
+    <ul>
+        {% for gasto in gastos %}
+        <li>
+            <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
+            <span class="gasto-monto">${{ gasto.monto }}</span>
+            <span class="gasto-fecha">{{ gasto.fecha }}</span>
+            <span class="gasto-moneda">({{ gasto.moneda.codigo }})</span>
+            <span class="gasto-categoria">({{ gasto.categoria }})</span>
+            <a href="{% url 'editar_gasto' gasto.id %}">Editar</a>
+            <a href="{% url 'eliminar_gasto' gasto.id %}">Eliminar</a>
+        </li>
+        {% empty %}
+        <li class="no-gastos">No hay gastos registrados.</li>
+        {% endfor %}
+    </ul>
+    
+    <a href="{% url 'crear_gasto' %}" class="crear-gasto">Crear Nuevo Gasto</a>
+</main>
 
-    <footer>
-        <p>¡Gracias por utilizar nuestra billetera virtual!</p>
-    </footer>
-</body>
-</html>
+<footer>
+    <p>¡Gracias por utilizar nuestra billetera virtual!</p>
+</footer>
+{% endblock %}
