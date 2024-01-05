@@ -1,31 +1,33 @@
 {% extends "gastos/base.html" %}
 {% load static %} 
-
 {% block title %}Lista de Gastos{% endblock %}
 {% block content %}
-<main>
+<main class="container mt-5">
     <h2>Lista de Gastos</h2>
 
-    <ul>
+    <ul class="list-group">
         {% for gasto in gastos %}
-        <li>
-            <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
-            <span class="gasto-monto">${{ gasto.monto }}</span>
-            <span class="gasto-fecha">{{ gasto.fecha }}</span>
-            <span class="gasto-moneda">({{ gasto.moneda.codigo }})</span>
-            <span class="gasto-categoria">({{ gasto.categoria }})</span>
-            <a href="{% url 'editar_gasto' gasto.id %}">Editar</a>
-            <a href="{% url 'eliminar_gasto' gasto.id %}">Eliminar</a>
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
+                    <span class="gasto-monto">${{ gasto.monto }}</span>
+                    <span class="gasto-fecha">{{ gasto.fecha }}</span>
+                    <span class="gasto-moneda">({{ gasto.moneda.codigo }})</span>
+                    <span class="gasto-categoria">({{ gasto.categoria }})</span>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'editar_gasto' gasto.id %}" class="btn btn-primary">Editar</a>
+                    <a href="{% url 'eliminar_gasto' gasto.id %}" class="btn btn-danger">Eliminar</a>
+                </div>
+            </div>
         </li>
         {% empty %}
-        <li class="no-gastos">No hay gastos registrados.</li>
+        <li class="list-group-item text-center">No hay gastos registrados.</li>
         {% endfor %}
     </ul>
     
-    <a href="{% url 'crear_gasto' %}" class="crear-gasto">Crear Nuevo Gasto</a>
+    <a href="{% url 'crear_gasto' %}" class="btn btn-success mt-3">Crear Nuevo Gasto</a>
 </main>
 
-<footer>
-    <p>¡Gracias por utilizar nuestra billetera virtual!</p>
-</footer>
 {% endblock %}

@@ -1,45 +1,11 @@
 /* Estilos para la página Lista de Gastos */
 
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-}
-
 h1, h2 {
     background-color: #007BFF;
     color: #fff;
     padding: 10px;
     text-align: center;
     margin-bottom: 20px;
-}
-
-main {
-    max-width: 800px;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    box-sizing: border-box;
-}
-
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    margin: 10px 0;
-    padding: 10px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
 }
 
 .gasto-descripcion {
@@ -70,16 +36,4 @@ li {
     text-decoration: none;
     font-weight: bold;
     border-radius: 5px;
-}
-
-/* Estilos para dispositivos móviles */
-@media (max-width: 768px) {
-    main {
-        padding: 10px;
-    }
-
-    li {
-        margin: 5px 0;
-        padding: 5px;
-    }
 }
