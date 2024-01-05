@@ -24,7 +24,21 @@ def create_initial_data(sender, **kwargs):
             Moneda.objects.create(codigo='ARS', nombre='Peso Argentino', simbolo='$')
         if not Moneda.objects.filter(codigo='CLP').exists():
             Moneda.objects.create(codigo='CLP', nombre='Peso Chileno', simbolo='$')
-    
+        #Crea instancias de Categoría si no existen
+        categorias = ['Alimentación',
+                      'Transporte',
+                      'Entretenimiento',
+                      'Salud',
+                      'Vivienda',
+                      'Educación',
+                      'Ropa',
+                      'Viajes',
+                      'Tecnología',
+                      'Ahorros e Inversiones']
+        for categoria_nombre in categorias:
+            if not Categoria.objects.filter(nombre=categoria_nombre).exists():
+                Categoria.objects.create(nombre=categoria_nombre)
+
 class Categoria(models.Model):
     nombre = models.CharField(max_length=50)
 
