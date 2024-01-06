@@ -3,9 +3,9 @@
 {% block title %}Lista de Gastos{% endblock %}
 {% block content %}
 <main class="container mt-5">
-    <h2>Lista de Gastos</h2>
+    <h2 class="row">Lista de Gastos</h2>
 
-    <ul class="list-group">
+    <ul class="row list-group">
         {% for gasto in gastos %}
         <li class="list-group-item">
             <div class="d-flex justify-content-between align-items-center">
@@ -17,8 +17,8 @@
                     <span class="gasto-categoria">({{ gasto.categoria }})</span>
                 </div>
                 <div class="btn-group" role="group">
-                    <a href="{% url 'editar_gasto' gasto.id %}" class="btn btn-primary">Editar</a>
-                    <a href="{% url 'eliminar_gasto' gasto.id %}" class="btn btn-danger">Eliminar</a>
+                    <a href="{% url 'editar_gasto' gasto.id %}" class="btn btn-primary m-1">Editar</a>
+                    <a href="{% url 'eliminar_gasto' gasto.id %}" class="btn btn-danger m-1">Eliminar</a>
                 </div>
             </div>
         </li>
@@ -27,7 +27,7 @@
         {% endfor %}
     </ul>
     
-    <a href="{% url 'crear_gasto' %}" class="btn btn-success my-3">Crear Nuevo Gasto</a>
+    <a href="{% url 'crear_gasto' %}" class="row btn btn-success my-3 p-3">Crear Nuevo Gasto</a>
 </main>
 
 {% endblock %}
