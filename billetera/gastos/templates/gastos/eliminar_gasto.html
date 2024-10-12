@@ -4,7 +4,7 @@
 {% block content %}
 <main class="container mt-5">
     <h2>Eliminar Gasto</h2>
-    <p>¿Estás seguro de que deseas eliminar este gasto?</p>
+    <p>¿Estás seguro de que deseas eliminar este gasto?: {{gasto.descripcion}}</p>
     <form method="post">
         {% csrf_token %}
         <div class="d-grid gap-2">
