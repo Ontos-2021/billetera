@@ -4,3 +4,5 @@ staticfiles/
 billetera/gastos/migrations/
 .DS_Store
 billetera/.DS_Store
+.idea
+__pycache__

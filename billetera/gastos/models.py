@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone  # Importa timezone para configurar la zona horaria.
 from django.db.models.signals import post_migrate  # Para crear información automática en la base de datos
 from django.dispatch import receiver
+from django.contrib.auth.models import User  # Importar el modelo de usuario
 
 
 class Moneda(models.Model):
@@ -50,11 +51,12 @@ class Categoria(models.Model):
 
 
 class Gasto(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gastos')  # Relación con usuario
     descripcion = models.CharField(max_length=255)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha = models.DateTimeField(auto_now_add=True)  # Agrega este campo para la fecha de creación.
+    fecha = models.DateTimeField(auto_now_add=True)
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
 
     def __str__(self):
-        return self.descripcion
+        return f"{self.descripcion} - {self.monto} {self.moneda.simbolo}"

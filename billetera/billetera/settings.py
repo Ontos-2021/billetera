@@ -118,6 +118,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# settings.py
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'lista_gastos'
+LOGOUT_REDIRECT_URL = 'login'
+
+
 import os
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
