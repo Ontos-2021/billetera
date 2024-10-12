@@ -16,8 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
+from gastos import views as gastos_views
+
+# Router para la API REST
+router = routers.DefaultRouter()
+router.register(r'gastos', gastos_views.GastoViewSet)  # Aquí registras el viewset de gastos
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('gastos.urls')),
+    path('api/', include(router.urls)),  # Incluye las rutas de la API bajo el prefijo 'api/'
+    path('', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
 ]
+
