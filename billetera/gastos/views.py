@@ -24,7 +24,10 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def lista_gastos(request):
-    gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')
+    if request.user.is_superuser:
+        gastos = Gasto.objects.all().order_by('-fecha')
+    else:
+        gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')
     return render(request, 'gastos/lista_gastos.html', {'gastos': gastos})
 
 
@@ -35,21 +38,25 @@ from .models import Gasto
 from .serializers import GastoSerializer
 from rest_framework.permissions import IsAuthenticated
 
-from .permissions import IsOwnerOrReadOnly
+from .permissions import *
 from rest_framework import permissions
 
 
 class GastoViewSet(viewsets.ModelViewSet):
     queryset = Gasto.objects.all()
     serializer_class = GastoSerializer
-    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]  # Añadir nuestro permiso personalizado
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOwnOnly]
 
     def get_queryset(self):
-        # Asegurarse de que cada usuario sólo puede ver sus propios gastos
-        return self.queryset.filter(usuario=self.request.user)
+        # Los superusuarios pueden ver todos los gastos
+        if self.request.user.is_superuser:
+            return Gasto.objects.all()
+
+        # Los usuarios normales solo pueden ver sus propios gastos
+        return Gasto.objects.filter(usuario=self.request.user)
 
     def perform_create(self, serializer):
-        # Asignar automáticamente al usuario autenticado cuando se crea un nuevo gasto
+        # Cuando se crea un gasto, asigna automáticamente el usuario que lo crea
         serializer.save(usuario=self.request.user)
 
 
@@ -69,7 +76,10 @@ def crear_gasto(request):
 
 @login_required
 def editar_gasto(request, id):
-    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)  # Verifica que el gasto pertenezca al usuario
+    if request.user.is_superuser:
+        gasto = get_object_or_404(Gasto, id=id)
+    else:
+        gasto = get_object_or_404(Gasto, id=id, usuario=request.user)  # Verifica que el gasto pertenezca al usuario
     if request.method == 'POST':
         form = GastoForm(request.POST, instance=gasto)
         if form.is_valid():
