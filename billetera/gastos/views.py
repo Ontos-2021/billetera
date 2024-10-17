@@ -35,11 +35,22 @@ from .models import Gasto
 from .serializers import GastoSerializer
 from rest_framework.permissions import IsAuthenticated
 
+from .permissions import IsOwnerOrReadOnly
+from rest_framework import permissions
+
 
 class GastoViewSet(viewsets.ModelViewSet):
     queryset = Gasto.objects.all()
     serializer_class = GastoSerializer
-    permission_classes = [IsAuthenticated]  # Asegura que sólo los usuarios autenticados puedan acceder a la API
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]  # Añadir nuestro permiso personalizado
+
+    def get_queryset(self):
+        # Asegurarse de que cada usuario sólo puede ver sus propios gastos
+        return self.queryset.filter(usuario=self.request.user)
+
+    def perform_create(self, serializer):
+        # Asignar automáticamente al usuario autenticado cuando se crea un nuevo gasto
+        serializer.save(usuario=self.request.user)
 
 
 @login_required
