@@ -1,65 +1,42 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Gasto
 from .forms import GastoForm
-
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from rest_framework import viewsets, permissions
+from .serializers import GastoSerializer
+from .permissions import IsAdminOrReadOwnOnly
 
 
+# Registro de usuario
 def registro(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Guarda el usuario en la base de datos
-            login(request, user)  # Inicia sesión automáticamente después del registro
-            return redirect('lista_gastos')  # Redirige al usuario a la lista de gastos
+            user = form.save()
+            login(request, user)
+            return redirect('lista_gastos')
     else:
         form = UserCreationForm()
     return render(request, 'gastos/registro.html', {'form': form})
 
 
-from django.contrib.auth.decorators import login_required
+# Función para obtener los gastos filtrados por usuario o superusuario
+def obtener_gastos(request):
+    if request.user.is_superuser:
+        return Gasto.objects.all().order_by('-fecha')
+    return Gasto.objects.filter(usuario=request.user).order_by('-fecha')
 
 
+# Lista de gastos
 @login_required
 def lista_gastos(request):
-    if request.user.is_superuser:
-        gastos = Gasto.objects.all().order_by('-fecha')
-    else:
-        gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')
+    gastos = obtener_gastos(request)
     return render(request, 'gastos/lista_gastos.html', {'gastos': gastos})
 
 
-from datetime import datetime
-
-from rest_framework import viewsets
-from .models import Gasto
-from .serializers import GastoSerializer
-from rest_framework.permissions import IsAuthenticated
-
-from .permissions import *
-from rest_framework import permissions
-
-
-class GastoViewSet(viewsets.ModelViewSet):
-    queryset = Gasto.objects.all()
-    serializer_class = GastoSerializer
-    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOwnOnly]
-
-    def get_queryset(self):
-        # Los superusuarios pueden ver todos los gastos
-        if self.request.user.is_superuser:
-            return Gasto.objects.all()
-
-        # Los usuarios normales solo pueden ver sus propios gastos
-        return Gasto.objects.filter(usuario=self.request.user)
-
-    def perform_create(self, serializer):
-        # Cuando se crea un gasto, asigna automáticamente el usuario que lo crea
-        serializer.save(usuario=self.request.user)
-
-
+# Crear gasto
 @login_required
 def crear_gasto(request):
     if request.method == 'POST':
@@ -74,12 +51,10 @@ def crear_gasto(request):
     return render(request, 'gastos/crear_gasto.html', {'form': form})
 
 
+# Editar gasto
 @login_required
 def editar_gasto(request, id):
-    if request.user.is_superuser:
-        gasto = get_object_or_404(Gasto, id=id)
-    else:
-        gasto = get_object_or_404(Gasto, id=id, usuario=request.user)  # Verifica que el gasto pertenezca al usuario
+    gasto = get_object_or_404(Gasto, id=id, usuario=request.user if not request.user.is_superuser else None)
     if request.method == 'POST':
         form = GastoForm(request.POST, instance=gasto)
         if form.is_valid():
@@ -90,10 +65,41 @@ def editar_gasto(request, id):
     return render(request, 'gastos/editar_gasto.html', {'form': form})
 
 
+# Eliminar gasto
 @login_required
 def eliminar_gasto(request, id):
-    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)  # Verifica que el gasto pertenezca al usuario
+    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)
     if request.method == 'POST':
         gasto.delete()
         return redirect('lista_gastos')
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
+
+
+# API REST para gestionar los gastos
+class GastoViewSet(viewsets.ModelViewSet):
+    queryset = Gasto.objects.all()  # Añade el queryset explícitamente aquí
+    serializer_class = GastoSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOwnOnly]
+
+    def get_queryset(self):
+        # Los superusuarios pueden ver todos los gastos
+        if self.request.user.is_superuser:
+            return Gasto.objects.all()
+
+        # Filtrar gastos por usuario para usuarios normales
+        queryset = Gasto.objects.filter(usuario=self.request.user)
+
+        # Filtrar por fecha
+        fecha = self.request.query_params.get('fecha', None)
+        if fecha:
+            queryset = queryset.filter(fecha=fecha)
+
+        # Filtrar por categoría
+        categoria = self.request.query_params.get('categoria', None)
+        if categoria:
+            queryset = queryset.filter(categoria=categoria)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)

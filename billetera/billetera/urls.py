@@ -21,7 +21,7 @@ from gastos import views as gastos_views
 
 # Router para la API REST
 router = routers.DefaultRouter()
-router.register(r'gastos', gastos_views.GastoViewSet)  # Aquí registras el viewset de gastos
+router.register(r'gastos', gastos_views.GastoViewSet, basename='gasto')  # Añadimos el basename explícitamente
 
 urlpatterns = [
     path('admin/', admin.site.urls),
