@@ -7,6 +7,7 @@ from .forms import PerfilUsuarioForm
 def inicio_usuarios(request):
     return render(request, 'usuarios/inicio.html')
 
+
 @login_required
 def perfil_usuario(request):
     perfil = request.user.perfilusuario
