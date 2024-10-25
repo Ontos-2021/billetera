@@ -53,11 +53,14 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'billetera.urls'
+from pathlib import Path
+import os
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Agrega la ruta a la carpeta templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
