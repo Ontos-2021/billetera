@@ -4,6 +4,9 @@ from .models import PerfilUsuario
 from .forms import PerfilUsuarioForm
 
 
+def inicio(request):
+    return render(request, 'usuarios/inicio.html')
+
 def inicio_usuarios(request):
     return render(request, 'usuarios/inicio.html')
 
