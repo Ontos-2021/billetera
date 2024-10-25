@@ -26,6 +26,7 @@ router.register(r'gastos', gastos_views.GastoViewSet, basename='gasto')  # Añad
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),  # Incluye las rutas de la API bajo el prefijo 'api/'
-    path('', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
+    path('gastos', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
+    path('usuarios/', include('usuarios.urls')),
 ]
 
