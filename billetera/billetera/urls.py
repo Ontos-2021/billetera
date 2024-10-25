@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from gastos import views as gastos_views
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Router para la API REST
 router = routers.DefaultRouter()
@@ -30,3 +32,5 @@ urlpatterns = [
     path('usuarios/', include('usuarios.urls')),
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

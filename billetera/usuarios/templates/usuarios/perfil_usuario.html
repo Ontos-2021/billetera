@@ -1,12 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Perfil Usuario{% endblock %}
+{% load static %}
+
+{% block title %}Perfil de Usuario{% endblock %}
 {% block content %}
+
 <div class="container mt-5">
-    <h2>Perfil de {{ user.username }}</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    </form>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Perfil de Usuario</h2>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.perfilusuario.imagen_perfil %}
+                        <img src="{{ user.perfilusuario.imagen_perfil.url }}" alt="Imagen de Perfil" class="img-thumbnail mb-3" width="150" height="150">
+                    {% else %}
+                        <img src="{% static 'img/default_profile.png' %}" alt="Imagen por Defecto" class="img-thumbnail mb-3" width="150" height="150">
+                    {% endif %}
+                    <h4>{{ user.username }}</h4>
+                    <p>{{ user.email }}</p>
+                    <a href="{% url 'editar_perfil' %}" class="btn btn-primary mt-3">Editar Perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 {% endblock %}
