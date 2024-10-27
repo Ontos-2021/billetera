@@ -1,74 +1,179 @@
-{% load static %}
+<html><head><base href="/" /><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{% block title %}Billetera Virtual - Tu Control Financiero{% endblock %}</title>
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #3b82f6;
+        --accent-color: #06b6d4;
+        --bg-light: #f8fafc;
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --glass-bg: rgba(255, 255, 255, 0.7);
+    }
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Billetera Virtual{% endblock %}</title>
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    .navbar {
+        background: rgba(37, 99, 235, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #3b82f6;
-            --accent-color: #06b6d4;
-            --bg-light: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --glass-bg: rgba(255, 255, 255, 0.7);
+    .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white !important;
+    }
+
+    .nav-link {
+        color: rgba(255,255,255,0.9) !important;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: var(--secondary-color) !important;
+    }
+
+    .sidebar {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .main-content {
+        padding: 2rem;
+    }
+
+    .container-fluid {
+        flex: 1 0 auto;
+    }
+
+    .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .footer {
+        flex-shrink: 0;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 1rem 0;
+        margin-top: 2rem;
+    }
+
+    .balance-card {
+        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .balance-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease-in-out;
+    }
+
+    .balance-card:hover::before {
+        transform: translateX(100%);
+    }
+
+    .wallet-icon {
+        font-size: 2rem;
+        margin-right: 0.5rem;
+    }
+
+    .progress {
+        height: 12px;
+        border-radius: 6px;
+        background: rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        transition: width 1s ease-in-out;
+        background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+        background-size: 1rem 1rem;
+        animation: progress-bar-stripes 1s linear infinite;
+    }
+
+    .nav-item .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .nav-item .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: var(--accent-color);
+        transition: all 0.3s ease;
+    }
+
+    .nav-item .nav-link:hover::after {
+        width: 100%;
+        left: 0;
+    }
+
+    .sidebar .nav-link {
+        color: #1a1a1a !important;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.3rem;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar .nav-link:hover {
+        background-color: var(--primary-color);
+        color: white !important;
+        transform: translateX(5px);
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            min-height: auto;
+            position: static;
         }
-
-        body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+        
+        .main-content {
+            padding: 1rem;
         }
-
-        .navbar {
-            background: rgba(37, 99, 235, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white !important;
-        }
-
-        .nav-link {
-            color: rgba(255,255,255,0.9) !important;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: var(--secondary-color) !important;
-        }
-
-        .footer {
-            flex-shrink: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 0;
-            margin-top: 2rem;
-        }
-    </style>
-
-    {% block extra_css %}{% endblock %}  <!-- Bloque para incluir CSS adicional en páginas específicas -->
+    }
+</style>
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'inicio_usuarios' %}">
+            <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="fas fa-wallet wallet-icon"></i>
                 Billetera Virtual
             </a>
@@ -77,28 +182,14 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <span class="navbar-text ms-3">
-                                Bienvenido {{ user.username }}
-                            </span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'perfil_usuario' %}">Perfil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
-                        </li>
-                    {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                        <a class="nav-link" href="{% url 'home' %}">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'gastos:lista' %}">Gastos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'perfil' %}">Mi Perfil</a>
                     </li>
                 </ul>
             </div>
@@ -106,20 +197,296 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="container-fluid mt-4">
-        {% block content %}{% endblock %}
-    </main>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="{% url 'dashboard' %}">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="{% url 'gastos:nuevo' %}">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Nuevo Gasto
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="{% url 'reportes' %}">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Reportes
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
 
+            <!-- Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                {% block content %}
+                <div class="container">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card balance-card p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="mb-0">Balance Total</h4>
+                                        <h2 class="display-4 mb-0">$25,420.00</h2>
+                                    </div>
+                                    <i class="fas fa-wallet fa-3x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">
+                                        <i class="fas fa-exchange-alt me-2"></i>
+                                        Moneda Principal
+                                    </h5>
+                                    <select class="form-select">
+                                        <option value="ARS">ARS - Peso Argentino</option>
+                                        <option value="USD">USD - Dólar Estadounidense</option>
+                                        <option value="EUR">EUR - Euro</option>
+                                        <option value="BTC">BTC - Bitcoin</option>
+                                        <option value="ETH">ETH - Ethereum</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card balance-card p-4" style="background: linear-gradient(135deg, #f7931a 0%, #fbb03b 100%);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">Bitcoin</h5>
+                                        <h4 class="mb-0">0.0045 BTC</h4>
+                                        <small class="text-white-50">≈ $2,150.00 USD</small>
+                                    </div>
+                                    <i class="fab fa-bitcoin fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card balance-card p-4" style="background: linear-gradient(135deg, #627eea 0%, #8ca3f2 100%);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">Ethereum</h5>
+                                        <h4 class="mb-0">0.15 ETH</h4>
+                                        <small class="text-white-50">≈ $450.00 USD</small>
+                                    </div>
+                                    <i class="fab fa-ethereum fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card balance-card p-4" style="background: linear-gradient(135deg, #24a0ed 0%, #4dc9f6 100%);">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">USD Coin</h5>
+                                        <h4 class="mb-0">150.00 USDC</h4>
+                                        <small class="text-white-50">≈ $150.00 USD</small>
+                                    </div>
+                                    <i class="fas fa-dollar-sign fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Resumen de Gastos -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Resumen de Gastos
+                                    </h5>
+                                    <canvas id="gastosPieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Últimas Transacciones -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-history me-2"></i>
+                                        Últimas Transacciones
+                                    </h5>
+                                    <div class="list-group">
+                                        <a href="#" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">Supermercado</h6>
+                                                <small class="text-danger">-$150.00</small>
+                                            </div>
+                                            <small class="text-muted">Hace 3 días</small>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">Transporte</h6>
+                                                <small class="text-danger">-$25.00</small>
+                                            </div>
+                                            <small class="text-muted">Hace 5 días</small>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Metas de Ahorro -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-bullseye me-2"></i>
+                                        Metas de Ahorro
+                                    </h5>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 75%">
+                                            Vacaciones (75%)
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: 45%">
+                                            Nueva Laptop (45%)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Consejos Financieros -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-lightbulb me-2"></i>
+                                        Consejos Financieros
+                                    </h5>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Establece un presupuesto mensual para mantener tus finanzas bajo control.
+                                    </div>
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Ahorra al menos el 20% de tus ingresos mensuales.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+    {{ block content}}
+    {{ endblock }}
     <!-- Footer -->
     <footer class="footer text-center">
         <div class="container">
-            <span>Billetera Virtual &copy; 2024 - Todos los derechos reservados.</span>
+            <span>&copy; 2023 Billetera Virtual. Todos los derechos reservados.</span>
         </div>
     </footer>
 
-    <!-- JavaScript dependencies -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Configuración del gráfico de gastos
+        const ctx = document.getElementById('gastosPieChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Alimentación', 'Transporte', 'Entretenimiento', 'Servicios', 'Otros'],
+                datasets: [{
+                    data: [30, 20, 15, 25, 10],
+                    backgroundColor: [
+                        '#2ecc71',
+                        '#3498db',
+                        '#e74c3c',
+                        '#f1c40f',
+                        '#95a5a6'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
 
-    {% block extra_js %}{% endblock %}  <!-- Bloque para incluir JS adicional en páginas específicas -->
+        function updateCryptoPrices() {
+            const prices = {
+                BTC: {min: 45000, max: 48000},
+                ETH: {min: 2800, max: 3000},
+                USDC: {min: 0.99, max: 1.01}
+            };
+            
+            Object.keys(prices).forEach(crypto => {
+                const price = prices[crypto];
+                const randomPrice = price.min + Math.random() * (price.max - price.min);
+                const priceElements = document.querySelectorAll(`[data-crypto="${crypto}"]`);
+                priceElements.forEach(el => {
+                    el.textContent = randomPrice.toFixed(2);
+                });
+            });
+        }
+
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.innerHTML = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(value);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const balanceElement = document.querySelector('.display-4');
+            if(balanceElement) {
+                const finalBalance = parseFloat(balanceElement.innerHTML.replace(/[^0-9.-]+/g,""));
+                animateValue(balanceElement, 0, finalBalance, 1500);
+            }
+            
+            const transactionItems = document.querySelectorAll('.list-group-item');
+            transactionItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(10px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+        });
+
+        setInterval(updateCryptoPrices, 30000);
+        updateCryptoPrices(); // Initial update
+    </script>
+    {% endblock %}
 </body>
 </html>
