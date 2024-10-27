@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
-from .views import GastoViewSet
+from .api_views import GastoViewSet
 
 # Router para las rutas de la API REST
 router = DefaultRouter()
-router.register(r'gastos', GastoViewSet)
+router.register(r'', GastoViewSet, basename='gasto')
 
 # Lista de URLS combinada
 urlpatterns = [

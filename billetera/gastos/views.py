@@ -2,9 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Gasto
 from .forms import GastoForm
 from django.contrib.auth.decorators import login_required
-from rest_framework import viewsets, permissions
-from .serializers import GastoSerializer
-from .permissions import IsAdminOrReadOwnOnly
 
 
 # Función para obtener los gastos filtrados por usuario o superusuario
@@ -62,34 +59,3 @@ def eliminar_gasto(request, id):
         gasto.delete()  # Elimina el gasto de la base de datos
         return redirect('lista_gastos')  # Redirige a la lista de gastos
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
-
-
-# API REST para gestionar los gastos
-class GastoViewSet(viewsets.ModelViewSet):
-    queryset = Gasto.objects.all()  # Define el conjunto de datos inicial para la vista
-    serializer_class = GastoSerializer  # Define el serializador a utilizar
-    permission_classes = [permissions.IsAuthenticated, IsAdminOrReadOwnOnly]  # Define los permisos para la vista
-
-    def get_queryset(self):
-        # Los superusuarios pueden ver todos los gastos
-        if self.request.user.is_superuser:
-            return Gasto.objects.all()
-
-        # Filtrar gastos por usuario para usuarios normales
-        queryset = Gasto.objects.filter(usuario=self.request.user)
-
-        # Filtrar por fecha si se proporciona en los parámetros de la solicitud
-        fecha = self.request.query_params.get('fecha', None)
-        if fecha:
-            queryset = queryset.filter(fecha=fecha)
-
-        # Filtrar por categoría si se proporciona en los parámetros de la solicitud
-        categoria = self.request.query_params.get('categoria', None)
-        if categoria:
-            queryset = queryset.filter(categoria=categoria)
-
-        return queryset
-
-    def perform_create(self, serializer):
-        # Asocia automáticamente el usuario autenticado al crear un nuevo gasto
-        serializer.save(usuario=self.request.user)
