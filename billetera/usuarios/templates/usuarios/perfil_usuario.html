@@ -19,6 +19,8 @@
                     {% endif %}
                     <h4>{{ user.username }}</h4>
                     <p>{{ user.email }}</p>
+                    <p>Dirección: {{ user.perfilusuario.direccion }}</p>
+                    <p>Número de teléfono: {{ user.perfilusuario.telefono }}</p>
                     <a href="{% url 'editar_perfil' %}" class="btn btn-primary mt-3">Editar Perfil</a>
                 </div>
             </div>
