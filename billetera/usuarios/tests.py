@@ -39,6 +39,7 @@ class VistasUsuariosTest(TestCase):
         # URLs a probar
         self.editar_perfil_url = reverse('editar_perfil')
         self.registro_url = reverse('registro')
+        self.login_url = reverse('login')
 
     def test_editar_perfil_view_GET(self):
         # Autenticar al usuario para poder acceder a la vista de editar perfil
@@ -60,6 +61,17 @@ class VistasUsuariosTest(TestCase):
         self.assertEqual(response.status_code, 200)
         # Verificar que se utiliza el template correcto
         self.assertTemplateUsed(response, 'usuarios/registro.html')
+        # Verificar que el contexto contiene el formulario de registro
+        self.assertContains(response, 'Registrarse')
+
+    def test_login_view_GET(self):
+        # Prueba para la vista de registro de usuario
+        response = self.client.get(self.login_url)
+
+        # Verificar que la respuesta sea exitosa (código 200)
+        self.assertEqual(response.status_code, 200)
+        # Verificar que se utiliza el template correcto
+        self.assertTemplateUsed(response, 'usuarios/login.html')
         # Verificar que el contexto contiene el formulario de registro
         self.assertContains(response, 'Registrarse')
 

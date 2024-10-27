@@ -4,6 +4,7 @@ from django.db.models.signals import post_migrate  # Para crear información aut
 from django.dispatch import receiver
 from django.contrib.auth.models import User  # Importar el modelo de usuario
 
+
 class Moneda(models.Model):
     nombre = models.CharField(max_length=30)
     codigo = models.CharField(max_length=3, unique=True)
