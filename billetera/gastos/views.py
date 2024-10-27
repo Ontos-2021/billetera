@@ -1,26 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Gasto
 from .forms import GastoForm
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets, permissions
 from .serializers import GastoSerializer
 from .permissions import IsAdminOrReadOwnOnly
-
-
-# Registro de usuario
-def registro(request):
-    # Maneja la lógica de registro de usuario
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()  # Guarda el nuevo usuario en la base de datos
-            login(request, user)  # Inicia sesión automáticamente con el nuevo usuario
-            return redirect('lista_gastos')  # Redirige a la lista de gastos
-    else:
-        form = UserCreationForm()  # Crea un formulario de registro vacío
-    return render(request, 'gastos/registro.html', {'form': form})
 
 
 # Función para obtener los gastos filtrados por usuario o superusuario

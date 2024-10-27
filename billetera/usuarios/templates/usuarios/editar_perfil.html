@@ -23,7 +23,15 @@
                             {% endif %}
                             <input type="file" name="imagen_perfil" id="imagen_perfil" class="form-control" onchange="previewImage(event)">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+                        <div class="form-group mt-3">
+                            <label for="direccion">Dirección</label>
+                            <input type="text" name="direccion" id="direccion" class="form-control" value="{{ perfil.direccion }}">
+                        </div>
+                        <div class="form-group mt-3">
+                            <label for="telefono">Número de Teléfono</label>
+                            <input type="text" name="telefono" id="telefono" class="form-control" value="{{ perfil.telefono }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-4">Guardar Cambios</button>
                     </form>
                 </div>
             </div>
