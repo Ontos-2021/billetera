@@ -7,65 +7,118 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Billetera Virtual{% endblock %}</title>
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+            --accent-color: #06b6d4;
+            --bg-light: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(37, 99, 235, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+
+        .footer {
+            flex-shrink: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+    </style>
 
     {% block extra_css %}{% endblock %}  <!-- Bloque para incluir CSS adicional en páginas específicas -->
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'inicio_usuarios' %}">Billetera Virtual</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ml-auto">
-                        {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <span class="navbar-text mr-3">
-                                    Bienvenido, {{ user.username }}
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'perfil_usuario' %}">Perfil</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
-                            </li>
-                        {% endif %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'inicio_usuarios' %}">
+                <i class="fas fa-wallet wallet-icon"></i>
+                Billetera Virtual
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                            <span class="navbar-text ms-3">
+                                Bienvenido {{ user.username }}
+                            </span>
                         </li>
-                    </ul>
-                </div>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'perfil_usuario' %}">Perfil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'registro' %}">Registrarse</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Admin</a>
+                    </li>
+                </ul>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
-    <main class="container mt-4">
+    <!-- Main Content -->
+    <main class="container-fluid mt-4">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-dark text-white text-center py-3 mt-4">
-        <p class="mb-0">Billetera Virtual &copy; 2024 - Todos los derechos reservados.</p>
+    <!-- Footer -->
+    <footer class="footer text-center">
+        <div class="container">
+            <span>Billetera Virtual &copy; 2024 - Todos los derechos reservados.</span>
+        </div>
     </footer>
 
     <!-- JavaScript dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     {% block extra_js %}{% endblock %}  <!-- Bloque para incluir JS adicional en páginas específicas -->
 </body>
