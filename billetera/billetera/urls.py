@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('gastos/', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
     path('usuarios/', include('usuarios.urls')),
+    path('ingresos/', include('ingresos.urls')),
     path('', usuarios_views.inicio, name='inicio_usuarios'),  # Esta es la nueva línea para la página de inicio
     path('', usuarios_views.inicio, name='inicio'),  # Esta es la nueva línea para la página de inicio
 ]

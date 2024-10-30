@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{# Template para Eliminar Ingreso #}
+{% block title %}Eliminar Ingreso{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Eliminar Ingreso</h2>
+    <p>Estás seguro que deseas eliminar el ingreso: "{{ ingreso.descripcion }}" por un monto de {{ ingreso.monto }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar Ingreso</button>
+        <a href="{% url 'ingresos:lista_ingresos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

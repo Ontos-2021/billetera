@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'gastos',
     'usuarios',
+    'ingresos',
 ]
 
 MIDDLEWARE = [

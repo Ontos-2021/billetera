@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% extends 'base.html' %}
+
+{# Template para Listar Ingresos #}
+{% block title %}Lista de Ingresos{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Mis Ingresos</h2>
+    <a href="{% url 'ingresos:crear_ingreso' %}" class="btn btn-success mb-3">Nuevo Ingreso</a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ingreso in ingresos %}
+                <tr>
+                    <td>{{ ingreso.descripcion }}</td>
+                    <td>{{ ingreso.monto }}</td>
+                    <td>{{ ingreso.fecha|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'ingresos:editar_ingreso' ingreso.id %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'ingresos:eliminar_ingreso' ingreso.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4">No hay ingresos registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+</title>
+</head>
+<body>
+
+</body>
+</html>
