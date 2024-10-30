@@ -29,7 +29,7 @@ def crear_gasto(request):
             gasto = form.save(commit=False)  # Crea un objeto Gasto sin guardarlo aún
             gasto.usuario = request.user  # Asocia el gasto con el usuario autenticado
             gasto.save()  # Guarda el gasto en la base de datos
-            return redirect('lista_gastos')  # Redirige a la lista de gastos
+            return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
         form = GastoForm()  # Crea un formulario de gasto vacío
     return render(request, 'gastos/crear_gasto.html', {'form': form})
@@ -44,7 +44,7 @@ def editar_gasto(request, id):
         form = GastoForm(request.POST, instance=gasto)  # Crea un formulario con los datos del gasto existente
         if form.is_valid():
             form.save()  # Guarda los cambios realizados en el gasto
-            return redirect('lista_gastos')  # Redirige a la lista de gastos
+            return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
         form = GastoForm(instance=gasto)  # Crea un formulario con los datos del gasto para editar
     return render(request, 'gastos/editar_gasto.html', {'form': form})
@@ -57,5 +57,5 @@ def eliminar_gasto(request, id):
     gasto = get_object_or_404(Gasto, id=id, usuario=request.user)
     if request.method == 'POST':
         gasto.delete()  # Elimina el gasto de la base de datos
-        return redirect('lista_gastos')  # Redirige a la lista de gastos
+        return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})

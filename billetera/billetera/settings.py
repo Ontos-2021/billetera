@@ -130,7 +130,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Carpeta final donde se ju
 
 # settings.py
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'lista_gastos'
+LOGIN_REDIRECT_URL = 'gastos:lista_gastos'
 LOGOUT_REDIRECT_URL = 'login'
 
 

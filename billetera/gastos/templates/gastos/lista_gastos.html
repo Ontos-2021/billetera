@@ -17,8 +17,8 @@
                     <span class="gasto-categoria">({{ gasto.categoria }})</span>
                 </div>
                 <div class="btn-group" role="group">
-                    <a href="{% url 'editar_gasto' gasto.id %}" class="btn btn-primary m-1">Editar</a>
-                    <a href="{% url 'eliminar_gasto' gasto.id %}" class="btn btn-danger m-1">Eliminar</a>
+                    <a href="{% url 'gastos:editar_gasto' gasto.id %}" class="btn btn-primary m-1">Editar</a>
+                    <a href="{% url 'gastos:eliminar_gasto' gasto.id %}" class="btn btn-danger m-1">Eliminar</a>
                 </div>
             </div>
         </li>
@@ -27,7 +27,7 @@
         {% endfor %}
     </ul>
     
-    <a href="{% url 'crear_gasto' %}" class="row btn btn-success my-3 p-3">Crear Nuevo Gasto</a>
+    <a href="{% url 'gastos:crear_gasto' %}" class="row btn btn-success my-3 p-3">Crear Nuevo Gasto</a>
 </main>
 
 {% endblock %}

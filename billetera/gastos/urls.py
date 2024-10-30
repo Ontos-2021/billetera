@@ -7,6 +7,8 @@ from .api_views import GastoViewSet
 router = DefaultRouter()
 router.register(r'', GastoViewSet, basename='gasto')
 
+app_name = 'gastos'
+
 # Lista de URLS combinada
 urlpatterns = [
     # Rutas de la API REST

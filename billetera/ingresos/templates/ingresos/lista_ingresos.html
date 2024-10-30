@@ -16,6 +16,7 @@
             <tr>
                 <th>Descripción</th>
                 <th>Monto</th>
+                <th>Moneda</th>
                 <th>Fecha</th>
                 <th>Acciones</th>
             </tr>
@@ -25,6 +26,7 @@
                 <tr>
                     <td>{{ ingreso.descripcion }}</td>
                     <td>{{ ingreso.monto }}</td>
+                    <td>({{ ingreso.moneda.codigo }})</td>
                     <td>{{ ingreso.fecha|date:"d M Y" }}</td>
                     <td>
                         <a href="{% url 'ingresos:editar_ingreso' ingreso.id %}" class="btn btn-warning btn-sm">Editar</a>
