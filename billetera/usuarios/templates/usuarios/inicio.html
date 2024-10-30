@@ -4,12 +4,45 @@
 
 {% block content %}
 <main class="container mt-4">
-    <div class="jumbotron">
-        <h1 class="display-4">Bienvenido/a, {{ user.username }}!</h1>
-        <p class="lead">Este es el panel principal para gestionar la información de tu perfil y ver las actividades relacionadas con tu cuenta.</p>
-        <hr class="my-4">
-        <p>Aquí puedes revisar tus gastos, actualizar tu perfil y más.</p>
-        <a class="btn btn-primary btn-lg" href="{% url 'gastos:lista_gastos' %}" role="button">Ver Gastos</a>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <h1 class="display-4 mb-3">Bienvenido/a, {{ user.username }}!</h1>
+                    <p class="lead mb-4">Este es el panel principal para gestionar la información de tu perfil y ver las actividades relacionadas con tu cuenta.</p>
+                    <hr class="my-4">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-primary h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Gastos</h5>
+                                    <p class="card-text">Gestiona y revisa todos tus gastos de manera organizada.</p>
+                                    <a class="btn btn-primary" href="{% url 'gastos:lista_gastos' %}">Ver Gastos</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-success h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Ingresos</h5>
+                                    <p class="card-text">Mantén un registro detallado de todos tus ingresos.</p>
+                                    <a class="btn btn-success" href="{% url 'ingresos:lista_ingresos' %}">Ver Ingresos</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-info h-100">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Perfil</h5>
+                                    <p class="card-text">Actualiza la información de tu perfil y mantén tus datos al día.</p>
+                                    <a class="btn btn-info" href="{% url 'perfil_usuario' %}">Actualizar Perfil</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 {% endblock %}
