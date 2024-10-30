@@ -6,3 +6,5 @@ billetera/gastos/migrations/
 billetera/.DS_Store
 .idea
 __pycache__
+billetera/imagenes_perfil
+media/

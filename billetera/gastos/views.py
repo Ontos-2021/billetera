@@ -1,78 +1,61 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Gasto
 from .forms import GastoForm
-
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
-from django.shortcuts import render, redirect
-
-
-def registro(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()  # Guarda el usuario en la base de datos
-            login(request, user)  # Inicia sesión automáticamente después del registro
-            return redirect('lista_gastos')  # Redirige al usuario a la lista de gastos
-    else:
-        form = UserCreationForm()
-    return render(request, 'gastos/registro.html', {'form': form})
-
-
 from django.contrib.auth.decorators import login_required
 
 
-@login_required
+# Función para obtener los gastos filtrados por usuario o superusuario
+def obtener_gastos(request):
+    # Los superusuarios pueden ver todos los gastos
+    if request.user.is_superuser:
+        return Gasto.objects.all().order_by('-fecha')
+    # Los usuarios normales solo pueden ver sus propios gastos
+    return Gasto.objects.filter(usuario=request.user).order_by('-fecha')
+
+
+# Lista de gastos
+@login_required  # Requiere que el usuario esté autenticado
 def lista_gastos(request):
-    gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')
+    gastos = obtener_gastos(request)  # Obtiene los gastos correspondientes al usuario
     return render(request, 'gastos/lista_gastos.html', {'gastos': gastos})
 
 
-from datetime import datetime
-
-from rest_framework import viewsets
-from .models import Gasto
-from .serializers import GastoSerializer
-from rest_framework.permissions import IsAuthenticated
-
-
-class GastoViewSet(viewsets.ModelViewSet):
-    queryset = Gasto.objects.all()
-    serializer_class = GastoSerializer
-    permission_classes = [IsAuthenticated]  # Asegura que sólo los usuarios autenticados puedan acceder a la API
-
-
-@login_required
+# Crear gasto
+@login_required  # Requiere que el usuario esté autenticado
 def crear_gasto(request):
     if request.method == 'POST':
         form = GastoForm(request.POST)
         if form.is_valid():
-            gasto = form.save(commit=False)
+            gasto = form.save(commit=False)  # Crea un objeto Gasto sin guardarlo aún
             gasto.usuario = request.user  # Asocia el gasto con el usuario autenticado
-            gasto.save()
-            return redirect('lista_gastos')
+            gasto.save()  # Guarda el gasto en la base de datos
+            return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
-        form = GastoForm()
+        form = GastoForm()  # Crea un formulario de gasto vacío
     return render(request, 'gastos/crear_gasto.html', {'form': form})
 
 
-@login_required
+# Editar gasto
+@login_required  # Requiere que el usuario esté autenticado
 def editar_gasto(request, id):
-    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)  # Verifica que el gasto pertenezca al usuario
+    # Obtiene el gasto por id, asegurándose de que pertenezca al usuario (excepto si es superusuario)
+    gasto = get_object_or_404(Gasto, id=id, usuario=request.user if not request.user.is_superuser else None)
     if request.method == 'POST':
-        form = GastoForm(request.POST, instance=gasto)
+        form = GastoForm(request.POST, instance=gasto)  # Crea un formulario con los datos del gasto existente
         if form.is_valid():
-            form.save()
-            return redirect('lista_gastos')
+            form.save()  # Guarda los cambios realizados en el gasto
+            return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
-        form = GastoForm(instance=gasto)
+        form = GastoForm(instance=gasto)  # Crea un formulario con los datos del gasto para editar
     return render(request, 'gastos/editar_gasto.html', {'form': form})
 
 
-@login_required
+# Eliminar gasto
+@login_required  # Requiere que el usuario esté autenticado
 def eliminar_gasto(request, id):
-    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)  # Verifica que el gasto pertenezca al usuario
+    # Obtiene el gasto por id, asegurándose de que pertenezca al usuario
+    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)
     if request.method == 'POST':
-        gasto.delete()
-        return redirect('lista_gastos')
+        gasto.delete()  # Elimina el gasto de la base de datos
+        return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})

@@ -16,16 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
-from gastos import views as gastos_views
+from django.conf import settings
+from django.conf.urls.static import static
 
-# Router para la API REST
-router = routers.DefaultRouter()
-router.register(r'gastos', gastos_views.GastoViewSet)  # Aquí registras el viewset de gastos
+from usuarios import views as usuarios_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),  # Incluye las rutas de la API bajo el prefijo 'api/'
-    path('', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
+    path('gastos/', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
+    path('usuarios/', include('usuarios.urls')),
+    path('ingresos/', include('ingresos.urls')),
+    path('', usuarios_views.inicio, name='inicio_usuarios'),  # Esta es la nueva línea para la página de inicio
+    path('', usuarios_views.inicio, name='inicio'),  # Esta es la nueva línea para la página de inicio
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

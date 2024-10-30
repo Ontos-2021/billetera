@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{# Template para Editar Ingreso #}
+{% block title %}Editar Ingreso{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Ingreso</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+    <a href="{% url 'ingresos:lista_ingresos' %}" class="btn btn-secondary mt-2">Volver a la lista</a>
+</div>
+{% endblock %}
