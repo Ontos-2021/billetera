@@ -73,6 +73,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'billetera.wsgi.application'
 
 # Database Configuration
+print(os.getenv('DATABASE_URL'))
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
