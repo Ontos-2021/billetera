@@ -35,7 +35,7 @@ def perfil_usuario(request):
         form = PerfilUsuarioForm(request.POST, request.FILES, instance=perfil)
         if form.is_valid():
             form.save()
-            return redirect('perfil_usuario')
+            return redirect('usuarios:perfil_usuario')
     else:
         form = PerfilUsuarioForm(instance=perfil)
     return render(request, 'usuarios/perfil_usuario.html', {'form': form})
