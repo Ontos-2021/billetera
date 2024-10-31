@@ -4,3 +4,7 @@ from django.test import TestCase
 
 # Hay que crear un tests para que el admin pueda eliminar y editar gastos desde las views editar y eliminar.
 # Hay que escribir un test para que nunca gaste plata si es que no tiene
+
+
+# Test que ve si un nuevo usuario puede crear gastos desde la view
+

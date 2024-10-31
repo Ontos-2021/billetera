@@ -20,7 +20,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # No dejar la clave 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Allowed Hosts
-ALLOWED_HOSTS = ['*']
+if os.getenv('ENV') == 'production':
+    ALLOWED_HOSTS = ['billetera-production.up.railway.app']
+else:
+    ALLOWED_HOSTS = ['*']
 
 # Installed Apps
 INSTALLED_APPS = [
@@ -30,8 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'whitenoise.runserver_nostatic',
     'rest_framework',
+    'whitenoise.runserver_nostatic',  # Mover después de staticfiles
     'gastos',
     'usuarios',
     'ingresos',
