@@ -50,7 +50,11 @@ class Categoria(models.Model):
 
 
 class Gasto(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gastos')  # Relación con usuario
+    usuario = models.ForeignKey(User,
+                                on_delete=models.CASCADE,
+                                related_name='gastos',  # Relación con usuario
+                                null=True,
+                                blank=True)
     descripcion = models.CharField(max_length=255)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha = models.DateTimeField(auto_now_add=True)
