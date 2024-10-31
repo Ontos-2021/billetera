@@ -20,7 +20,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # No dejar la clave 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Allowed Hosts
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = ['*']
 
 # Installed Apps
 INSTALLED_APPS = [
@@ -73,10 +73,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'billetera.wsgi.application'
 
 # Database Configuration
-print(os.getenv('DATABASE_URL'))
-DATABASES = {
-    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-}
+if os.getenv('ENV') == 'production':
+    DATABASES = {
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Password Validators
 AUTH_PASSWORD_VALIDATORS = [
