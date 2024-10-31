@@ -1,1 +1,1 @@
-web: gunicorn billetera/billetera.wsgi && python3 manage.py collecstatic && python3 billetera/manage.py runserver 0.0.0.0:$PORT
+web: python billetera/manage.py collectstatic && gunicorn billetera/billetera.wsgi
