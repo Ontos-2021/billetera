@@ -7,5 +7,6 @@ billetera/.DS_Store
 .idea
 __pycache__
 billetera/imagenes_perfil
-media/".env" 
+media/".env"
+media/
 .env

@@ -82,3 +82,12 @@ class GastosTestCase(TestCase):
         # Verificar que el gasto ha sido creado
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Gasto.objects.filter(descripcion='Cine', usuario=self.usuario).exists())
+
+    def test_usuario_puede_eliminar_gasto(self):
+        # Iniciar sesión como usuario
+        self.client.login(username='usuario', password='password123')
+        response = self.client.post(reverse('gastos:eliminar_gasto', kwargs={'id': self.gasto.id}))
+
+        # Verificar que el gasto ha sido eliminado
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Gasto.objects.filter(id=self.gasto.id).exists())

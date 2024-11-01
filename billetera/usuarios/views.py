@@ -26,7 +26,7 @@ def registro(request):
         if form.is_valid():
             user = form.save()  # Guarda el nuevo usuario en la base de datos
             login(request, user)  # Inicia sesión automáticamente con el nuevo usuario
-            return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
+            return redirect('inicio_usuarios')  # Redirige a la lista de gastos
     else:
         form = UserCreationForm()  # Crea un formulario de registro vacío
     return render(request, 'usuarios/registro.html', {'form': form})

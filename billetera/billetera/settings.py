@@ -17,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # No dejar la clave por defecto en producción
 
 # Debug
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', '').lower() in ['true', '1']
 
 # Allowed Hosts
 if os.getenv('ENV') == 'production':
@@ -117,7 +117,7 @@ CSRF_TRUSTED_ORIGINS = ['https://billetera-production.up.railway.app']
 
 # Login Configuration
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'gastos:lista_gastos'
+LOGIN_REDIRECT_URL = 'inicio_usuarios'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Default Auto Field
