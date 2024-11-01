@@ -10,10 +10,6 @@ def inicio(request):
     return render(request, 'usuarios/inicio.html')
 
 
-def inicio_usuarios(request):
-    return render(request, 'usuarios/inicio.html')
-
-
 # Registro de usuario
 def registro(request):
     # Maneja la lógica de registro de usuario
