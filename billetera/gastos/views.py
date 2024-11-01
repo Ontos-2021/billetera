@@ -38,8 +38,11 @@ def crear_gasto(request):
 # Editar gasto
 @login_required  # Requiere que el usuario esté autenticado
 def editar_gasto(request, id):
-    # Obtiene el gasto por id, asegurándose de que pertenezca al usuario (excepto si es superusuario)
-    gasto = get_object_or_404(Gasto, id=id, usuario=request.user if not request.user.is_superuser else None)
+    # Obtiene el gasto por id, permitiendo al superusuario editar cualquier gasto
+    gasto = get_object_or_404(Gasto, id=id)
+    if not request.user.is_superuser and gasto.usuario != request.user:
+        return redirect('gastos:lista_gastos')  # Redirige si el usuario no tiene permisos
+
     if request.method == 'POST':
         form = GastoForm(request.POST, instance=gasto)  # Crea un formulario con los datos del gasto existente
         if form.is_valid():
@@ -53,9 +56,13 @@ def editar_gasto(request, id):
 # Eliminar gasto
 @login_required  # Requiere que el usuario esté autenticado
 def eliminar_gasto(request, id):
-    # Obtiene el gasto por id, asegurándose de que pertenezca al usuario
-    gasto = get_object_or_404(Gasto, id=id, usuario=request.user)
+    # Obtiene el gasto por id, permitiendo al superusuario eliminar cualquier gasto
+    gasto = get_object_or_404(Gasto, id=id)
+    if not request.user.is_superuser and gasto.usuario != request.user:
+        return redirect('gastos:lista_gastos')  # Redirige si el usuario no tiene permisos
+
     if request.method == 'POST':
         gasto.delete()  # Elimina el gasto de la base de datos
         return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
+

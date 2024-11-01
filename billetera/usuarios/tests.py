@@ -81,6 +81,7 @@ class VistasUsuariosTest(TestCase):
 
         # Datos nuevos para actualizar el perfil
         data = {
+            # Se podría chequear si guarda las imágenes
             'direccion': 'Nueva Direccion 456',
             'telefono': '987654321'
         }
