@@ -59,3 +59,5 @@ class IngresoModelTestCase(TestCase):
         moneda = Moneda.objects.get(codigo='EUR')
         self.assertEqual(moneda.nombre, 'Euro')
         self.assertEqual(moneda.simbolo, '€')
+
+    # Test para que no se pueda crear un ingreso negativo

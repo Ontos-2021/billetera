@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Inicio de Usuarios{% endblock %}
+{% block title %}Inicio{% endblock %}
 
 {% block content %}
 <main class="container mt-4">
@@ -8,6 +8,7 @@
         <div class="col-md-12">
             <div class="card shadow-sm mb-4">
                 <div class="card-body text-center">
+                    {% if user.is_authenticated %}
                     <h1 class="display-4 mb-3">Bienvenido/a, {{ user.username }}!</h1>
                     <p class="lead mb-4">Este es el panel principal para gestionar la información de tu perfil y ver las actividades relacionadas con tu cuenta.</p>
                     <hr class="my-4">
@@ -15,6 +16,9 @@
                         <div class="col-md-4 mb-3">
                             <div class="card border-primary h-100">
                                 <div class="card-body text-center">
+                                    <div class="card-icon mb-3">
+                                        <i class="fas fa-wallet fa-3x text-primary"></i>
+                                    </div>
                                     <h5 class="card-title">Gastos</h5>
                                     <p class="card-text">Gestiona y revisa todos tus gastos de manera organizada.</p>
                                     <a class="btn btn-primary" href="{% url 'gastos:lista_gastos' %}">Ver Gastos</a>
@@ -24,6 +28,9 @@
                         <div class="col-md-4 mb-3">
                             <div class="card border-success h-100">
                                 <div class="card-body text-center">
+                                    <div class="card-icon mb-3">
+                                        <i class="fas fa-coins fa-3x text-success"></i>
+                                    </div>
                                     <h5 class="card-title">Ingresos</h5>
                                     <p class="card-text">Mantén un registro detallado de todos tus ingresos.</p>
                                     <a class="btn btn-success" href="{% url 'ingresos:lista_ingresos' %}">Ver Ingresos</a>
@@ -33,6 +40,9 @@
                         <div class="col-md-4 mb-3">
                             <div class="card border-info h-100">
                                 <div class="card-body text-center">
+                                    <div class="card-icon mb-3">
+                                        <i class="fas fa-user fa-3x text-info"></i>
+                                    </div>
                                     <h5 class="card-title">Perfil</h5>
                                     <p class="card-text">Actualiza la información de tu perfil y mantén tus datos al día.</p>
                                     <a class="btn btn-info" href="{% url 'perfil_usuario' %}">Actualizar Perfil</a>
@@ -40,6 +50,13 @@
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    <h1 class="display-4 mb-3">Bienvenido/a a Billetera Virtual!</h1>
+                    <p class="lead mb-4">Gestiona tus finanzas de manera fácil y eficiente. Regístrate o inicia sesión para empezar a controlar tus ingresos y gastos.</p>
+                    <hr class="my-4">
+                    <a class="btn btn-primary btn-lg" href="{% url 'registro' %}" role="button">Registrarse</a>
+                    <a class="btn btn-secondary btn-lg" href="{% url 'login' %}" role="button">Iniciar Sesión</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
