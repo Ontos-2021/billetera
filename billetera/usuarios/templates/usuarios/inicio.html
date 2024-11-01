@@ -50,6 +50,34 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row mt-5">
+                        <div class="col-md-6 mb-3">
+                            <h4>Últimos Gastos</h4>
+                            <ul class="list-group">
+                                {% for gasto in gastos|slice:":5" %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <strong>{{ gasto.descripcion }}</strong>  {{ gasto.monto }} {{ gasto.moneda.simbolo }}
+                                        <span class="badge badge-primary badge-pill">{{ gasto.fecha|date:"d M Y" }}</span>
+                                    </li>
+                                {% empty %}
+                                    <li class="list-group-item">No hay gastos registrados.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h4>Últimos Ingresos</h4>
+                            <ul class="list-group">
+                                {% for ingreso in ingresos|slice:":5" %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <strong>{{ ingreso.descripcion }}</strong>  {{ ingreso.monto }} {{ ingreso.moneda.simbolo }}
+                                        <span class="badge badge-success badge-pill">{{ ingreso.fecha|date:"d M Y" }}</span>
+                                    </li>
+                                {% empty %}
+                                    <li class="list-group-item">No hay ingresos registrados.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
                     {% else %}
                     <h1 class="display-4 mb-3">Bienvenido/a a Billetera Virtual!</h1>
                     <p class="lead mb-4">Gestiona tus finanzas de manera fácil y eficiente. Regístrate o inicia sesión para empezar a controlar tus ingresos y gastos.</p>

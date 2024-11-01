@@ -4,10 +4,18 @@ from .models import PerfilUsuario
 from .forms import PerfilUsuarioForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
+from gastos.models import Gasto
+from ingresos.models import Ingreso
 
 
 def inicio(request):
-    return render(request, 'usuarios/inicio.html')
+    ingresos = None
+    gastos = None
+    if request.user.is_authenticated and not request.user.is_superuser:
+        ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:5]
+        gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:5]
+
+    return render(request, 'usuarios/inicio.html', {'ingresos': ingresos, 'gastos': gastos})
 
 
 # Registro de usuario
