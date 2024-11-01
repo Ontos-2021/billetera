@@ -31,3 +31,6 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # También se puede servir en producción de esta manera cuando uses Railway Disk.
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
