@@ -108,9 +108,9 @@ if IS_PRODUCTION:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
 
 # Configuración de archivos de medios
-MEDIA_URL = '/media/'
+MEDIA_URL = '/billetera/media/'
 if IS_PRODUCTION:
-    MEDIA_ROOT = os.path.join('/app/billetera', 'media')
+    MEDIA_ROOT = os.path.join('/app', 'media')
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
