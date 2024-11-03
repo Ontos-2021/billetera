@@ -10,7 +10,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Determinar el entorno
-ENV = os.getenv('ENV', 'development')
+ENV = os.getenv('ENV', 'production')
 IS_PRODUCTION = ENV == 'production'
 
 # Secret Key

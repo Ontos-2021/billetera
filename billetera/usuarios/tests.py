@@ -1,6 +1,7 @@
 from django.test import TestCase
-from django.contrib.auth.models import User
-from .models import PerfilUsuario
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.conf import settings
+import os
 
 
 class PerfilUsuarioModelTest(TestCase):
@@ -79,12 +80,21 @@ class VistasUsuariosTest(TestCase):
         # Autenticar al usuario para poder acceder a la vista de editar perfil
         self.client.login(username='testuser', password='password123')
 
-        # Datos nuevos para actualizar el perfil
+        # Crear una imagen de prueba en memoria
+        imagen_prueba = SimpleUploadedFile(
+            name='imagen_prueba.jpg',
+            content=b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xFF\xFF\xFF\x21\xF9\x04\x01\x0A\x00\x01\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x4C\x01\x00\x3B',
+            content_type='image/jpeg'
+        )
+
+        # Datos nuevos para actualizar el perfil, incluyendo la imagen
         data = {
-            # Se podría chequear si guarda las imágenes
             'direccion': 'Nueva Direccion 456',
-            'telefono': '987654321'
+            'telefono': '987654321',
+            'imagen_perfil': imagen_prueba
         }
+
+        # Realizar la solicitud POST para actualizar el perfil
         response = self.client.post(self.editar_perfil_url, data)
 
         # Verificar redirección después de actualizar el perfil
@@ -96,6 +106,17 @@ class VistasUsuariosTest(TestCase):
         # Verificar que los datos se actualizaron correctamente
         self.assertEqual(self.perfil.direccion, 'Nueva Direccion 456')
         self.assertEqual(self.perfil.telefono, '987654321')
+
+        # Verificar que la imagen de perfil se haya actualizado
+        self.assertTrue(self.perfil.imagen_perfil.name.endswith('imagen_prueba.jpg'))
+
+        # Verificar que el archivo de la imagen exista en el sistema de archivos
+        ruta_imagen = os.path.join(settings.MEDIA_ROOT, self.perfil.imagen_perfil.name)
+        self.assertTrue(os.path.exists(ruta_imagen))
+
+        # Limpiar eliminando la imagen de prueba después de la prueba
+        if os.path.exists(ruta_imagen):
+            os.remove(ruta_imagen)
 
     def test_registro_view_POST(self):
         # Prueba para crear un usuario nuevo mediante la vista de registro
