@@ -1,26 +1,31 @@
-# Django settings for billetera project.
 from pathlib import Path
 import os
 import dj_database_url
 from dotenv import load_dotenv
 
-# Cargar variables de entorno desde .env
+# Cargar variables de entorno desde .env en desarrollo
 load_dotenv()
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Determinar el entorno
+ENV = os.getenv('ENV', 'development')
+IS_PRODUCTION = ENV == 'production'
+
 # Secret Key
-SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')  # Clave por defecto solo para desarrollo.
+SECRET_KEY = os.getenv('SECRET_KEY', 'clave_por_defecto_para_desarrollo')
+if not SECRET_KEY:
+    raise ValueError("La variable de entorno SECRET_KEY no está definida.")
 
 # Debug
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = not IS_PRODUCTION
 
 # Allowed Hosts
-if os.getenv('ENV') == 'production':
+if IS_PRODUCTION:
     ALLOWED_HOSTS = ['billetera-production.up.railway.app']
 else:
-    ALLOWED_HOSTS = ['*']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
@@ -69,7 +74,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'billetera.wsgi.application'
 
 # Database Configuration
-if os.getenv('ENV') == 'production':
+if IS_PRODUCTION:
     DATABASES = {
         'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
     }
@@ -99,14 +104,21 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
+if IS_PRODUCTION:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
 
 # Configuración de archivos de medios
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join('/app', 'media')
+if IS_PRODUCTION:
+    MEDIA_ROOT = os.path.join('/app', 'media')
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CSRF Trusted Origins
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost').split(',')
+if IS_PRODUCTION:
+    CSRF_TRUSTED_ORIGINS = ['https://billetera-production.up.railway.app']
+else:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost']
 
 # Configuración de inicio de sesión
 LOGIN_URL = 'login'
@@ -117,7 +129,7 @@ LOGOUT_REDIRECT_URL = 'login'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Seguridad adicional en producción
-if not DEBUG:
+if IS_PRODUCTION:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SESSION_COOKIE_SECURE = True
