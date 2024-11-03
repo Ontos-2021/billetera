@@ -114,6 +114,9 @@ if IS_PRODUCTION:
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+WHITENOISE_ALLOW_ALL_ORIGINS = True
+WHITENOISE_ROOT = MEDIA_ROOT
+
 # CSRF Trusted Origins
 if IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = ['https://billetera-production.up.railway.app']
