@@ -107,12 +107,11 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if IS_PRODUCTION:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
 
-# Configuración de archivos de medios
-MEDIA_URL = '/billetera/media/'
+MEDIA_URL = '/media/'
 if IS_PRODUCTION:
-    MEDIA_ROOT = os.path.join('/app', 'media')
+    MEDIA_ROOT = os.path.join('/app', 'billetera', 'media')  # Ruta para producción en Railway
 else:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Ruta para desarrollo
 
 WHITENOISE_ALLOW_ALL_ORIGINS = True
 WHITENOISE_ROOT = MEDIA_ROOT
