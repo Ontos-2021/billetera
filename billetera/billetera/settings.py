@@ -109,10 +109,7 @@ if IS_PRODUCTION:
 
 # Configuración de archivos de medios
 MEDIA_URL = '/media/'
-if IS_PRODUCTION:
-    MEDIA_ROOT = os.path.join('/app', 'media')
-else:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Configura WhiteNoise para servir archivos de medios
 WHITENOISE_ALLOW_ALL_ORIGINS = True
