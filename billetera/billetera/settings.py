@@ -110,7 +110,7 @@ if IS_PRODUCTION:
 # Configuración de archivos de medios
 MEDIA_URL = '/media/'
 if IS_PRODUCTION:
-    MEDIA_ROOT = os.path.join('/app', 'media')
+    MEDIA_ROOT = os.path.join('/app/billetera', 'media')
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
