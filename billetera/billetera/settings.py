@@ -107,9 +107,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if IS_PRODUCTION:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
 
+from django.conf import settings
+new_directory = os.path.join(settings.MEDIA_ROOT, 'media')
+if not os.path.exists(new_directory):
+  os.makedirs(new_directory)
+
 MEDIA_URL = '/media/'
 if IS_PRODUCTION:
-    MEDIA_ROOT = os.environ["RAILWAY_VOLUME_MOUNT_PATH"]  # Ruta para producción en Railway
+    try:
+        MEDIA_ROOT = os.environ["RAILWAY_VOLUME_MOUNT_PATH"]  # Ruta para producción en Railway
+    except KeyError as e:
+        print(f"Error: {e}")
+
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Ruta para desarrollo
 
