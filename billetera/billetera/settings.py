@@ -109,11 +109,12 @@ if IS_PRODUCTION:
 
 MEDIA_URL = '/media/'
 if IS_PRODUCTION:
-    MEDIA_ROOT = os.path.join('/app', 'billetera', 'media')  # Ruta para producción en Railway
+    MEDIA_ROOT = os.environ["RAILWAY_VOLUME_MOUNT_PATH"]  # Ruta para producción en Railway
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Ruta para desarrollo
 
 WHITENOISE_ALLOW_ALL_ORIGINS = True
+WHITENOISE_USE_FINDERS = True
 WHITENOISE_ROOT = MEDIA_ROOT
 
 # CSRF Trusted Origins
