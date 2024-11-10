@@ -29,7 +29,7 @@ def editar_ingreso(request, ingreso_id):
         form = IngresoForm(request.POST, instance=ingreso)
         if form.is_valid():
             form.save()
-            return redirect('ingresos/lista_ingresos.html')
+            return redirect('ingresos:lista_ingresos')  # Redireccionar a la lista de ingresos
     else:
         form = IngresoForm(instance=ingreso)
     return render(request, 'ingresos/editar_ingreso.html', {'form': form, 'ingreso': ingreso})

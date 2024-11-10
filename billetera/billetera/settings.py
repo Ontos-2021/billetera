@@ -10,8 +10,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Determinar el entorno
-ENV = os.getenv('ENV', 'production')
-IS_PRODUCTION = ENV == 'production'
+ENV = os.getenv('ENV', 'development')  # Por defecto, el entorno es desarrollo
+IS_PRODUCTION = ENV == 'production'  # Si el entorno es producción, IS_PRODUCTION es True
 
 # Secret Key
 SECRET_KEY = os.getenv('SECRET_KEY', 'clave_por_defecto_para_desarrollo')
@@ -108,9 +108,10 @@ if IS_PRODUCTION:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
 
 from django.conf import settings
+
 new_directory = os.path.join(settings.MEDIA_ROOT, 'media')
 if not os.path.exists(new_directory):
-  os.makedirs(new_directory)
+    os.makedirs(new_directory)
 
 MEDIA_URL = '/media/'
 if IS_PRODUCTION:

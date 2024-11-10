@@ -91,3 +91,18 @@ class GastosTestCase(TestCase):
         # Verificar que el gasto ha sido eliminado
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Gasto.objects.filter(id=self.gasto.id).exists())
+
+    # Test para usuario que pueda editar un gasto desde la vista
+    def test_usuario_puede_editar_gasto(self):
+        # Iniciar sesión como usuario
+        self.client.login(username='usuario', password='password123')
+        response = self.client.post(reverse('gastos:editar_gasto', kwargs={'id': self.gasto.id}), {
+            'descripcion': 'Cine',
+            'monto': '300.00',
+            'moneda': self.moneda.id,
+            'categoria': self.categoria.id
+        })
+
+        # Verificar que el gasto ha sido editado
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Gasto.objects.filter(descripcion='Cine', usuario=self.usuario).exists())
