@@ -26,9 +26,10 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ml-auto">
                         {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <span class="navbar-text mr-3">
-                                    Bienvenido, {{ user.username }}
+                            <li class="nav-item d-flex align-items-center">
+                                <img src="{% if user.perfilusuario.imagen_perfil %}{{ user.perfilusuario.imagen_perfil.url }}{% else %}{% static 'img/default_profile.png' %}{% endif %}" alt="Imagen de Perfil" class="img-thumbnail" width="30" height="30">
+                                <span class="navbar-text ml-2 mr-3">
+                                    {{ user.username }}
                                 </span>
                             </li>
                             <li class="nav-item">
