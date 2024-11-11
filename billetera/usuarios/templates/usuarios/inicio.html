@@ -2,91 +2,198 @@
 
 {% block title %}Inicio{% endblock %}
 
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .badge {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .badge:hover {
+        transform: scale(1.1);
+    }
+
+    .list-group-item {
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .list-group-item:hover {
+        background-color: rgba(0,0,0,0.02);
+    }
+
+    .total-card {
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .total-card h6 {
+        font-size: 1rem;
+        margin-bottom: 10px;
+    }
+
+    .total-card h3 {
+        font-size: 1.8rem;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <main class="container mt-4">
     <div class="row">
         <div class="col-md-12">
             <div class="card shadow-sm mb-4">
-                <div class="card-body text-center">
-                    {% if user.is_authenticated %}
-                    <h1 class="display-4 mb-3">Bienvenido/a, {{ user.username }}!</h1>
-                    <p class="lead mb-4">Este es el panel principal para gestionar la información de tu perfil y ver las actividades relacionadas con tu cuenta.</p>
-                    <hr class="my-4">
-                    <div class="row">
-                        <!-- Card de Ingresos -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-success h-100">
-                                <div class="card-body text-center">
-                                    <div class="card-icon mb-3">
-                                        <i class="fas fa-coins fa-3x text-success"></i>
-                                    </div>
-                                    <h5 class="card-title">Ingresos</h5>
-                                    <p class="card-text">Mantén un registro detallado de todos tus ingresos.</p>
-                                    <a class="btn btn-success" href="{% url 'ingresos:lista_ingresos' %}">Ver Ingresos</a>
+                <div class="card-body">
+                    {% if user.is_authenticated and not user.is_superuser %}
+                        <div class="text-center mb-4">
+                            <h1 class="display-4 mb-3">Bienvenido/a, {{ user.username }}!</h1>
+                            <p class="lead">Este es tu panel principal para gestionar tus finanzas personales.</p>
+                        </div>
+
+                        <!-- Tarjetas de Totales -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="total-card bg-success text-white">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-coins me-2"></i>
+                                        Total Ingresos
+                                    </h6>
+                                    <h3>{{ total_ingresos|floatformat:2 }} $</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="total-card bg-danger text-white">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-wallet me-2"></i>
+                                        Total Gastos
+                                    </h6>
+                                    <h3>{{ total_gastos|floatformat:2 }} $</h3>
                                 </div>
                             </div>
                         </div>
-                        <!-- Card de Gastos -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-primary h-100">
-                                <div class="card-body text-center">
-                                    <div class="card-icon mb-3">
-                                        <i class="fas fa-wallet fa-3x text-primary"></i>
+
+                        <!-- Cards de Navegación -->
+                        <div class="row mb-4">
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card border-success h-100">
+                                    <div class="card-body text-center">
+                                        <div class="card-icon mb-3">
+                                            <i class="fas fa-coins fa-3x text-success"></i>
+                                        </div>
+                                        <h5 class="card-title">Ingresos</h5>
+                                        <p class="card-text">Gestiona y registra todos tus ingresos.</p>
+                                        <a class="btn btn-success" href="{% url 'ingresos:lista_ingresos' %}">Ver Ingresos</a>
                                     </div>
-                                    <h5 class="card-title">Gastos</h5>
-                                    <p class="card-text">Gestiona y revisa todos tus gastos de manera organizada.</p>
-                                    <a class="btn btn-primary" href="{% url 'gastos:lista_gastos' %}">Ver Gastos</a>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card border-primary h-100">
+                                    <div class="card-body text-center">
+                                        <div class="card-icon mb-3">
+                                            <i class="fas fa-wallet fa-3x text-primary"></i>
+                                        </div>
+                                        <h5 class="card-title">Gastos</h5>
+                                        <p class="card-text">Registra y controla todos tus gastos.</p>
+                                        <a class="btn btn-primary" href="{% url 'gastos:lista_gastos' %}">Ver Gastos</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 mb-3">
+                                <div class="card border-info h-100">
+                                    <div class="card-body text-center">
+                                        <div class="card-icon mb-3">
+                                            <i class="fas fa-user fa-3x text-info"></i>
+                                        </div>
+                                        <h5 class="card-title">Perfil</h5>
+                                        <p class="card-text">Gestiona tu información personal.</p>
+                                        <a class="btn btn-info" href="{% url 'perfil_usuario' %}">Ver Perfil</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- Card de Perfil -->
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-info h-100">
-                                <div class="card-body text-center">
-                                    <div class="card-icon mb-3">
-                                        <i class="fas fa-user fa-3x text-info"></i>
+
+                        <!-- Últimas Transacciones -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Últimos Gastos</h5>
+                                        <a href="{% url 'gastos:lista_gastos' %}" class="btn btn-sm btn-light">Ver todos</a>
                                     </div>
-                                    <h5 class="card-title">Perfil</h5>
-                                    <p class="card-text">Actualiza la información de tu perfil y mantén tus datos al día.</p>
-                                    <a class="btn btn-info" href="{% url 'perfil_usuario' %}">Actualizar Perfil</a>
+                                    <div class="list-group list-group-flush">
+                                        {% if gastos %}
+                                            {% for gasto in gastos %}
+                                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                                    <div class="ms-2 me-auto">
+                                                        <div class="fw-bold">
+                                                            <i class="fas fa-shopping-cart me-2"></i>
+                                                            {{ gasto.descripcion }}
+                                                        </div>
+                                                        <small class="text-muted">{{ gasto.categoria }}</small>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="d-block text-danger">{{ gasto.monto }} $</span>
+                                                        <small class="badge bg-primary">{{ gasto.fecha|date:"d M Y" }}</small>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="list-group-item text-center text-muted">
+                                                No hay gastos registrados
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                        <h5 class="mb-0">Últimos Ingresos</h5>
+                                        <a href="{% url 'ingresos:lista_ingresos' %}" class="btn btn-sm btn-light">Ver todos</a>
+                                    </div>
+                                    <div class="list-group list-group-flush">
+                                        {% if ingresos %}
+                                            {% for ingreso in ingresos %}
+                                                <div class="list-group-item d-flex justify-content-between align-items-start">
+                                                    <div class="ms-2 me-auto">
+                                                        <div class="fw-bold">
+                                                            <i class="fas fa-coins me-2"></i>
+                                                            {{ ingreso.descripcion }}
+                                                        </div>
+                                                        <small class="text-muted">{{ ingreso.categoria }}</small>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="d-block text-success">{{ ingreso.monto }} $</span>
+                                                        <small class="badge bg-success">{{ ingreso.fecha|date:"d M Y" }}</small>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="list-group-item text-center text-muted">
+                                                No hay ingresos registrados
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="row mt-5">
-                        <div class="col-md-6 mb-3">
-                            <h4>Últimos Gastos</h4>
-                            <ul class="list-group">
-                                {% for gasto in gastos|slice:":5" %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <strong>{{ gasto.descripcion }}</strong>  {{ gasto.monto }} {{ gasto.moneda.simbolo }}
-                                        <span class="badge bg-primary text-white">{{ gasto.fecha|date:"d M Y" }}</span>
-                                    </li>
-                                {% empty %}
-                                    <li class="list-group-item">No hay gastos registrados.</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <h4>Últimos Ingresos</h4>
-                            <ul class="list-group">
-                                {% for ingreso in ingresos|slice:":5" %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <strong>{{ ingreso.descripcion }}</strong>  {{ ingreso.monto }} {{ ingreso.moneda.simbolo }}
-                                        <span class="badge bg-success text-white">{{ ingreso.fecha|date:"d M Y" }}</span>
-                                    </li>
-                                {% empty %}
-                                    <li class="list-group-item">No hay ingresos registrados.</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
                     {% else %}
-                    <h1 class="display-4 mb-3">Bienvenido/a a Billetera Virtual!</h1>
-                    <p class="lead mb-4">Gestiona tus finanzas de manera fácil y eficiente. Regístrate o inicia sesión para empezar a controlar tus ingresos y gastos.</p>
-                    <hr class="my-4">
-                    <a class="btn btn-primary btn-lg" href="{% url 'registro' %}" role="button">Registrarse</a>
-                    <a class="btn btn-secondary btn-lg" href="{% url 'login' %}" role="button">Iniciar Sesión</a>
+                        <div class="text-center">
+                            <h1 class="display-4 mb-3">Bienvenido/a a Billetera Virtual!</h1>
+                            <p class="lead mb-4">Gestiona tus finanzas de manera fácil y eficiente. Regístrate o inicia sesión para empezar a controlar tus ingresos y gastos.</p>
+                            <hr class="my-4">
+                            <a class="btn btn-primary btn-lg me-2" href="{% url 'registro' %}" role="button">Registrarse</a>
+                            <a class="btn btn-secondary btn-lg" href="{% url 'login' %}" role="button">Iniciar Sesión</a>
+                        </div>
                     {% endif %}
                 </div>
             </div>

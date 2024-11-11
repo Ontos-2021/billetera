@@ -1,3 +1,4 @@
+from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import PerfilUsuario
@@ -9,13 +10,25 @@ from ingresos.models import Ingreso
 
 
 def inicio(request):
-    ingresos = None
-    gastos = None
-    if request.user.is_authenticated and not request.user.is_superuser:
-        ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:5]
-        gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:5]
+    context = {}
 
-    return render(request, 'usuarios/inicio.html', {'ingresos': ingresos, 'gastos': gastos})
+    if request.user.is_authenticated and not request.user.is_superuser:
+        # Últimos 5 registros para la lista del inicio
+        ultimos_ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:5]
+        ultimos_gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:5]
+
+        # Total de todos los ingresos y registros solo con moneda de id 3 (Peso Argentino)
+        total_ingresos = Ingreso.objects.filter(usuario=request.user).filter(moneda=3).aggregate(Sum('monto'))['monto__sum']
+        total_gastos = Gasto.objects.filter(usuario=request.user).filter(moneda=3).aggregate(Sum('monto'))['monto__sum']
+
+        context = {
+            'ingresos': ultimos_ingresos,  # Para mantener compatibilidad con el template
+            'gastos': ultimos_gastos,  # Para mantener compatibilidad con el template
+            'total_ingresos': total_ingresos,
+            'total_gastos': total_gastos,
+        }
+
+    return render(request, 'usuarios/inicio.html', context)
 
 
 # Registro de usuario
