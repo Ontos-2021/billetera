@@ -18,8 +18,9 @@ def inicio(request):
         ultimos_gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:5]
 
         # Total de todos los ingresos y registros solo con moneda de id 3 (Peso Argentino)
-        total_ingresos = Ingreso.objects.filter(usuario=request.user).filter(moneda=3).aggregate(Sum('monto'))['monto__sum']
-        total_gastos = Gasto.objects.filter(usuario=request.user).filter(moneda=3).aggregate(Sum('monto'))['monto__sum']
+
+        total_ingresos = Ingreso.objects.filter(usuario=request.user, moneda=3).aggregate(Sum('monto'))['monto__sum'] or 0
+        total_gastos = Gasto.objects.filter(usuario=request.user, moneda=3).aggregate(Sum('monto'))['monto__sum'] or 0
 
         context = {
             'ingresos': ultimos_ingresos,  # Para mantener compatibilidad con el template
