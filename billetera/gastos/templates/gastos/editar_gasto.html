@@ -1,16 +1,116 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}Editar Gasto{% endblock %}
+
 {% block content %}
-<main class="container mt-5">
-    <h2>Editar Gasto</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h2 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Gasto
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-tag me-2 text-muted"></i>{{ form.descripcion.label }}
+                            </label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.help_text %}
+                                <div class="form-text">{{ form.descripcion.help_text }}</div>
+                            {% endif %}
+                            {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">{{ form.descripcion.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.categoria.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-list me-2 text-muted"></i>{{ form.categoria.label }}
+                            </label>
+                            {{ form.categoria }}
+                            {% if form.categoria.errors %}
+                                <div class="invalid-feedback d-block">{{ form.categoria.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-4">
+                                <label for="{{ form.monto.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-dollar-sign me-2 text-muted"></i>{{ form.monto.label }}
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.monto }}
+                                </div>
+                                {% if form.monto.help_text %}
+                                    <div class="form-text">{{ form.monto.help_text }}</div>
+                                {% endif %}
+                                {% if form.monto.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.monto.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="{{ form.moneda.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="fas fa-coins me-2 text-muted"></i>{{ form.moneda.label }}
+                                </label>
+                                {{ form.moneda }}
+                                {% if form.moneda.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.moneda.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg text-dark">
+                                <i class="fas fa-save me-2"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'gastos:lista_gastos' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Volver a la lista de gastos
+                </a>
+            </div>
         </div>
-    </form>
-    <a href="{% url 'gastos:lista_gastos' %}" class="btn btn-secondary my-3">Volver a la lista de gastos</a>
-</main>
+    </div>
+</div>
+
+<script>
+// Validación en tiempo real para formularios
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.prototype.slice.call(forms).forEach(function(form) {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+    
+    // Formatear input de números
+    const numberInputs = document.querySelectorAll('.number-input');
+    numberInputs.forEach(function(input) {
+        input.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

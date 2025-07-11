@@ -1,0 +1,319 @@
+/* static/css/themes/default.css */
+
+
+:root {
+    /* Paleta moderna, limpia y profesional para aplicación financiera */
+    --primary-color: #4285f4;         /* Azul moderno, confianza y estabilidad */
+    --primary-dark: #3367d6;          /* Azul más profundo */
+    --secondary-color: #34a853;       /* Verde éxito, crecimiento financiero */
+    --secondary-dark: #2d7d32;        /* Verde más oscuro */
+    --warning-color: #fbbc04;         /* Amarillo atención, precaución */
+    --danger-color: #ea4335;          /* Rojo para pérdidas o alertas */
+    --info-color: #4285f4;            /* Azul información */
+    --light-color: #f8f9fa;           /* Gris muy claro, limpio */
+    --dark-color: #212529;            /* Gris oscuro, legibilidad */
+    --background-color: #ffffff;      /* Fondo blanco limpio */
+    --card-background: #ffffff;       /* Tarjetas blancas */
+    --text-color: #212529;            /* Texto oscuro, máxima legibilidad */
+    --text-muted: #6c757d;            /* Gris medio para texto secundario */
+    --number-color: #1565c0;          /* Azul profesional para números */
+    --number-negative: #d32f2f;       /* Rojo claro para números negativos */
+    --number-highlight: #ff9800;      /* Naranja para destacar */
+    --font-main: 'Inter', 'SF Pro Display', 'Helvetica Neue', 'Arial', sans-serif;
+    --font-numbers: 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
+}
+
+.bg-primary { background-color: var(--primary-color) !important; }
+.bg-secondary { background-color: var(--secondary-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--danger-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+.bg-light { background-color: var(--light-color) !important; }
+.bg-dark { background-color: var(--dark-color) !important; }
+
+.text-primary { color: var(--primary-color) !important; }
+.text-secondary { color: var(--secondary-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-danger { color: var(--danger-color) !important; }
+.text-info { color: var(--info-color) !important; }
+.text-light { color: var(--light-color) !important; }
+.text-dark { color: var(--dark-color) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+}
+
+.number, .amount, .balance, .currency, .total-gastos, .total-ingresos {
+    color: var(--number-color);
+    font-family: var(--font-numbers);
+    font-size: 1.25em;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.number.negative, .amount.negative, .balance.negative {
+    color: var(--number-negative);
+}
+
+.number.highlight, .amount.highlight {
+    color: var(--number-highlight);
+    font-weight: bold;
+}
+
+.card {
+    background-color: var(--card-background);
+    border: 1px solid var(--light-color);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    border: none;
+    padding: 2rem 1.5rem 1.5rem;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+/* Estilos mejorados para formularios */
+.form-control-lg {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.form-control-lg:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+}
+
+.form-select-lg {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.form-select-lg:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--light-color);
+    border: 2px solid #e9ecef;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.form-label {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.form-text {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Mejoras de responsividad y usabilidad */
+
+/* Breadcrumbs responsivos */
+.breadcrumb {
+    font-size: 0.875rem;
+    background-color: transparent;
+    padding: 0.5rem 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: var(--text-muted);
+}
+
+/* Mejoras para pantallas pequeñas */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .card-header {
+        padding: 1rem !important;
+    }
+    
+    .h3 {
+        font-size: 1.25rem;
+    }
+    
+    .form-control-lg, .form-select-lg {
+        padding: 0.5rem 0.75rem;
+        font-size: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.625rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .input-group-text {
+        padding: 0.5rem 0.75rem;
+        font-size: 1rem;
+    }
+}
+
+/* Mejoras para pantallas medianas */
+@media (min-width: 576px) and (max-width: 768px) {
+    .col-sm-10 {
+        max-width: 90%;
+    }
+}
+
+/* Mejoras para pantallas grandes */
+@media (min-width: 1200px) {
+    .col-xl-5 {
+        max-width: 40%;
+    }
+}
+
+/* Accesibilidad: mejores contrastes */
+.form-label {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Estados de focus mejorados para accesibilidad */
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.btn:focus {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Espaciado adaptativo */
+.g-2 {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+}
+
+.g-md-3 {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+}
+
+@media (min-width: 768px) {
+    .g-md-3 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+    }
+}
+
+/* Animaciones suaves para mejor UX */
+.card {
+    transition: all 0.3s ease;
+}
+
+.btn {
+    transition: all 0.2s ease;
+}
+
+/* Touch targets para dispositivos móviles */
+@media (pointer: coarse) {
+    .btn, .form-control, .form-select {
+        min-height: 44px; /* Tamaño mínimo recomendado para touch */
+    }
+    
+    .breadcrumb-item a {
+        padding: 0.25rem 0.5rem;
+        margin: -0.25rem -0.5rem;
+    }
+}
+
+/* Estados de error mejorados */
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    color: #dc3545;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Mejoras para el input de números */
+.number-input {
+    text-align: right;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+/* Indicadores visuales mejorados */
+.form-label [aria-label="Campo obligatorio"] {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Loading state para botones */
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Print styles */
+@media print {
+    .breadcrumb,
+    .btn,
+    .card-header {
+        display: none;
+    }
+    
+    .card {
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+}

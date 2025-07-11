@@ -7,8 +7,31 @@ class IngresoForm(forms.ModelForm):
         model = Ingreso
         fields = ['descripcion', 'monto', 'moneda', 'categoria']
         widgets = {
-            'descripcion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Descripción del ingreso'}),
-            'monto': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Monto'}),
-            'moneda': forms.Select(attrs={'class': 'form-select'}),
-            'categoria': forms.Select(attrs={'class': 'form-select'}),
+            'descripcion': forms.TextInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Ej: Salario mensual',
+                'maxlength': '255'
+            }),
+            'monto': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg number-input',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'moneda': forms.Select(attrs={
+                'class': 'form-select form-select-lg'
+            }),
+            'categoria': forms.Select(attrs={
+                'class': 'form-select form-select-lg'
+            }),
+        }
+        labels = {
+            'descripcion': 'Descripción del ingreso',
+            'monto': 'Monto',
+            'moneda': 'Moneda',
+            'categoria': 'Categoría',
+        }
+        help_texts = {
+            'descripcion': 'Breve descripción de tu fuente de ingreso',
+            'monto': 'Ingresa el monto sin símbolos de moneda',
         }
