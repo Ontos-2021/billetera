@@ -24,10 +24,8 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 'yes']
 # Allowed Hosts
 if IS_PRODUCTION:
     # Koyeb forwards traffic to port 8000; use your Koyeb app domain
-    ALLOWED_HOSTS = [
-        os.getenv('ALLOWED_HOSTS', 'classic-pippy-ontos-b4c068be.koyeb.app').split(','),
-        '.koyeb.app',  # permite cualquier subdominio de koyeb.app
-    ]
+    env_hosts = os.getenv('ALLOWED_HOSTS', 'classic-pippy-ontos-b4c068be.koyeb.app')
+    ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(',')] + ['.koyeb.app']  # permite cualquier subdominio de koyeb.app
 else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
