@@ -67,4 +67,7 @@ class Gasto(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
 
     def __str__(self):
-        return f"{self.descripcion} - {self.monto} {self.moneda.simbolo}"
+        if self.moneda:
+            return f"{self.descripcion} - {self.monto} {self.moneda.simbolo}"
+        else:
+            return f"{self.descripcion} - {self.monto}"
