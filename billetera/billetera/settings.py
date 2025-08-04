@@ -18,16 +18,14 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'clave_por_defecto_para_desarrollo')
 if not SECRET_KEY:
     raise ValueError("La variable de entorno SECRET_KEY no está definida.")
 
-# Debug
-DEBUG = not IS_PRODUCTION
+# Debug - Independiente del entorno para permitir debugging en producción
+DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 'yes']
 
 # Allowed Hosts
 if IS_PRODUCTION:
-    ALLOWED_HOSTS = [
-        'billetera-production.up.railway.app',
-        'classic-pippy-ontos-b4c068be.koyeb.app',
-        '.koyeb.app',  # permite cualquier subdominio de koyeb.app
-    ]
+    # Koyeb forwards traffic to port 8000; use your Koyeb app domain
+    env_hosts = os.getenv('ALLOWED_HOSTS', 'classic-pippy-ontos-b4c068be.koyeb.app')
+    ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(',')] + ['.koyeb.app']  # permite cualquier subdominio de koyeb.app
 else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
