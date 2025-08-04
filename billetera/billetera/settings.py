@@ -25,7 +25,7 @@ DEBUG = not IS_PRODUCTION
 if IS_PRODUCTION:
     ALLOWED_HOSTS = [
         'billetera-production.up.railway.app',
-        'ep-bold-cake-a4fid9km.us-east-1.pg.koyeb.app',  # tu dominio actual en Koyeb
+        'classic-pippy-ontos-b4c068be.koyeb.app',
         '.koyeb.app',  # permite cualquier subdominio de koyeb.app
     ]
 else:
