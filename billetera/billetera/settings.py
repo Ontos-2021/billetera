@@ -25,10 +25,11 @@ DEBUG = not IS_PRODUCTION
 if IS_PRODUCTION:
     ALLOWED_HOSTS = [
         'billetera-production.up.railway.app',
-        'classic-pippy-ontos-b4c068be.koyeb.app',  # reemplaza con tu dominio en Koyeb
+        'ep-bold-cake-a4fid9km.us-east-1.pg.koyeb.app',  # tu dominio actual en Koyeb
+        '.koyeb.app',  # permite cualquier subdominio de koyeb.app
     ]
 else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Application definition
 INSTALLED_APPS = [
@@ -137,10 +138,11 @@ else:
 if IS_PRODUCTION:
     CSRF_TRUSTED_ORIGINS = [
         'https://billetera-production.up.railway.app',
-        'https://<TU_APP>.koyeb.app',  # reemplaza con tu dominio en Koyeb
+        'https://classic-pippy-ontos-b4c068be.koyeb.app',  # tu dominio actual en Koyeb
+        'https://*.koyeb.app',  # permite cualquier subdominio de koyeb.app
     ]
 else:
-    CSRF_TRUSTED_ORIGINS = ['http://localhost']
+    CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1:8000']
 
 # Configuración de inicio de sesión
 LOGIN_URL = 'login'

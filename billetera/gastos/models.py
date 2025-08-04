@@ -17,29 +17,34 @@ class Moneda(models.Model):
 @receiver(post_migrate)
 def create_initial_data(sender, **kwargs):
     if sender.name == 'gastos':
-        # Crea instancias de Moneda si no existen
-        if not Moneda.objects.filter(codigo='USD').exists():
-            Moneda.objects.create(codigo='USD', nombre='Dólar Estadounidense', simbolo='$')
-        if not Moneda.objects.filter(codigo='EUR').exists():
-            Moneda.objects.create(codigo='EUR', nombre='Euro', simbolo='€')
-        if not Moneda.objects.filter(codigo='ARS').exists():
-            Moneda.objects.create(codigo='ARS', nombre='Peso Argentino', simbolo='$')
-        if not Moneda.objects.filter(codigo='CLP').exists():
-            Moneda.objects.create(codigo='CLP', nombre='Peso Chileno', simbolo='$')
-        # Crea instancias de Categoría si no existen
-        categorias = ['Alimentación',
-                      'Transporte',
-                      'Entretenimiento',
-                      'Salud',
-                      'Vivienda',
-                      'Educación',
-                      'Ropa',
-                      'Viajes',
-                      'Tecnología',
-                      'Ahorros e Inversiones']
-        for categoria_nombre in categorias:
-            if not Categoria.objects.filter(nombre=categoria_nombre).exists():
-                Categoria.objects.create(nombre=categoria_nombre)
+        try:
+            # Crea instancias de Moneda si no existen
+            if not Moneda.objects.filter(codigo='USD').exists():
+                Moneda.objects.create(codigo='USD', nombre='Dólar Estadounidense', simbolo='$')
+            if not Moneda.objects.filter(codigo='EUR').exists():
+                Moneda.objects.create(codigo='EUR', nombre='Euro', simbolo='€')
+            if not Moneda.objects.filter(codigo='ARS').exists():
+                Moneda.objects.create(codigo='ARS', nombre='Peso Argentino', simbolo='$')
+            if not Moneda.objects.filter(codigo='CLP').exists():
+                Moneda.objects.create(codigo='CLP', nombre='Peso Chileno', simbolo='$')
+            # Crea instancias de Categoría si no existen
+            categorias = ['Alimentación',
+                          'Transporte',
+                          'Entretenimiento',
+                          'Salud',
+                          'Vivienda',
+                          'Educación',
+                          'Ropa',
+                          'Viajes',
+                          'Tecnología',
+                          'Ahorros e Inversiones']
+            for categoria_nombre in categorias:
+                if not Categoria.objects.filter(nombre=categoria_nombre).exists():
+                    Categoria.objects.create(nombre=categoria_nombre)
+        except Exception as e:
+            # Si hay algún error (como tablas no creadas aún), simplemente ignoramos
+            print(f"Error creating initial data: {e}")
+            pass
 
 
 class Categoria(models.Model):
