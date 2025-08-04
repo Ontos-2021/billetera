@@ -1,0 +1,38 @@
+# Koyeb deployment configuration for MoneyFlow Mirror
+name: moneyflow
+services:
+  - name: web
+    source:
+      type: git
+      repository: https://github.com/Ontos-2021/billetera
+      branch: main
+    build:
+      type: dockerfile
+      dockerfile_path: Dockerfile
+    env:
+      - name: SECRET_KEY
+        value: $SECRET_KEY
+      - name: ENV
+        value: "production"
+      - name: DEBUG
+        value: "0"
+      - name: DATABASE_URL
+        value: $DATABASE_URL
+      - name: AWS_ACCESS_KEY_ID
+        value: $AWS_ACCESS_KEY_ID
+      - name: AWS_SECRET_ACCESS_KEY
+        value: $AWS_SECRET_ACCESS_KEY
+      - name: AWS_STORAGE_BUCKET_NAME
+        value: $AWS_STORAGE_BUCKET_NAME
+      - name: AWS_S3_ENDPOINT_URL
+        value: $AWS_S3_ENDPOINT_URL
+      - name: ALLOWED_HOSTS
+        value: "moneyflow-<org>.koyeb.app"
+      - name: CSRF_TRUSTED_ORIGINS
+        value: "https://moneyflow-<org>.koyeb.app"
+    instance:
+      type: shared
+      size: micro
+    routes:
+      - path: /
+        port: 8000

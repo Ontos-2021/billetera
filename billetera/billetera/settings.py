@@ -23,7 +23,10 @@ DEBUG = not IS_PRODUCTION
 
 # Allowed Hosts
 if IS_PRODUCTION:
-    ALLOWED_HOSTS = ['billetera-production.up.railway.app']
+    ALLOWED_HOSTS = [
+        'billetera-production.up.railway.app',
+        'classic-pippy-ontos-b4c068be.koyeb.app',  # reemplaza con tu dominio en Koyeb
+    ]
 else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -37,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'whitenoise.runserver_nostatic',  # WhiteNoise para servir archivos estáticos en producción
+    'storages',  # django-storages for Cloudflare R2
     'gastos',
     'usuarios',
     'ingresos',
@@ -107,29 +111,34 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if IS_PRODUCTION:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # WhiteNoise para producción
 
-from django.conf import settings
-
-new_directory = os.path.join(settings.MEDIA_ROOT, 'media')
-if not os.path.exists(new_directory):
-    os.makedirs(new_directory)
-
-MEDIA_URL = '/media/'
+# Media files configuration
 if IS_PRODUCTION:
-    try:
-        MEDIA_ROOT = os.environ["RAILWAY_VOLUME_MOUNT_PATH"]  # Ruta para producción en Railway
-    except KeyError as e:
-        print(f"Error: {e}")
+    # Cloudflare R2 settings
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    AWS_LOCATION = 'media'
+    AWS_DEFAULT_ACL = None
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_VERIFY = True
 
+    # Use django-storages S3 backend
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    # Correct MEDIA_URL construction for R2
+    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL.replace('https://', '').split('.')[0]}.r2.cloudflarestorage.com/{AWS_LOCATION}/"
 else:
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Ruta para desarrollo
-
-WHITENOISE_ALLOW_ALL_ORIGINS = True
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_ROOT = MEDIA_ROOT
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CSRF Trusted Origins
 if IS_PRODUCTION:
-    CSRF_TRUSTED_ORIGINS = ['https://billetera-production.up.railway.app']
+    CSRF_TRUSTED_ORIGINS = [
+        'https://billetera-production.up.railway.app',
+        'https://<TU_APP>.koyeb.app',  # reemplaza con tu dominio en Koyeb
+    ]
 else:
     CSRF_TRUSTED_ORIGINS = ['http://localhost']
 
