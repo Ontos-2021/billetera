@@ -112,22 +112,33 @@ if IS_PRODUCTION:
 
 # Media files configuration
 if IS_PRODUCTION:
+    # Use django-storages S3 backend
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    
     # Cloudflare R2 settings
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
+    AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "virtual")
+    
+    # R2 specific settings
     AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     AWS_LOCATION = 'media'
     AWS_DEFAULT_ACL = None
     AWS_S3_FILE_OVERWRITE = False
     AWS_S3_VERIFY = True
+    AWS_S3_SIGNATURE_VERSION = 's3v4'  # Required for R2
+    AWS_S3_CUSTOM_DOMAIN = None  # Let django-storages handle the domain
 
-    # Use django-storages S3 backend
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-    # Correct MEDIA_URL construction for R2
-    MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL.replace('https://', '').split('.')[0]}.r2.cloudflarestorage.com/{AWS_LOCATION}/"
+    # Simplified MEDIA_URL - let django-storages handle the URL construction
+    if AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
+        # Extract account ID from endpoint URL
+        account_id = AWS_S3_ENDPOINT_URL.replace('https://', '').split('.')[0]
+        MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.{account_id}.r2.cloudflarestorage.com/{AWS_LOCATION}/"
+    else:
+        MEDIA_URL = '/media/'  # Fallback
 else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
