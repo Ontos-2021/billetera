@@ -1,1 +1,0 @@
-web: cd billetera && python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn billetera.wsgi --bind 0.0.0.0:$PORT
