@@ -1,33 +1,99 @@
 {% extends "base.html" %}
 {% load static %} 
-{% block title %}Lista de Gastos{% endblock %}
-{% block content %}
-<main class="container mt-5">
-    <h2 class="row">Lista de Gastos</h2>
+{% block title %}Lista de Gastos - MoneyFlow Mirror{% endblock %}
 
-    <ul class="row list-group">
-        {% for gasto in gastos %}
-        <li class="list-group-item">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="gasto-descripcion">{{ gasto.descripcion }}</span>
-                    <span class="gasto-monto">${{ gasto.monto }}</span>
-                    <span class="gasto-fecha">{{ gasto.fecha }}</span>
-                    <span class="gasto-moneda">({{ gasto.moneda.codigo }})</span>
-                    <span class="gasto-categoria">({{ gasto.categoria }})</span>
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">💸 Lista de Gastos</h1>
+            <p class="text-gray-600">Controla y gestiona todos tus gastos de manera consciente</p>
+        </div>
+        <a href="{% url 'gastos:crear_gasto' %}" class="mt-4 sm:mt-0 bg-expense hover:bg-expense-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
+            <span class="mr-2">+</span>
+            Nuevo Gasto
+        </a>
+    </div>
+
+    {% if gastos %}
+        <!-- Expenses Grid -->
+        <div class="grid gap-4">
+            {% for gasto in gastos %}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover border-l-4 border-l-expense">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <!-- Expense Info -->
+                        <div class="flex-1 mb-4 sm:mb-0">
+                            <div class="flex items-start justify-between sm:justify-start">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900 text-lg mb-1">{{ gasto.descripcion }}</h3>
+                                    <div class="flex flex-wrap gap-2 text-sm text-gray-500">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            📁 {{ gasto.categoria }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            💱 {{ gasto.moneda.codigo }}
+                                        </span>
+                                        <span class="text-xs text-gray-400">
+                                            📅 {{ gasto.fecha|date:"d M Y" }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Amount Display -->
+                                <div class="text-right ml-4">
+                                    <p class="text-2xl font-numbers font-bold text-expense">-${{ gasto.monto }}</p>
+                                    <p class="text-xs text-gray-500">{{ gasto.moneda.codigo }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-2 pt-4 sm:pt-0 sm:ml-6">
+                            <a href="{% url 'gastos:editar_gasto' gasto.id %}" 
+                               class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 text-sm">
+                                ✏️ Editar
+                            </a>
+                            <a href="{% url 'gastos:eliminar_gasto' gasto.id %}" 
+                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200 text-sm">
+                                🗑️ Eliminar
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="btn-group" role="group">
-                    <a href="{% url 'gastos:editar_gasto' gasto.id %}" class="btn btn-primary m-1">Editar</a>
-                    <a href="{% url 'gastos:eliminar_gasto' gasto.id %}" class="btn btn-danger m-1">Eliminar</a>
+            {% endfor %}
+        </div>
+
+        <!-- Summary Section -->
+        <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">Total de Gastos</h3>
+                    <p class="text-sm text-gray-500">Suma de todos los gastos registrados</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-3xl font-numbers font-bold text-expense">
+                        Total registrado
+                    </p>
+                    <p class="text-xs text-gray-500">ARS</p>
                 </div>
             </div>
-        </li>
-        {% empty %}
-        <li class="list-group-item text-center">No hay gastos registrados.</li>
-        {% endfor %}
-    </ul>
-    
-    <a href="{% url 'gastos:crear_gasto' %}" class="row btn btn-success my-3 p-3">Crear Nuevo Gasto</a>
-</main>
-
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="text-4xl">📝</span>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No hay gastos registrados</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                Comienza a registrar tus gastos para tener un mejor control de tus finanzas.
+            </p>
+            <a href="{% url 'gastos:crear_gasto' %}" 
+               class="bg-expense hover:bg-expense-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
+                <span class="mr-2">+</span>
+                Registrar Primer Gasto
+            </a>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

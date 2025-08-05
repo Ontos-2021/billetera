@@ -1,0 +1,38 @@
+/* MoneyFlow Mirror - Default Theme */
+/* This file is kept for backward compatibility but TailwindCSS is now the primary styling solution */
+
+/* Legacy color variables for any remaining Bootstrap components */
+:root {
+  --primary-color: #4285f4;
+  --success-color: #34a853;
+  --warning-color: #fbbc04;
+  --danger-color: #ea4335;
+  --info-color: #1a73e8;
+  --light-color: #f8fafc;
+  --dark-color: #0f172a;
+}
+
+/* Bootstrap color override if needed */
+.bg-primary {
+  background-color: var(--primary-color) !important;
+}
+
+.bg-success {
+  background-color: var(--success-color) !important;
+}
+
+.bg-danger {
+  background-color: var(--danger-color) !important;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.text-success {
+  color: var(--success-color) !important;
+}
+
+.text-danger {
+  color: var(--danger-color) !important;
+}

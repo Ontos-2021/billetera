@@ -1,53 +1,159 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Editar Perfil{% endblock %}
-{% block content %}
+{% block title %}Editar Perfil - MoneyFlow Mirror{% endblock %}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">Editar Perfil</h2>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="imagen_perfil">Imagen de Perfil</label><br>
-                            {% if perfil.imagen_perfil %}
-                                <img id="preview" src="{{ perfil.imagen_perfil.url }}" alt="Imagen de Perfil" class="img-thumbnail mb-3" width="150" height="150">
-                            {% else %}
-                                <img id="preview" src="{% static 'img/default_profile.png' %}" alt="Imagen por Defecto" class="img-thumbnail mb-3" width="150" height="150">
-                            {% endif %}
-                            <input type="file" name="imagen_perfil" id="imagen_perfil" class="form-control" onchange="previewImage(event)">
-                        </div>
-                        <div class="form-group mt-3">
-                            <label for="direccion">Dirección</label>
-                            <input type="text" name="direccion" id="direccion" class="form-control" value="{{ perfil.direccion }}">
-                        </div>
-                        <div class="form-group mt-3">
-                            <label for="telefono">Número de Teléfono</label>
-                            <input type="text" name="telefono" id="telefono" class="form-control" value="{{ perfil.telefono }}">
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-4">Guardar Cambios</button>
-                    </form>
-                </div>
-            </div>
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'inicio_usuarios' %}" class="hover:text-primary transition-colors duration-200">Inicio</a></li>
+            <li class="before:content-['/'] before:mx-2">
+                <a href="{% url 'perfil_usuario' %}" class="hover:text-primary transition-colors duration-200">Perfil</a>
+            </li>
+            <li class="before:content-['/'] before:mx-2 text-gray-900">Editar</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">✏️</span>
         </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Editar Perfil</h1>
+        <p class="text-gray-600">Actualiza tu información personal</p>
+    </div>
+
+    <!-- Edit Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-primary text-white p-6 text-center">
+            <h2 class="text-xl font-semibold">👤 Información Personal</h2>
+        </div>
+        
+        <div class="p-6">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Profile Image Section -->
+                <div class="text-center">
+                    <label class="block text-sm font-medium text-gray-900 mb-4">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-2">📸</span>
+                            Imagen de Perfil
+                        </span>
+                    </label>
+                    
+                    <!-- Current Image Preview -->
+                    <div class="mb-4">
+                        {% if perfil.imagen_perfil %}
+                            <img id="preview" 
+                                 src="{{ perfil.imagen_perfil.url }}" 
+                                 alt="Imagen de Perfil" 
+                                 class="w-32 h-32 rounded-full border-4 border-gray-200 mx-auto object-cover">
+                        {% else %}
+                            <div id="preview" class="w-32 h-32 rounded-full border-4 border-gray-200 mx-auto bg-gray-100 flex items-center justify-center">
+                                <span class="text-4xl text-gray-400">👤</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- File Input -->
+                    <div class="flex justify-center">
+                        <label for="imagen_perfil" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200 cursor-pointer inline-flex items-center">
+                            <span class="mr-2">📎</span>
+                            Cambiar Imagen
+                        </label>
+                        <input type="file" 
+                               name="imagen_perfil" 
+                               id="imagen_perfil" 
+                               class="hidden" 
+                               accept="image/*"
+                               onchange="previewImage(event)">
+                    </div>
+                </div>
+
+                <!-- Address Field -->
+                <div>
+                    <label for="direccion" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">🏠</span>
+                            Dirección
+                        </span>
+                    </label>
+                    <input type="text" 
+                           name="direccion" 
+                           id="direccion" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                           placeholder="Tu dirección completa"
+                           value="{{ perfil.direccion|default:'' }}">
+                </div>
+
+                <!-- Phone Field -->
+                <div>
+                    <label for="telefono" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📞</span>
+                            Número de Teléfono
+                        </span>
+                    </label>
+                    <input type="tel" 
+                           name="telefono" 
+                           id="telefono" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                           placeholder="+1 (555) 123-4567"
+                           value="{{ perfil.telefono|default:'' }}">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="space-y-4 pt-6">
+                    <button type="submit" 
+                            class="w-full bg-primary hover:bg-primary-dark text-white font-medium px-6 py-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md text-lg">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-2">💾</span>
+                            Guardar Cambios
+                        </span>
+                    </button>
+                    <p class="text-sm text-gray-500 text-center">
+                        Tus cambios se guardarán de forma segura
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-6">
+        <a href="{% url 'perfil_usuario' %}" 
+           class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200 inline-flex items-center">
+            <span class="mr-2">←</span>
+            Volver al Perfil
+        </a>
     </div>
 </div>
 
 <script>
-    function previewImage(event) {
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
         const reader = new FileReader();
-        reader.onload = function() {
-            const output = document.getElementById('preview');
-            output.src = reader.result;
+        reader.onload = function(e) {
+            const preview = document.getElementById('preview');
+            
+            // If preview is currently a div (placeholder), replace it with an img
+            if (preview.tagName === 'DIV') {
+                const img = document.createElement('img');
+                img.id = 'preview';
+                img.className = 'w-32 h-32 rounded-full border-4 border-gray-200 mx-auto object-cover';
+                img.alt = 'Vista previa de imagen';
+                img.src = e.target.result;
+                preview.parentNode.replaceChild(img, preview);
+            } else {
+                preview.src = e.target.result;
+            }
         }
-        reader.readAsDataURL(event.target.files[0]);
+        reader.readAsDataURL(file);
     }
+}
 </script>
-
 {% endblock %}

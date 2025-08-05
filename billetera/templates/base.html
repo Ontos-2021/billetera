@@ -5,80 +5,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Billetera Virtual{% endblock %}</title>
+    <title>{% block title %}MoneyFlow Mirror{% endblock %}</title>
 
-    <!-- Bootstrap CSS (versión 5) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4285f4',
+                        'primary-light': '#6ba6f6',
+                        'primary-dark': '#3367d6',
+                        success: '#34a853',
+                        'success-light': '#81c995',
+                        'success-dark': '#2d7d32',
+                        warning: '#fbbc04',
+                        'warning-light': '#fdd663',
+                        'warning-dark': '#f29900',
+                        expense: '#ea4335',
+                        'expense-light': '#f07470',
+                        'expense-dark': '#d23025'
+                    },
+                    fontFamily: {
+                        'main': ['Inter', 'system-ui', 'sans-serif'],
+                        'numbers': ['SF Mono', 'JetBrains Mono', 'monospace']
+                    },
+                    animation: {
+                        'pulse-success': 'pulse-success 600ms ease-out',
+                    }
+                }
+            }
+        }
+    </script>
 
     <!-- Google Fonts - Fuentes profesionales -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Tema de colores personalizado -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/themes/default.css' %}">
-
     <!-- Custom CSS -->
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
 
-    {% block extra_css %}{% endblock %}  <!-- Bloque para incluir CSS adicional en páginas específicas -->
+    {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container-fluid">
+<body class="bg-gray-50 font-main min-h-screen flex flex-col">
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
-                <a class="navbar-brand" href="{% url 'inicio_usuarios' %}">Billetera Virtual</a>
-
-                <!-- Botón de menú (Hamburguesa) -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Elementos del menú -->
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        {% if user.is_authenticated %}
-                            <li class="nav-item">
-                                <div class="d-flex align-items-center h-100"><a class="nav-link" href="{% url 'ingresos:lista_ingresos' %}">Ingresos</a></div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="d-flex align-items-center h-100"><a class="nav-link" href="{% url 'gastos:lista_gastos' %}">Gastos</a></div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="d-flex align-items-center h-100"><a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a></div>
-                            </li>
-                            <li class="nav-item d-flex align-items-center">
-                                <a href="{% url 'perfil_usuario' %}" class="nav-link d-flex align-items-center">
-                                    <span class="me-2">{{ user.username }}</span>
-                                    <img src="{% if user.perfilusuario.imagen_perfil %}{{ user.perfilusuario.imagen_perfil.url }}{% else %}{% static 'img/default_profile.png' %}{% endif %}" alt="Imagen de Perfil" class="rounded-circle" width="40" height="40">
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <div class="d-flex align-items-center h-100"><a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a></div>
-                            </li>
-                            <li class="nav-item">
-                                <div class="d-flex align-items-center h-100"><a class="nav-link" href="{% url 'registro' %}">Registrarse</a></div>
-                            </li>
-                        {% endif %}
-                    </ul>
+                <div class="flex items-center">
+                    <a href="{% url 'inicio_usuarios' %}" class="text-xl font-semibold text-primary hover:text-primary-dark transition-colors duration-200">
+                        💸 MoneyFlow Mirror
+                    </a>
                 </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'ingresos:lista_ingresos' %}" class="text-gray-700 hover:text-success font-medium transition-colors duration-200 flex items-center">
+                            <span class="mr-2">💰</span>Ingresos
+                        </a>
+                        <a href="{% url 'gastos:lista_gastos' %}" class="text-gray-700 hover:text-expense font-medium transition-colors duration-200 flex items-center">
+                            <span class="mr-2">💸</span>Gastos
+                        </a>
+                        <div class="flex items-center space-x-4">
+                            <a href="{% url 'perfil_usuario' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors duration-200">
+                                <span class="text-sm font-medium">{{ user.username }}</span>
+                                <img src="{% if user.perfilusuario.imagen_perfil %}{{ user.perfilusuario.imagen_perfil.url }}{% else %}{% static 'img/default_profile.png' %}{% endif %}" 
+                                     alt="Imagen de Perfil" 
+                                     class="w-8 h-8 rounded-full border-2 border-gray-200 hover:border-primary transition-colors duration-200">
+                            </a>
+                            <a href="{% url 'logout' %}" class="text-gray-500 hover:text-gray-700 font-medium transition-colors duration-200">
+                                Cerrar sesión
+                            </a>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-200">
+                            Iniciar sesión
+                        </a>
+                        <a href="{% url 'registro' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                            Registrarse
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary rounded-lg p-2 transition-colors duration-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div id="mobile-menu" class="hidden md:hidden pb-4 space-y-2">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'ingresos:lista_ingresos' %}" class="block px-3 py-2 text-gray-700 hover:text-success hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        💰 Ingresos
+                    </a>
+                    <a href="{% url 'gastos:lista_gastos' %}" class="block px-3 py-2 text-gray-700 hover:text-expense hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        💸 Gastos
+                    </a>
+                    <a href="{% url 'perfil_usuario' %}" class="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        👤 {{ user.username }}
+                    </a>
+                    <a href="{% url 'logout' %}" class="block px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        Cerrar sesión
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        Iniciar sesión
+                    </a>
+                    <a href="{% url 'registro' %}" class="block px-3 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors duration-200 text-center">
+                        Registrarse
+                    </a>
+                {% endif %}
             </div>
         </nav>
     </header>
 
-    <main class="container mt-5">
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p class="mb-0">Billetera Virtual &copy; 2024 - Todos los derechos reservados.</p>
+    <footer class="bg-gray-900 text-white text-center py-6 mt-auto">
+        <p class="text-sm">MoneyFlow Mirror &copy; 2024 - Gestiona tus finanzas con confianza</p>
     </footer>
 
-    <!-- JavaScript dependencies (Bootstrap 5) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Mobile menu toggle script -->
+    <script>
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
 
-    {% block extra_js %}{% endblock %}  <!-- Bloque para incluir JS adicional en páginas específicas -->
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

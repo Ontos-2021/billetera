@@ -1,31 +1,146 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Perfil de Usuario{% endblock %}
-{% block content %}
+{% block title %}Perfil de Usuario - MoneyFlow Mirror{% endblock %}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0">Perfil de Usuario</h2>
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">👤 Mi Perfil</h1>
+        <p class="text-gray-600">Gestiona tu información personal y configuración</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Profile Card -->
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-primary text-white p-6 text-center">
+                    <h2 class="text-xl font-semibold">Información Personal</h2>
                 </div>
-                <div class="card-body text-center">
-                    {% if user.perfilusuario.imagen_perfil %}
-                        <img src="{{ user.perfilusuario.imagen_perfil.url }}" alt="Imagen de Perfil" class="img-thumbnail mb-3" width="150" height="150">
-                    {% else %}
-                        <img src="{% static 'img/default_profile.png' %}" alt="Imagen por Defecto" class="img-thumbnail mb-3" width="150" height="150">
+                
+                <div class="p-6 text-center">
+                    <!-- Profile Image -->
+                    <div class="mb-6">
+                        {% if user.perfilusuario.imagen_perfil %}
+                            <img src="{{ user.perfilusuario.imagen_perfil.url }}" 
+                                 alt="Imagen de Perfil" 
+                                 class="w-32 h-32 rounded-full border-4 border-gray-200 mx-auto object-cover">
+                        {% else %}
+                            <div class="w-32 h-32 rounded-full border-4 border-gray-200 mx-auto bg-gray-100 flex items-center justify-center">
+                                <span class="text-4xl text-gray-400">👤</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- User Info -->
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ user.username }}</h3>
+                    {% if user.email %}
+                        <p class="text-gray-600 mb-4">{{ user.email }}</p>
                     {% endif %}
-                    <h4>{{ user.username }}</h4>
-                    <p>{{ user.email }}</p>
-                    <p>Dirección: {{ user.perfilusuario.direccion }}</p>
-                    <p>Número de teléfono: {{ user.perfilusuario.telefono }}</p>
-                    <a href="{% url 'editar_perfil' %}" class="btn btn-primary mt-3">Editar Perfil</a>
+
+                    <!-- Edit Button -->
+                    <a href="{% url 'editar_perfil' %}" 
+                       class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
+                        <span class="mr-2">✏️</span>
+                        Editar Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Cards -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Contact Information -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <span class="mr-2">📧</span>
+                        Información de Contacto
+                    </h3>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
+                            <p class="text-gray-900">{{ user.email|default:"No especificado" }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
+                            <p class="text-gray-900">{{ user.perfilusuario.telefono|default:"No especificado" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-medium text-gray-500 mb-1">Dirección</label>
+                        <p class="text-gray-900">{{ user.perfilusuario.direccion|default:"No especificada" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Statistics -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <span class="mr-2">📊</span>
+                        Estadísticas de la Cuenta
+                    </h3>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <span class="text-xl">💰</span>
+                            </div>
+                            <p class="text-2xl font-numbers font-bold text-success">{{ total_ingresos|default:0 }}</p>
+                            <p class="text-sm text-gray-500">Ingresos Registrados</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <span class="text-xl">💸</span>
+                            </div>
+                            <p class="text-2xl font-numbers font-bold text-expense">{{ total_gastos|default:0 }}</p>
+                            <p class="text-sm text-gray-500">Gastos Registrados</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <span class="text-xl">📅</span>
+                            </div>
+                            <p class="text-2xl font-numbers font-bold text-primary">{{ dias_activo|default:0 }}</p>
+                            <p class="text-sm text-gray-500">Días Activo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Actions -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <span class="mr-2">⚙️</span>
+                        Acciones de Cuenta
+                    </h3>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <a href="{% url 'editar_perfil' %}" 
+                           class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-3 rounded-lg transition-colors duration-200 text-center">
+                            ✏️ Editar Información
+                        </a>
+                        
+                        <a href="{% url 'logout' %}" 
+                           class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-3 rounded-lg transition-colors duration-200 text-center">
+                            🚪 Cerrar Sesión
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {% endblock %}

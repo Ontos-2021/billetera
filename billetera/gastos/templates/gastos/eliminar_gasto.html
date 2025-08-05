@@ -1,16 +1,78 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Eliminar Gasto{% endblock %}
+{% block title %}Eliminar Gasto - MoneyFlow Mirror{% endblock %}
+
 {% block content %}
-<main class="container mt-5">
-    <h2>Eliminar Gasto</h2>
-    <p>¿Estás seguro de que deseas eliminar este gasto?: {{gasto.descripcion}}</p>
-    <form method="post">
-        {% csrf_token %}
-        <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+<div class="max-w-lg mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">🗑️</span>
         </div>
-    </form>
-    <a href="{% url 'gastos:lista_gastos' %}" class="btn btn-secondary my-3">Cancelar</a>
-</main>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Eliminar Gasto</h1>
+        <p class="text-gray-600">Esta acción no se puede deshacer</p>
+    </div>
+
+    <!-- Confirmation Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-expense text-white p-6 text-center">
+            <h2 class="text-xl font-semibold">⚠️ Confirmar Eliminación</h2>
+        </div>
+        
+        <div class="p-6">
+            <!-- Expense Details -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 class="font-semibold text-gray-900 mb-2">Gasto a eliminar:</h3>
+                <div class="space-y-2">
+                    <p class="text-lg font-medium text-gray-900">{{ gasto.descripcion }}</p>
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <span>Monto:</span>
+                        <span class="font-numbers font-bold text-expense">${{ gasto.monto }} {{ gasto.moneda.codigo }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <span>Fecha:</span>
+                        <span>{{ gasto.fecha|date:"d M Y" }}</span>
+                    </div>
+                    {% if gasto.categoria %}
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <span>Categoría:</span>
+                        <span>{{ gasto.categoria }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="bg-expense-light bg-opacity-10 border border-expense-light rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <span class="text-expense mr-3 mt-0.5">⚠️</span>
+                    <div class="text-sm">
+                        <p class="font-medium text-expense mb-1">¿Estás seguro?</p>
+                        <p class="text-gray-600">Esta acción eliminará permanentemente este registro de gasto de tu historial financiero.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <button type="submit" 
+                        class="w-full bg-expense hover:bg-expense-dark text-white font-medium px-6 py-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md text-lg">
+                    <span class="flex items-center justify-center">
+                        <span class="mr-2">🗑️</span>
+                        Confirmar Eliminación
+                    </span>
+                </button>
+                
+                <a href="{% url 'gastos:lista_gastos' %}" 
+                   class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-4 rounded-lg transition-colors duration-200 text-center block">
+                    <span class="flex items-center justify-center">
+                        <span class="mr-2">←</span>
+                        Cancelar
+                    </span>
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
