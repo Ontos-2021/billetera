@@ -21,12 +21,16 @@ def inicio(request):
 
         total_ingresos = Ingreso.objects.filter(usuario=request.user, moneda=3).aggregate(Sum('monto'))['monto__sum'] or 0
         total_gastos = Gasto.objects.filter(usuario=request.user, moneda=3).aggregate(Sum('monto'))['monto__sum'] or 0
+        
+        # Calcular el balance neto (ingresos - gastos)
+        balance_neto = total_ingresos - total_gastos
 
         context = {
             'ingresos': ultimos_ingresos,  # Para mantener compatibilidad con el template
             'gastos': ultimos_gastos,  # Para mantener compatibilidad con el template
             'total_ingresos': total_ingresos,
             'total_gastos': total_gastos,
+            'balance_neto': balance_neto,
         }
 
     return render(request, 'usuarios/inicio.html', context)

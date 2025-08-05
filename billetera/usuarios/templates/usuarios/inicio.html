@@ -10,6 +10,42 @@
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">Tu panel principal para gestionar tus finanzas con confianza y claridad.</p>
     </div>
 
+    <!-- Quick Actions Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 text-center mb-6">⚡ Acciones Rápidas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <!-- Quick Add Expense -->
+            <a href="{% url 'gastos:crear_gasto' %}" 
+               class="group bg-gradient-to-br from-expense to-expense-dark hover:from-expense-dark hover:to-expense text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 group-hover:bg-opacity-30 transition-all duration-300">
+                        <span class="text-3xl">💸</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Registrar Gasto</h3>
+                    <p class="text-expense-light opacity-90">Anota un gasto al instante</p>
+                    <div class="mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
+                        <span class="text-sm font-medium">+ Agregar ahora</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Quick Add Income -->
+            <a href="{% url 'ingresos:crear_ingreso' %}" 
+               class="group bg-gradient-to-br from-success to-success-dark hover:from-success-dark hover:to-success text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 group-hover:bg-opacity-30 transition-all duration-300">
+                        <span class="text-3xl">💰</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Registrar Ingreso</h3>
+                    <p class="text-success-light opacity-90">Celebra un nuevo ingreso</p>
+                    <div class="mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
+                        <span class="text-sm font-medium">+ Agregar ahora</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
     <!-- Financial Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <!-- Total Income Card -->
@@ -17,7 +53,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-success-dark mb-1">💰 Total Ingresos</p>
-                    <p class="text-3xl font-numbers font-bold text-success">${{ total_ingresos|floatformat:2 }}</p>
+                    <p class="text-3xl font-numbers font-bold text-success">+${{ total_ingresos|floatformat:2 }}</p>
                     <p class="text-xs text-gray-500 mt-1">ARS</p>
                 </div>
                 <div class="w-12 h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center">
@@ -31,7 +67,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-expense-dark mb-1">💸 Total Gastos</p>
-                    <p class="text-3xl font-numbers font-bold text-expense">${{ total_gastos|floatformat:2 }}</p>
+                    <p class="text-3xl font-numbers font-bold text-expense">-${{ total_gastos|floatformat:2 }}</p>
                     <p class="text-xs text-gray-500 mt-1">ARS</p>
                 </div>
                 <div class="w-12 h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center">
@@ -45,61 +81,80 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-primary-dark mb-1">💼 Balance Neto</p>
-                    {% with balance=total_ingresos|add:total_gastos|floatformat:'-2' %}
-                        <p class="text-3xl font-numbers font-bold {% if balance > 0 %}text-success{% elif balance < 0 %}text-expense{% else %}text-primary{% endif %}">
-                            ${{ total_ingresos|add:total_gastos|floatformat:2 }}
+                    {% if balance_neto > 0 %}
+                        <p class="text-3xl font-numbers font-bold text-success">
+                            +${{ balance_neto|floatformat:2 }}
                         </p>
-                    {% endwith %}
-                    <p class="text-xs text-gray-500 mt-1">ARS</p>
+                        <p class="text-xs text-success-dark mt-1">Balance positivo 📈</p>
+                    {% elif balance_neto < 0 %}
+                        <p class="text-3xl font-numbers font-bold text-expense">
+                            ${{ balance_neto|floatformat:2 }}
+                        </p>
+                        <p class="text-xs text-expense-dark mt-1">Balance negativo 📉</p>
+                    {% else %}
+                        <p class="text-3xl font-numbers font-bold text-primary">
+                            ${{ balance_neto|floatformat:2 }}
+                        </p>
+                        <p class="text-xs text-primary-dark mt-1">Balance equilibrado ⚖️</p>
+                    {% endif %}
                 </div>
                 <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center">
-                    <span class="text-2xl">⚖️</span>
+                    {% if balance_neto > 0 %}
+                        <span class="text-2xl">📈</span>
+                    {% elif balance_neto < 0 %}
+                        <span class="text-2xl">📉</span>
+                    {% else %}
+                        <span class="text-2xl">⚖️</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Ingresos Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-3xl">💰</span>
+    <!-- Navigation Cards -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 text-center mb-6">📊 Gestionar Finanzas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Ingresos Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">💰</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mis Ingresos</h3>
+                    <p class="text-gray-600 mb-3 text-sm">Ver historial completo</p>
+                    <a href="{% url 'ingresos:lista_ingresos' %}" class="bg-success hover:bg-success-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
+                        Ver Lista
+                    </a>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Ingresos</h3>
-                <p class="text-gray-600 mb-4">Gestiona y registra todos tus ingresos</p>
-                <a href="{% url 'ingresos:lista_ingresos' %}" class="bg-success hover:bg-success-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block">
-                    Ver Ingresos
-                </a>
             </div>
-        </div>
 
-        <!-- Gastos Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-3xl">💸</span>
+            <!-- Gastos Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">💸</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mis Gastos</h3>
+                    <p class="text-gray-600 mb-3 text-sm">Ver historial completo</p>
+                    <a href="{% url 'gastos:lista_gastos' %}" class="bg-expense hover:bg-expense-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
+                        Ver Lista
+                    </a>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Gastos</h3>
-                <p class="text-gray-600 mb-4">Registra y controla todos tus gastos</p>
-                <a href="{% url 'gastos:lista_gastos' %}" class="bg-expense hover:bg-expense-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block">
-                    Ver Gastos
-                </a>
             </div>
-        </div>
 
-        <!-- Perfil Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-3xl">👤</span>
+            <!-- Perfil Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
+                <div class="text-center">
+                    <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">👤</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mi Perfil</h3>
+                    <p class="text-gray-600 mb-3 text-sm">Gestionar información</p>
+                    <a href="{% url 'perfil_usuario' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
+                        Ver Perfil
+                    </a>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">Perfil</h3>
-                <p class="text-gray-600 mb-4">Gestiona tu información personal</p>
-                <a href="{% url 'perfil_usuario' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block">
-                    Ver Perfil
-                </a>
             </div>
         </div>
     </div>

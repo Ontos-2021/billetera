@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Gasto
 from .forms import GastoForm
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 
 
 # Función para obtener los gastos filtrados por usuario o superusuario
@@ -17,7 +18,14 @@ def obtener_gastos(request):
 @login_required  # Requiere que el usuario esté autenticado
 def lista_gastos(request):
     gastos = obtener_gastos(request)  # Obtiene los gastos correspondientes al usuario
-    return render(request, 'gastos/lista_gastos.html', {'gastos': gastos})
+    
+    # Calcular total de gastos
+    total_gastos = gastos.aggregate(total=Sum('monto'))['total'] or 0
+    
+    return render(request, 'gastos/lista_gastos.html', {
+        'gastos': gastos,
+        'total_gastos': total_gastos
+    })
 
 
 # Crear gasto

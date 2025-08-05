@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.http import HttpResponse
+from django.db.models import Sum
 from .models import Ingreso
 from .forms import IngresoForm
 
@@ -49,4 +50,11 @@ def eliminar_ingreso(request, ingreso_id):
 @login_required
 def lista_ingresos(request):
     ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')
-    return render(request, 'ingresos/lista_ingresos.html', {'ingresos': ingresos})
+    
+    # Calcular total de ingresos
+    total_ingresos = ingresos.aggregate(total=Sum('monto'))['total'] or 0
+    
+    return render(request, 'ingresos/lista_ingresos.html', {
+        'ingresos': ingresos,
+        'total_ingresos': total_ingresos
+    })
