@@ -29,6 +29,41 @@
 
 ## ⚙️ Requisitos 📋
 
+- 🐍 Python 3.11+
+- 🐳 Docker y Docker Compose (para desarrollo local)
+- 🗄️ PostgreSQL (incluido en Docker)
+- ☁️ Cloudflare R2 (para almacenamiento de archivos)
+
+## 🔧 Configuración del Entorno
+
+### 🔒 Variables de Entorno
+
+**⚠️ IMPORTANTE**: Nunca subas archivos `.env` con credenciales reales al repositorio.
+
+1. **Para desarrollo local**:
+   ```bash
+   cp .env.local.example .env
+   # Edita .env con tus credenciales reales
+   ```
+
+2. **Para producción (Koyeb)**:
+   - Configura las variables en el panel de Koyeb
+   - Usa `.env.koyeb.example` como referencia
+
+### 📋 Variables Requeridas
+
+| Variable | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `ENV` | Entorno (development/production) | `production` |
+| `DEBUG` | Modo debug (0/1) | `0` |
+| `SECRET_KEY` | Clave secreta de Django | `your-secret-key` |
+| `DATABASE_URL` | URL de la base de datos | `postgresql://...` |
+| `ALLOWED_HOSTS` | Hosts permitidos | `localhost,your-app.koyeb.app` |
+| `AWS_ACCESS_KEY_ID` | Clave de acceso R2 | `your-r2-access-key` |
+| `AWS_SECRET_ACCESS_KEY` | Clave secreta R2 | `your-r2-secret-key` |
+| `AWS_STORAGE_BUCKET_NAME` | Nombre del bucket | `your-bucket-name` |
+| `AWS_S3_ENDPOINT_URL` | Endpoint de R2 | `https://account.r2.cloudflarestorage.com` |
+
 - 🐍 Python 3.x ([Documentación oficial](https://www.python.org/doc/))
 - 🐍 Django 4.2 (se instala junto con las dependencias del entorno virtual 🌐) ([Documentación oficial](https://docs.djangoproject.com/en/stable/))
 

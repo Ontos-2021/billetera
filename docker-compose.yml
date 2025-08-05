@@ -20,15 +20,26 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - ENV=development
-      - DEBUG=1
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/billetera
-      - SECRET_KEY=development-secret-key
-      - ALLOWED_HOSTS=localhost,127.0.0.1
-      - CSRF_TRUSTED_ORIGINS=http://localhost:8000
+      - ENV=${ENV:-development}
+      - DEBUG=${DEBUG:-1}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@db:5432/billetera}
+      - SECRET_KEY=${SECRET_KEY:-development-secret-key}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost:8000}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_ENDPOINT_URL=${AWS_S3_ENDPOINT_URL}
+      - AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+      - AWS_S3_REGION_NAME=${AWS_S3_REGION}
+      - AWS_S3_ADDRESSING_STYLE=${AWS_S3_ADDRESSING_STYLE:-virtual}
     depends_on:
       - db
     restart: unless-stopped
+    command: >
+      bash -c "cd /app/billetera &&
+               python manage.py migrate --noinput &&
+               python manage.py collectstatic --noinput &&
+               python manage.py runserver 0.0.0.0:8000"
 
 volumes:
   db_data:
