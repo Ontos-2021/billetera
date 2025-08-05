@@ -111,62 +111,17 @@
         </div>
     </div>
 
-    <!-- Navigation Cards -->
-    <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 text-center mb-6">📊 Gestionar Finanzas</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Ingresos Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="text-2xl">💰</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mis Ingresos</h3>
-                    <p class="text-gray-600 mb-3 text-sm">Ver historial completo</p>
-                    <a href="{% url 'ingresos:lista_ingresos' %}" class="bg-success hover:bg-success-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
-                        Ver Lista
-                    </a>
-                </div>
-            </div>
-
-            <!-- Gastos Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="text-2xl">💸</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mis Gastos</h3>
-                    <p class="text-gray-600 mb-3 text-sm">Ver historial completo</p>
-                    <a href="{% url 'gastos:lista_gastos' %}" class="bg-expense hover:bg-expense-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
-                        Ver Lista
-                    </a>
-                </div>
-            </div>
-
-            <!-- Perfil Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="text-2xl">👤</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Mi Perfil</h3>
-                    <p class="text-gray-600 mb-3 text-sm">Gestionar información</p>
-                    <a href="{% url 'perfil_usuario' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
-                        Ver Perfil
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Recent Transactions -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Recent Expenses -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="bg-expense text-white p-4 flex justify-between items-center">
                 <h3 class="text-lg font-semibold">Últimos Gastos</h3>
-                <a href="{% url 'gastos:lista_gastos' %}" class="text-white hover:text-gray-200 text-sm font-medium transition-colors duration-200">
-                    Ver todos →
+                <a href="{% url 'gastos:lista_gastos' %}" class="flex items-center text-white hover:text-gray-200 text-sm font-medium transition-colors duration-200">
+                    Ver todos
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                 </a>
             </div>
             <div class="divide-y divide-gray-200">
@@ -198,8 +153,11 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="bg-success text-white p-4 flex justify-between items-center">
                 <h3 class="text-lg font-semibold">Últimos Ingresos</h3>
-                <a href="{% url 'ingresos:lista_ingresos' %}" class="text-white hover:text-gray-200 text-sm font-medium transition-colors duration-200">
-                    Ver todos →
+                <a href="{% url 'ingresos:lista_ingresos' %}" class="flex items-center text-white hover:text-gray-200 text-sm font-medium transition-colors duration-200">
+                    Ver todos
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
                 </a>
             </div>
             <div class="divide-y divide-gray-200">
@@ -225,6 +183,24 @@
                     </div>
                 {% endif %}
             </div>
+        </div>
+    </div>
+
+    <!-- Profile Card (At the bottom) -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mt-6 hover:shadow-md transition-shadow duration-200 card-hover">
+        <div class="flex flex-wrap items-center justify-between">
+            <div class="flex items-center mb-4 md:mb-0">
+                <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                    <span class="text-2xl">👤</span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Mi Perfil</h3>
+                    <p class="text-sm text-gray-600">Gestionar mi información personal</p>
+                </div>
+            </div>
+            <a href="{% url 'perfil_usuario' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
+                Ver Perfil
+            </a>
         </div>
     </div>
 {% else %}
