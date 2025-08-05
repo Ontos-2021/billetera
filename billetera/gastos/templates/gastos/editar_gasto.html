@@ -1,116 +1,142 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Editar Gasto{% endblock %}
+{% block title %}Editar Gasto - MoneyFlow Mirror{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-warning text-dark text-center">
-                    <h2 class="mb-0">
-                        <i class="fas fa-edit me-2"></i>
-                        Editar Gasto
-                    </h2>
+<div class="max-w-2xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">✏️ Editar Gasto</h1>
+        <p class="text-gray-600">Actualiza los detalles de tu gasto de manera consciente</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-expense text-white p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                    <span class="text-2xl">💸</span>
                 </div>
-                <div class="card-body p-4">
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        <div class="mb-4">
-                            <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-semibold">
-                                <i class="fas fa-tag me-2 text-muted"></i>{{ form.descripcion.label }}
-                            </label>
-                            {{ form.descripcion }}
-                            {% if form.descripcion.help_text %}
-                                <div class="form-text">{{ form.descripcion.help_text }}</div>
-                            {% endif %}
-                            {% if form.descripcion.errors %}
-                                <div class="invalid-feedback d-block">{{ form.descripcion.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="{{ form.categoria.id_for_label }}" class="form-label fw-semibold">
-                                <i class="fas fa-list me-2 text-muted"></i>{{ form.categoria.label }}
-                            </label>
-                            {{ form.categoria }}
-                            {% if form.categoria.errors %}
-                                <div class="invalid-feedback d-block">{{ form.categoria.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-8 mb-4">
-                                <label for="{{ form.monto.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-dollar-sign me-2 text-muted"></i>{{ form.monto.label }}
-                                </label>
-                                <div class="input-group input-group-lg">
-                                    <span class="input-group-text">$</span>
-                                    {{ form.monto }}
-                                </div>
-                                {% if form.monto.help_text %}
-                                    <div class="form-text">{{ form.monto.help_text }}</div>
-                                {% endif %}
-                                {% if form.monto.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.monto.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <label for="{{ form.moneda.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="fas fa-coins me-2 text-muted"></i>{{ form.moneda.label }}
-                                </label>
-                                {{ form.moneda }}
-                                {% if form.moneda.errors %}
-                                    <div class="invalid-feedback d-block">{{ form.moneda.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-warning btn-lg text-dark">
-                                <i class="fas fa-save me-2"></i>
-                                Guardar Cambios
-                            </button>
-                        </div>
-                    </form>
+                <div>
+                    <h2 class="text-xl font-semibold">Modificar Gasto</h2>
+                    <p class="text-expense-light opacity-90">Ajusta los detalles según sea necesario</p>
                 </div>
             </div>
-            
-            <div class="text-center mt-4">
-                <a href="{% url 'gastos:lista_gastos' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>
-                    Volver a la lista de gastos
-                </a>
-            </div>
+        </div>
+
+        <div class="p-6">
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Descripción -->
+                <div>
+                    <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        📝 {{ form.descripcion.label }}
+                    </label>
+                    <input type="text" 
+                           name="{{ form.descripcion.name }}" 
+                           id="{{ form.descripcion.id_for_label }}"
+                           value="{{ form.descripcion.value|default:'' }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-expense focus:border-expense transition-colors duration-200 {% if form.descripcion.errors %}border-red-500{% endif %}"
+                           placeholder="Describe tu gasto..."
+                           required>
+                    {% if form.descripcion.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.descripcion.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Categoría -->
+                <div>
+                    <label for="{{ form.categoria.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        📁 {{ form.categoria.label }}
+                    </label>
+                    <select name="{{ form.categoria.name }}" 
+                            id="{{ form.categoria.id_for_label }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-expense focus:border-expense transition-colors duration-200 {% if form.categoria.errors %}border-red-500{% endif %}"
+                            required>
+                        {% for choice in form.categoria.field.choices %}
+                            <option value="{{ choice.0 }}" {% if form.categoria.value == choice.0 %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.categoria.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.categoria.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Monto y Moneda -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="{{ form.monto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            💰 {{ form.monto.label }}
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-lg font-semibold">$</span>
+                            </div>
+                            <input type="number" 
+                                   step="0.01"
+                                   name="{{ form.monto.name }}" 
+                                   id="{{ form.monto.id_for_label }}"
+                                   value="{{ form.monto.value|default:'' }}"
+                                   class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-expense focus:border-expense transition-colors duration-200 font-numbers {% if form.monto.errors %}border-red-500{% endif %}"
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                        {% if form.monto.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.monto.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.moneda.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            💱 {{ form.moneda.label }}
+                        </label>
+                        <select name="{{ form.moneda.name }}" 
+                                id="{{ form.moneda.id_for_label }}"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-expense focus:border-expense transition-colors duration-200 {% if form.moneda.errors %}border-red-500{% endif %}"
+                                required>
+                            {% for choice in form.moneda.field.choices %}
+                                <option value="{{ choice.0 }}" {% if form.moneda.value == choice.0 %}selected{% endif %}>
+                                    {{ choice.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.moneda.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.moneda.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-expense hover:bg-expense-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center justify-center">
+                        <span class="mr-2">💾</span>
+                        Guardar Cambios
+                    </button>
+                    <a href="{% url 'gastos:lista_gastos' %}" 
+                       class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200 inline-flex items-center justify-center">
+                        <span class="mr-2">↩️</span>
+                        Cancelar
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <script>
-// Validación en tiempo real para formularios
+// Auto-format amount input
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('.needs-validation');
-    
-    Array.prototype.slice.call(forms).forEach(function(form) {
-        form.addEventListener('submit', function(event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        }, false);
-    });
-    
-    // Formatear input de números
-    const numberInputs = document.querySelectorAll('.number-input');
-    numberInputs.forEach(function(input) {
-        input.addEventListener('blur', function() {
-            if (this.value) {
+    const amountInput = document.querySelector('input[type="number"]');
+    if (amountInput) {
+        amountInput.addEventListener('blur', function() {
+            if (this.value && !isNaN(this.value)) {
                 this.value = parseFloat(this.value).toFixed(2);
             }
         });
-    });
+    }
 });
 </script>
 {% endblock %}
