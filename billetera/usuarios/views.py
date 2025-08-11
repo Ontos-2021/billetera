@@ -82,6 +82,19 @@ def registro(request):
 @login_required
 def perfil_usuario(request):
     perfil = request.user.perfilusuario
+    # Estadísticas de actividad financiera del usuario
+    # Conteo de registros de ingresos y gastos y días activos (días distintos con al menos un movimiento)
+    ingresos_qs = Ingreso.objects.filter(usuario=request.user)
+    gastos_qs = Gasto.objects.filter(usuario=request.user)
+    total_ingresos_registrados = ingresos_qs.count()
+    total_gastos_registrados = gastos_qs.count()
+
+    # Calcular días activos (número de días distintos con algún ingreso o gasto)
+    from django.db.models.functions import TruncDate
+    ingresos_dias = ingresos_qs.annotate(day=TruncDate('fecha')).values_list('day', flat=True).distinct()
+    gastos_dias = gastos_qs.annotate(day=TruncDate('fecha')).values_list('day', flat=True).distinct()
+    dias_activo = len(set(list(ingresos_dias) + list(gastos_dias)))
+
     if request.method == 'POST':
         form = PerfilUsuarioForm(request.POST, request.FILES, instance=perfil)
         if form.is_valid():
@@ -89,7 +102,12 @@ def perfil_usuario(request):
             return redirect('usuarios:perfil_usuario')
     else:
         form = PerfilUsuarioForm(instance=perfil)
-    return render(request, 'usuarios/perfil_usuario.html', {'form': form})
+    return render(request, 'usuarios/perfil_usuario.html', {
+        'form': form,
+        'total_ingresos': total_ingresos_registrados,
+        'total_gastos': total_gastos_registrados,
+        'dias_activo': dias_activo,
+    })
 
 
 @login_required
