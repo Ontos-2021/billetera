@@ -25,12 +25,41 @@ def inicio(request):
         # Calcular el balance neto (ingresos - gastos)
         balance_neto = total_ingresos - total_gastos
 
+        # Construir lista combinada de últimos movimientos (ingresos y gastos mezclados cronológicamente)
+        # Tomamos más elementos de cada lado para que al mezclarlos haya suficiente para los 10 finales
+        ingresos_para_mezcla = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:10]
+        gastos_para_mezcla = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:10]
+
+        movimientos = []
+        for ing in ingresos_para_mezcla:
+            movimientos.append({
+                'tipo': 'ingreso',
+                'descripcion': ing.descripcion,
+                'categoria': getattr(ing, 'categoria', ''),
+                'monto': ing.monto,
+                'fecha': ing.fecha,
+                'obj': ing,
+            })
+        for gas in gastos_para_mezcla:
+            movimientos.append({
+                'tipo': 'gasto',
+                'descripcion': gas.descripcion,
+                'categoria': getattr(gas, 'categoria', ''),
+                'monto': gas.monto,
+                'fecha': gas.fecha,
+                'obj': gas,
+            })
+
+        # Orden descendente por fecha y limitar a 10
+        movimientos = sorted(movimientos, key=lambda x: x['fecha'], reverse=True)[:10]
+
         context = {
             'ingresos': ultimos_ingresos,  # Para mantener compatibilidad con el template
             'gastos': ultimos_gastos,  # Para mantener compatibilidad con el template
             'total_ingresos': total_ingresos,
             'total_gastos': total_gastos,
             'balance_neto': balance_neto,
+            'movimientos': movimientos,
         }
 
     return render(request, 'usuarios/inicio.html', context)
