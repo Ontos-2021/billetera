@@ -17,6 +17,22 @@
     </div>
 
     {% if gastos %}
+        <!-- Summary Section (moved to top) -->
+        <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-1">💰 Total de Gastos</h3>
+                    <p class="text-sm text-gray-500">Suma de todos los gastos registrados</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-3xl font-numbers font-bold text-expense">
+                        -${{ total_gastos|floatformat:2 }}
+                    </p>
+                    <p class="text-xs text-gray-500">Total acumulado</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Expenses Grid -->
         <div class="grid gap-4">
             {% for gasto in gastos %}
@@ -63,21 +79,6 @@
             {% endfor %}
         </div>
 
-        <!-- Summary Section -->
-        <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-1">💰 Total de Gastos</h3>
-                    <p class="text-sm text-gray-500">Suma de todos los gastos registrados</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-3xl font-numbers font-bold text-expense">
-                        -${{ total_gastos|floatformat:2 }}
-                    </p>
-                    <p class="text-xs text-gray-500">Total acumulado</p>
-                </div>
-            </div>
-        </div>
     {% else %}
         <!-- Empty State -->
         <div class="text-center py-12">
