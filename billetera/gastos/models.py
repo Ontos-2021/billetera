@@ -37,7 +37,8 @@ def create_initial_data(sender, **kwargs):
                           'Ropa',
                           'Viajes',
                           'Tecnología',
-                          'Ahorros e Inversiones']
+                          'Ahorros e Inversiones',
+                          'Vicio']  # Nueva categoría para gastos impulsivos o no esenciales
             for categoria_nombre in categorias:
                 if not Categoria.objects.filter(nombre=categoria_nombre).exists():
                     Categoria.objects.create(nombre=categoria_nombre)
@@ -61,6 +62,7 @@ class Gasto(models.Model):
                                 null=True,
                                 blank=True)
     descripcion = models.CharField(max_length=255)
+    lugar = models.CharField(max_length=120, null=True, blank=True, help_text='Lugar o comercio donde se realizó la compra (ej: Carrefour, Kiosco, etc.)')
     monto = models.DecimalField(max_digits=10, decimal_places=2)
     fecha = models.DateTimeField(auto_now_add=True)
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')

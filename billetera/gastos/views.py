@@ -58,7 +58,7 @@ def editar_gasto(request, id):
             return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
         form = GastoForm(instance=gasto)  # Crea un formulario con los datos del gasto para editar
-    return render(request, 'gastos/editar_gasto.html', {'form': form})
+    return render(request, 'gastos/editar_gasto.html', {'form': form, 'gasto': gasto})
 
 
 # Eliminar gasto

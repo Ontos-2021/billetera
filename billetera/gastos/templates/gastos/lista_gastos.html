@@ -43,6 +43,11 @@
                             <div class="flex items-start justify-between sm:justify-start">
                                 <div class="flex-1">
                                     <h3 class="font-semibold text-gray-900 text-lg mb-1">{{ gasto.descripcion }}</h3>
+                                    {% if gasto.lugar %}
+                                        <p class="text-sm text-gray-600 mb-1 flex items-center">
+                                            <span class="mr-1">📍</span>{{ gasto.lugar }}
+                                        </p>
+                                    {% endif %}
                                     <div class="flex flex-wrap gap-2 text-sm text-gray-500">
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                             📁 {{ gasto.categoria }}
