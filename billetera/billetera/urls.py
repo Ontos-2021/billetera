@@ -16,6 +16,47 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
++
+-from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from gastos.models import Gasto
+from ingresos.models import Ingreso
+
+@login_required
+def transactions_combined(request):
+    # Combine ingresos and gastos for the authenticated user (or all if superuser)
+    if request.user.is_superuser:
+        gastos_qs = Gasto.objects.all()
+        ingresos_qs = Ingreso.objects.all()
+    else:
+        gastos_qs = Gasto.objects.filter(usuario=request.user)
+        ingresos_qs = Ingreso.objects.filter(usuario=request.user)
+
+    gastos_list = [{
+        'id': f'gasto-{g.id}',
+        'tipo_registro': 'gasto',
+        'descripcion': g.descripcion,
+        'lugar': g.lugar,
+        'monto': float(g.monto),
+        'fecha': g.fecha.isoformat(),
+        'categoria': g.categoria.nombre if g.categoria else None,
+        'moneda': g.moneda.codigo if g.moneda else None,
+    } for g in gastos_qs]
+
+    ingresos_list = [{
+        'id': f'ingreso-{i.id}',
+        'tipo_registro': 'ingreso',
+        'descripcion': i.descripcion,
+        'monto': float(i.monto),
+        'fecha': i.fecha.isoformat(),
+        'categoria': i.categoria.nombre if i.categoria else None,
+        'moneda': i.moneda.codigo if i.moneda else None,
+    } for i in ingresos_qs]
+
+    combined = gastos_list + ingresos_list
+    # Sort descending by fecha
+    combined.sort(key=lambda x: x['fecha'], reverse=True)
+    return JsonResponse({'results': combined})
 from django.views.static import serve
 from django.conf import settings
 from django.conf.urls.static import static
@@ -27,6 +68,8 @@ urlpatterns = [
     path('gastos/', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
     path('usuarios/', include('usuarios.urls')),
     path('ingresos/', include('ingresos.urls')),
+    path('api/transactions/', transactions_combined, name='transactions_combined'),
+    path('health/', lambda r: JsonResponse({'status': 'ok'})),
     path('', usuarios_views.inicio, name='inicio_usuarios'),  # Esta es la nueva línea para la página de inicio
 ]
 

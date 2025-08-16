@@ -56,6 +56,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CORS (solo dev abierto) - intenta habilitar si está instalado corsheaders
+try:
+    import corsheaders  # type: ignore
+    if 'corsheaders' not in INSTALLED_APPS:
+        INSTALLED_APPS.append('corsheaders')
+    if 'corsheaders.middleware.CorsMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.insert(2, 'corsheaders.middleware.CorsMiddleware')
+    CORS_ALLOW_ALL_ORIGINS = True
+except Exception:
+    pass
+
 ROOT_URLCONF = 'billetera.urls'
 
 TEMPLATES = [

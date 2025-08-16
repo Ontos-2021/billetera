@@ -5,4 +5,4 @@ from .models import Gasto
 class GastoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gasto
-    fields = ['id', 'descripcion', 'lugar', 'monto', 'fecha', 'moneda', 'categoria', 'usuario']
+        fields = ['id', 'descripcion', 'lugar', 'monto', 'fecha', 'moneda', 'categoria', 'usuario']
