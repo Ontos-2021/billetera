@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import post_migrate  # Para crear información automática en la base de datos
 from django.dispatch import receiver
 from django.contrib.auth.models import User  # Importar el modelo de usuario
+from django.db import connection
 
 
 class Moneda(models.Model):
@@ -18,6 +19,11 @@ class Moneda(models.Model):
 def create_initial_data(sender, **kwargs):
     if sender.name == 'gastos':
         try:
+            # Safety: if the underlying table doesn't exist yet, skip creating initial data
+            existing_tables = connection.introspection.table_names()
+            if 'gastos_moneda' not in existing_tables:
+                # tables not created yet - migrations haven't run; skip initial data
+                return
             # Crea instancias de Moneda si no existen
             if not Moneda.objects.filter(codigo='USD').exists():
                 Moneda.objects.create(codigo='USD', nombre='Dólar Estadounidense', simbolo='$')
