@@ -29,9 +29,23 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 'yes']
 
 # Allowed Hosts — configurable vía variable de entorno
 # Formato esperado: ALLOWED_HOSTS=host1.com,host2.example
+from urllib.parse import urlparse
+from typing import Optional
+
+def _normalize_host(value: str) -> Optional[str]:
+    v = (value or '').strip()
+    if not v:
+        return None
+    # If the user provided a full URL, extract the netloc (host[:port])
+    if v.startswith('http://') or v.startswith('https://'):
+        parsed = urlparse(v)
+        return parsed.netloc or parsed.path
+    # otherwise assume it's already a host
+    return v
+
 env_hosts = os.getenv('ALLOWED_HOSTS', '')
 if env_hosts:
-    ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(',') if h.strip()]
+    ALLOWED_HOSTS = [h for h in (_normalize_host(x) for x in env_hosts.split(',')) if h]
 else:
     # Valores por defecto según entorno
     if IS_PRODUCTION:
@@ -88,8 +102,9 @@ WSGI_APPLICATION = 'billetera.wsgi.application'
 
 # Database Configuration
 if IS_PRODUCTION:
+    # Use a connection pool timeout to avoid opening/closing too many DB connections
     DATABASES = {
-        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'), conn_max_age=600)
     }
 else:
     DATABASES = {
@@ -122,48 +137,52 @@ if IS_PRODUCTION:
 
 # Media files configuration
 if IS_PRODUCTION:
-    # Use django-storages S3 backend
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    
-    # Cloudflare R2 settings
+    # Cloudflare R2 settings (enable storage backend only if required env vars are present)
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
     AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "auto")
     AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "virtual")
-    
-    # R2 specific settings
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
-    AWS_LOCATION = 'media'
-    AWS_DEFAULT_ACL = None
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_VERIFY = True
-    AWS_S3_SIGNATURE_VERSION = 's3v4'  # Required for R2
-    AWS_S3_CUSTOM_DOMAIN = None  # Let django-storages handle the domain
 
-    # Simplified MEDIA_URL - let django-storages handle the URL construction
-    if AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
-        # Extract account ID from endpoint URL
-        account_id = AWS_S3_ENDPOINT_URL.replace('https://', '').split('.')[0]
-        MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.{account_id}.r2.cloudflarestorage.com/{AWS_LOCATION}/"
+    AWS_LOCATION = 'media'
+
+    if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
+        # Enable S3 storage backend
+        DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+        AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+        AWS_DEFAULT_ACL = None
+        AWS_S3_FILE_OVERWRITE = False
+        AWS_S3_VERIFY = True
+        AWS_S3_SIGNATURE_VERSION = 's3v4'  # Required for R2
+        AWS_S3_CUSTOM_DOMAIN = os.getenv('AWS_S3_CUSTOM_DOMAIN') or None
+
+        # Try to construct a sane MEDIA_URL for R2; if it fails, fall back to filesystem media URL
+        try:
+            endpoint_host = AWS_S3_ENDPOINT_URL.replace('https://', '').replace('http://', '').strip('/')
+            MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.{endpoint_host}/{AWS_LOCATION}/"
+        except Exception:
+            MEDIA_URL = f"/{AWS_LOCATION}/"
     else:
-        MEDIA_URL = '/media/'  # Fallback
+        # Fallback to filesystem media if R2 vars not present
+        MEDIA_URL = '/media/'
+        MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 else:
     MEDIA_URL = '/media/'
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# CSRF Trusted Origins
+# CSRF Trusted Origins — normalizar entradas de entorno
 if IS_PRODUCTION:
     env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-    default_origins = [
-        'https://billetera-production.up.railway.app',
-        'https://classic-pippy-ontos-b4c068be.koyeb.app',  # tu dominio actual en Koyeb
-        'https://*.koyeb.app',  # permite cualquier subdominio de koyeb.app
-    ]
-    # Si la variable de entorno está definida, la usamos además de los defaults
+    default_origins = ['https://billetera-production.up.railway.app', 'https://classic-pippy-ontos-b4c068be.koyeb.app']
     if env_csrf_origins:
-        CSRF_TRUSTED_ORIGINS = [o.strip() for o in env_csrf_origins.split(',')] + default_origins
+        parsed = []
+        for o in [p.strip() for p in env_csrf_origins.split(',') if p.strip()]:
+            # Ensure scheme is present; default to https
+            if not o.startswith('http://') and not o.startswith('https://'):
+                o = 'https://' + o
+            parsed.append(o)
+        CSRF_TRUSTED_ORIGINS = parsed + default_origins
     else:
         CSRF_TRUSTED_ORIGINS = default_origins
 else:
@@ -184,3 +203,7 @@ if IS_PRODUCTION:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
+    # Allow Django to detect HTTPS when behind a proxy (Railway/Koyeb/etc.)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Respect forwarded host header from the platform (Render, Railway, etc.)
+    USE_X_FORWARDED_HOST = True
