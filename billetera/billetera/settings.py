@@ -14,20 +14,30 @@ ENV = os.getenv('ENV', 'development')  # Por defecto, el entorno es desarrollo
 IS_PRODUCTION = ENV == 'production'  # Si el entorno es producción, IS_PRODUCTION es True
 
 # Secret Key
-SECRET_KEY = os.getenv('SECRET_KEY', 'clave_por_defecto_para_desarrollo')
+# En desarrollo permitimos un valor por defecto para facilitar el arranque local,
+# pero en producción exigimos que la variable de entorno esté definida.
+DEFAULT_SECRET = 'clave_por_defecto_para_desarrollo'
+SECRET_KEY = os.getenv('SECRET_KEY', DEFAULT_SECRET)
+if IS_PRODUCTION and SECRET_KEY == DEFAULT_SECRET:
+    raise ValueError("En producción debes definir SECRET_KEY en las variables de entorno.")
 if not SECRET_KEY:
+    # Si no está definida (ni siquiera el default) se lanza error en cualquier entorno
     raise ValueError("La variable de entorno SECRET_KEY no está definida.")
 
 # Debug - Independiente del entorno para permitir debugging en producción
 DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 'yes']
 
-# Allowed Hosts
-if IS_PRODUCTION:
-    # Koyeb forwards traffic to port 8000; use your Koyeb app domain
-    env_hosts = os.getenv('ALLOWED_HOSTS', 'classic-pippy-ontos-b4c068be.koyeb.app')
-    ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(',')] + ['.koyeb.app']  # permite cualquier subdominio de koyeb.app
+# Allowed Hosts — configurable vía variable de entorno
+# Formato esperado: ALLOWED_HOSTS=host1.com,host2.example
+env_hosts = os.getenv('ALLOWED_HOSTS', '')
+if env_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(',') if h.strip()]
 else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+    # Valores por defecto según entorno
+    if IS_PRODUCTION:
+        ALLOWED_HOSTS = ['classic-pippy-ontos-b4c068be.koyeb.app', '.koyeb.app']
+    else:
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Application definition
 INSTALLED_APPS = [
@@ -145,11 +155,17 @@ else:
 
 # CSRF Trusted Origins
 if IS_PRODUCTION:
-    CSRF_TRUSTED_ORIGINS = [
+    env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+    default_origins = [
         'https://billetera-production.up.railway.app',
         'https://classic-pippy-ontos-b4c068be.koyeb.app',  # tu dominio actual en Koyeb
         'https://*.koyeb.app',  # permite cualquier subdominio de koyeb.app
     ]
+    # Si la variable de entorno está definida, la usamos además de los defaults
+    if env_csrf_origins:
+        CSRF_TRUSTED_ORIGINS = [o.strip() for o in env_csrf_origins.split(',')] + default_origins
+    else:
+        CSRF_TRUSTED_ORIGINS = default_origins
 else:
     CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1:8000']
 
