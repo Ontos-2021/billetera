@@ -15,7 +15,7 @@ echo "Checking for model changes and creating migrations (if any)..."
 if python manage.py makemigrations --noinput; then
     echo "makemigrations completed (files created or no changes detected)."
 else
-    echo "makemigrations failed or returned non-zero; continuing anyway."
+    echo "makemigrations failed or returned non-wzero; continuing anyway."
 fi
 python manage.py migrate --noinput
 

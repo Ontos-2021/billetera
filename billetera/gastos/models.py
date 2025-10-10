@@ -1,8 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_migrate  # Para crear información automática en la base de datos
-from django.dispatch import receiver
 from django.contrib.auth.models import User  # Importar el modelo de usuario
-from django.db import connection
 
 
 class Moneda(models.Model):
@@ -14,44 +11,7 @@ class Moneda(models.Model):
         return self.nombre
 
 
-# Para crear información automática a la base de datos
-@receiver(post_migrate)
-def create_initial_data(sender, **kwargs):
-    if sender.name == 'gastos':
-        try:
-            # Safety: if the underlying table doesn't exist yet, skip creating initial data
-            existing_tables = connection.introspection.table_names()
-            if 'gastos_moneda' not in existing_tables:
-                # tables not created yet - migrations haven't run; skip initial data
-                return
-            # Crea instancias de Moneda si no existen
-            if not Moneda.objects.filter(codigo='USD').exists():
-                Moneda.objects.create(codigo='USD', nombre='Dólar Estadounidense', simbolo='$')
-            if not Moneda.objects.filter(codigo='EUR').exists():
-                Moneda.objects.create(codigo='EUR', nombre='Euro', simbolo='€')
-            if not Moneda.objects.filter(codigo='ARS').exists():
-                Moneda.objects.create(codigo='ARS', nombre='Peso Argentino', simbolo='$')
-            if not Moneda.objects.filter(codigo='CLP').exists():
-                Moneda.objects.create(codigo='CLP', nombre='Peso Chileno', simbolo='$')
-            # Crea instancias de Categoría si no existen
-            categorias = ['Alimentación',
-                          'Transporte',
-                          'Entretenimiento',
-                          'Salud',
-                          'Vivienda',
-                          'Educación',
-                          'Ropa',
-                          'Viajes',
-                          'Tecnología',
-                          'Ahorros e Inversiones',
-                          'Vicio']  # Nueva categoría para gastos impulsivos o no esenciales
-            for categoria_nombre in categorias:
-                if not Categoria.objects.filter(nombre=categoria_nombre).exists():
-                    Categoria.objects.create(nombre=categoria_nombre)
-        except Exception as e:
-            # Si hay algún error (como tablas no creadas aún), simplemente ignoramos
-            print(f"Error creating initial data: {e}")
-            pass
+# Initial data logic moved to gastos/signals.py to ensure it runs after migrations
 
 
 class Categoria(models.Model):

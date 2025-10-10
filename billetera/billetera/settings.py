@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'whitenoise.runserver_nostatic',  # WhiteNoise para servir archivos estáticos en producción
     'storages',  # django-storages for Cloudflare R2
-    'gastos',
+    'gastos.apps.GastosConfig',
     'usuarios',
     'ingresos',
 ]
