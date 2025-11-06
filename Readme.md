@@ -146,3 +146,31 @@ Este proyecto está bajo la licencia MIT 📝. Siéntete libre de usar, modifica
 
 > **Nota:** Para más detalles sobre las licencias y su elección, puedes consultar la [guía de licencias de software](https://choosealicense.com/).
 
+## 🔐 Autenticación: Google OIDC (Authorization Code + PKCE)
+
+Hemos añadido soporte en backend para iniciar sesión mediante Google usando OIDC Authorization Code Flow con PKCE. El backend usa `django-allauth` + `dj-rest-auth` para el intercambio del código y `djangorestframework-simplejwt` para emitir nuestros JWTs (access + refresh).
+
+Puntos clave:
+
+- El frontend obtiene el `authorization_code` y el `code_verifier` (PKCE) desde Google Identity Services o AppAuth.
+- El cliente envía al backend la payload JSON: `{ "code": "<AUTH_CODE>", "code_verifier": "<PKCE_VERIFIER>", "redirect_uri": "<REDIRECT_URI>" }` al endpoint `/auth/social/google/`.
+- El backend intercambia el código por tokens con Google vía `allauth`, valida `id_token` y crea/obtiene el usuario.
+- El backend devuelve los JWTs (access, refresh) generados por SimpleJWT.
+
+Variables de entorno necesarias (ejemplo):
+
+```env
+GOOGLE_OAUTH_CLIENT_ID=...
+GOOGLE_OAUTH_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=https://tu-dominio.com/auth/google/callback/
+GOOGLE_HOSTED_DOMAIN=example.com  # opcional, si quieres forzar dominio
+```
+
+Comando conveniente para enlazar la SocialApp a tu Site (usa las envs anteriores):
+
+```bash
+python manage.py bootstrap_google_socialapp
+```
+
+Más detalles y ejemplos de cliente en `billetera/usuarios/README.md`.
+

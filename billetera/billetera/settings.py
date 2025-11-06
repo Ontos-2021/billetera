@@ -69,16 +69,84 @@ INSTALLED_APPS = [
     'ingresos',
 ]
 
+# Note: we reuse the existing `usuarios` app for auth/social functionality.
+
+# --- Authentication and social login apps (add safely if not present) ---
+for _app in [
+    'django.contrib.sites',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+]:
+    if _app not in INSTALLED_APPS:
+        INSTALLED_APPS.append(_app)
+
+# Optional: CORS for SPA frontends
+if os.getenv('ENABLE_CORS', 'False').lower() in ['true', '1', 'yes']:
+    if 'corsheaders' not in INSTALLED_APPS:
+        INSTALLED_APPS.insert(0, 'corsheaders')
+
 MIDDLEWARE = [
+    # cors middleware should be as high as possible if enabled
+    *((['corsheaders.middleware.CorsMiddleware'] if os.getenv('ENABLE_CORS', 'False').lower() in ['true', '1', 'yes'] else [])),
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Middleware de WhiteNoise para archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # required by django-allauth
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Sites framework
+SITE_ID = int(os.getenv('SITE_ID', 1))
+
+# Allauth / dj-rest-auth settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = os.getenv('ACCOUNT_EMAIL_VERIFICATION', 'optional')
+SOCIALACCOUNT_QUERY_EMAIL = True
+
+# REST framework + SimpleJWT config
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.AllowAny',),
+}
+
+DJ_REST_AUTH = {
+    'USE_JWT': True,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv('ACCESS_TOKEN_MINUTES', 30))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.getenv('REFRESH_TOKEN_DAYS', 7))),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+# Google OAuth envs
+GOOGLE_OAUTH_CLIENT_ID = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
+GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
+GOOGLE_HOSTED_DOMAIN = os.getenv('GOOGLE_HOSTED_DOMAIN')
+
+# CORS (optional)
+if 'corsheaders' in INSTALLED_APPS:
+    CORS_ALLOW_CREDENTIALS = True
+    cors_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+    if cors_origins:
+        CORS_ALLOWED_ORIGINS = [c.strip() for c in cors_origins.split(',') if c.strip()]
 
 ROOT_URLCONF = 'billetera.urls'
 
@@ -96,6 +164,12 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+# Authentication backends (required for django-allauth login via templates)
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 WSGI_APPLICATION = 'billetera.wsgi.application'
@@ -192,6 +266,9 @@ else:
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'inicio_usuarios'
 LOGOUT_REDIRECT_URL = 'login'
+
+# Hook custom adapter to validate Google claims during server-side social login
+SOCIALACCOUNT_ADAPTER = 'usuarios.adapters.SocialAccountAdapter'
 
 # Auto Field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
