@@ -122,3 +122,22 @@ def editar_perfil(request):
         form = PerfilUsuarioForm(instance=perfil)
 
     return render(request, 'usuarios/editar_perfil.html', {'form': form, 'perfil': perfil})
+
+
+# API: perfil /me protegido por JWT
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+
+class ProfileMe(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        u = request.user
+        return Response({
+            'id': u.id,
+            'email': getattr(u, 'email', None),
+            'first_name': getattr(u, 'first_name', ''),
+            'last_name': getattr(u, 'last_name', ''),
+        })

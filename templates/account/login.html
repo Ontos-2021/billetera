@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load i18n socialaccount %}
+
+{% block title %}{% trans "Iniciar Sesión" %} - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+  <div class="text-center mb-8">
+    <div class="w-16 h-16 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <span class="text-3xl">🔐</span>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{% trans "Iniciar Sesión" %}</h1>
+    <p class="text-gray-600">{% trans "Accede a tu panel financiero personal" %}</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="bg-primary text-white p-6 text-center">
+      <h2 class="text-xl font-semibold">🔑 {% trans "Acceso Seguro" %}</h2>
+    </div>
+    <div class="p-6">
+      <!-- Google login button -->
+      <div class="mb-6">
+        <a href="/accounts/google/login/?process=login{% if request.GET.next %}&next={{ request.GET.next|urlencode }}{% endif %}"
+           class="w-full bg-white border border-gray-200 hover:bg-gray-50 text-gray-800 font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="h-5 w-5" aria-hidden="true">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.6 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.7 3l5.7-5.7C33.7 6.1 29.1 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/>
+            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.4 16 18.8 12 24 12c3 0 5.7 1.1 7.7 3l5.7-5.7C33.7 6.1 29.1 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/>
+            <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.1C29.3 36 26.8 37 24 37c-5.3 0-9.6-3.1-11.5-7.6l-6.5 5C9.5 39.7 16.3 44 24 44z"/>
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3-3.5 5.5-6.6 6.7l6.2 5.1C36.2 41 40 36.6 41.6 31c.5-1.6.8-3.3.8-5 0-1.3-.1-2.3-.4-3.5z"/>
+          </svg>
+          <span>{% trans "Continuar con Google" %}</span>
+        </a>
+        <p class="text-xs text-gray-500 mt-2 text-center">{% trans "Usaremos tu email de Google verificado. No compartimos tu contraseña." %}</p>
+      </div>
+
+      <!-- Divider -->
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+          <div class="w-full border-t border-gray-200"></div>
+        </div>
+        <div class="relative flex justify-center">
+          <span class="bg-white px-3 text-sm text-gray-500">{% trans "o ingresa con usuario y contraseña" %}</span>
+        </div>
+      </div>
+
+      <!-- Allauth form fallback (username/email + password) -->
+      <form method="post" action="{% url 'account_login' %}" class="space-y-6">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div>
+          {{ form.login.label_tag }}
+          {{ form.login|add_class:"w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200" }}
+          {{ form.login.errors }}
+        </div>
+        <div>
+          {{ form.password.label_tag }}
+          {{ form.password|add_class:"w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200" }}
+          {{ form.password.errors }}
+        </div>
+        {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-medium px-6 py-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md text-lg">
+          <span class="flex items-center justify-center"><span class="mr-2">🚀</span>{% trans "Ingresar a mi Panel" %}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="text-center mt-6">
+    <p class="text-gray-600">
+      {% trans "¿No tienes una cuenta?" %}
+      <a href="{% url 'account_signup' %}" class="text-primary hover:text-primary-dark font-medium transition-colors duration-200">{% trans "Regístrate aquí" %}</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block content %}
+<div class="container" style="max-width:480px;margin:40px auto;">
+  <h2 class="mb-3">Iniciar sesión</h2>
+
+  {# En caso de que uses también login por email/contraseña de allauth, puedes incluir el formulario aquí. #}
+  {# {% include "account/snippets/login_form.html" %} #}
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <p class="mb-2">Continuar con Google:</p>
+      <a class="btn btn-danger w-100" href="{% provider_login_url 'google' process='login' %}">
+        Iniciar sesión con Google
+      </a>
+      <p class="text-muted mt-2" style="font-size:0.9rem;">
+        Serás redirigido a Google para autorizar el acceso y volverás a esta aplicación.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

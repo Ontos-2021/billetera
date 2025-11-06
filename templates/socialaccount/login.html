@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Conectar con" %} {{ provider.name }} - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+  <div class="text-center mb-8">
+    <div class="w-16 h-16 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+      <span class="text-3xl">🔁</span>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">{% trans "Conectando con" %} {{ provider.name }}</h1>
+    <p class="text-gray-600">{% trans "Te redirigimos para completar el inicio de sesión" %}…</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-6 text-center">
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="w-full bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200">
+          {% trans "Continuar" %}
+        </button>
+      </form>
+      <p class="text-xs text-gray-500 mt-3">{% trans "Si no avanza automáticamente, haz clic en Continuar." %}</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Intento suave de auto-submit para que el salto sea inmediato
+  window.addEventListener('load', function(){
+    const form = document.querySelector('form');
+    if(form) setTimeout(() => form.submit(), 150);
+  });
+</script>
+{% endblock %}
