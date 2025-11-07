@@ -1,5 +1,5 @@
-/* static/css/themes/default.css */
-
+/* Moved from css/themes/default.css to avoid duplicate path during collectstatic.
+   This file contains the extended theme used by usuarios views. */
 
 :root {
     /* Paleta moderna, limpia y profesional para aplicación financiera */
