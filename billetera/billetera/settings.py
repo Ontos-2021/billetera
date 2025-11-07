@@ -141,6 +141,38 @@ GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
 GOOGLE_REDIRECT_URI = os.getenv('GOOGLE_REDIRECT_URI')
 GOOGLE_HOSTED_DOMAIN = os.getenv('GOOGLE_HOSTED_DOMAIN')
 
+# Default HTTP protocol for absolute URLs (helps allauth build correct links)
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.getenv(
+    'ACCOUNT_DEFAULT_HTTP_PROTOCOL',
+    'https' if IS_PRODUCTION else 'http'
+)
+
+# If GOOGLE_REDIRECT_URI is not provided, try to derive it from platform URL/envs
+if not GOOGLE_REDIRECT_URI:
+    ext_url = os.getenv('EXTERNAL_URL') or os.getenv('RENDER_EXTERNAL_URL') or os.getenv('KOYEB_APP_URL')
+    scheme = 'https' if IS_PRODUCTION else 'http'
+    host = None
+    if ext_url:
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(ext_url)
+            if parsed.scheme:
+                scheme = parsed.scheme
+            host = parsed.netloc
+        except Exception:
+            host = None
+    if not host:
+        # fall back to first allowed host in production
+        try:
+            host = (ALLOWED_HOSTS[0] if ALLOWED_HOSTS else None)
+            if host and (host.startswith('http://') or host.startswith('https://')):
+                from urllib.parse import urlparse
+                host = urlparse(host).netloc or host
+        except Exception:
+            host = None
+    if host:
+        GOOGLE_REDIRECT_URI = f"{scheme}://{host}/accounts/google/login/callback/"
+
 # CORS (optional)
 if 'corsheaders' in INSTALLED_APPS:
     CORS_ALLOW_CREDENTIALS = True

@@ -22,5 +22,8 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+echo "Bootstrapping Site and Google SocialApp (idempotent)..."
+python manage.py bootstrap_google_socialapp || echo "Bootstrap command skipped (missing envs)."
+
 echo "Starting Gunicorn..."
 exec gunicorn billetera.wsgi --bind 0.0.0.0:8000
