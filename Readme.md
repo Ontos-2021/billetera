@@ -63,6 +63,9 @@
 | `AWS_SECRET_ACCESS_KEY` | Clave secreta R2 | `your-r2-secret-key` |
 | `AWS_STORAGE_BUCKET_NAME` | Nombre del bucket | `your-bucket-name` |
 | `AWS_S3_ENDPOINT_URL` | Endpoint de R2 | `https://account.r2.cloudflarestorage.com` |
+| `BACKUP_FERNET_KEY` | Clave Fernet para cifrar respaldos | `gAAAAABk...` |
+| `BACKUP_WEBHOOK_TOKEN` | Token para endpoint /admin/tools/backup | `mi-token-backup` |
+| `BACKUP_RETENTION_COUNT` | Cantidad de backups a conservar | `7` |
 
 - 🐍 Python 3.x ([Documentación oficial](https://www.python.org/doc/))
 - 🐍 Django 4.2 (se instala junto con las dependencias del entorno virtual 🌐) ([Documentación oficial](https://docs.djangoproject.com/en/stable/))
@@ -135,6 +138,33 @@
 - **📊 Registro de Gastos e Ingresos**: Puedes registrar ingresos 📈 y gastos 💸 con sus respectivas categorías 📁 y monedas 💱, permitiendo un control claro de tus finanzas 💰.
 - **👀 Visualización y ✏️ Edición**: Consulta y edita tus gastos 💸 e ingresos 📈 para mantener la información actualizada 🔄 y organizada 📂.
 - **📋 Panel de Usuario**: Accede a tu panel de control 🕹️ para obtener una visión general de tus finanzas 📊.
+
+### 🔐 Respaldo de Base de Datos (Manual / Webhook)
+
+Se añadió un sistema de respaldo cifrado que genera un dump (Postgres) o copia (SQLite), lo cifra con Fernet y lo sube a Cloudflare R2 con retención automática.
+
+1. Generar una clave Fernet una sola vez:
+   ```bash
+   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+   ```
+2. Definir en variables de entorno: `BACKUP_FERNET_KEY`, opcional `BACKUP_RETENTION_COUNT`, `BACKUP_WEBHOOK_TOKEN`.
+3. Ejecutar manualmente en el contenedor/entorno:
+   ```bash
+   python manage.py backup_db
+   ```
+4. Disparar vía endpoint protegido (requiere header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o usuario staff autenticado):
+   ```bash
+   curl -H "X-Backup-Token: $BACKUP_WEBHOOK_TOKEN" https://tu-dominio/admin/tools/backup
+   ```
+5. Respuesta JSON ejemplo:
+   ```json
+   {"status":"ok","engine":"django.db.backends.postgresql","object_key":"backups/db/production/postgres-20250101-120000.dump.enc","r2_url":"s3://bucket/backups/db/production/postgres-20250101-120000.dump.enc","retention_kept":7}
+   ```
+
+Notas:
+- Asegúrate de que la imagen Docker tenga `postgresql-client` instalado para usar `pg_dump`.
+- Para instancias gratuitas (Render/Koyeb) puedes programar un GitHub Action que haga `curl` al endpoint.
+- Política de retención elimina automáticamente los backups más antiguos bajo el prefijo `backups/db/<ENV>/`.
 
 ## 🤝 Contribuciones 💪
 

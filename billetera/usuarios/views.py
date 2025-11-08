@@ -7,6 +7,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from gastos.models import Gasto
 from ingresos.models import Ingreso
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed
+from django.views.decorators.csrf import csrf_exempt
+import os
+
+from usuarios.backup import run_database_backup
 
 
 def inicio(request):
@@ -141,3 +146,28 @@ class ProfileMe(APIView):
             'first_name': getattr(u, 'first_name', ''),
             'last_name': getattr(u, 'last_name', ''),
         })
+
+
+@csrf_exempt
+def trigger_backup(request):
+    """
+    Endpoint protegido para disparar el backup.
+    Seguridad:
+      - Acepta GET/POST.
+      - Si el header X-Backup-Token o ?token= coincide con BACKUP_WEBHOOK_TOKEN => permitido.
+      - En caso contrario, requiere usuario autenticado STAFF.
+    """
+    if request.method not in ("GET", "POST"):
+        return HttpResponseNotAllowed(["GET", "POST"])
+
+    token_env = os.getenv('BACKUP_WEBHOOK_TOKEN')
+    token_req = request.headers.get('X-Backup-Token') or request.GET.get('token') or request.POST.get('token')
+
+    if not (token_env and token_req and token_req == token_env):
+        # Fallback a staff
+        user = getattr(request, 'user', None)
+        if not (user and user.is_authenticated and user.is_staff):
+            return HttpResponseForbidden('No autorizado')
+
+    result = run_database_backup()
+    return JsonResponse({'status': 'ok', **result})

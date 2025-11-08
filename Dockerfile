@@ -8,7 +8,9 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
+	&& rm -rf /var/lib/apt/lists/* \
+	&& pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
