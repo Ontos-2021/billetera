@@ -59,6 +59,24 @@
                     {% endif %}
                 </div>
 
+                <!-- Date Field -->
+                <div>
+                    <label for="{{ form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📅</span>
+                            {{ form.fecha.label }}
+                        </span>
+                    </label>
+                    <input type="datetime-local" 
+                           name="{{ form.fecha.name }}" 
+                           id="{{ form.fecha.id_for_label }}"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-success focus:border-success transition-colors duration-200"
+                           value="{% now 'Y-m-d\TH:i' %}">
+                    {% if form.fecha.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.fecha.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
                 <!-- Category Field -->
                 <div>
                     <label for="{{ form.categoria.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
