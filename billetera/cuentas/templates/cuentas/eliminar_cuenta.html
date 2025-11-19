@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Cuenta - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="text-3xl">⚠️</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">¿Eliminar Cuenta?</h2>
+            <p class="text-gray-600 mb-6">
+                Estás a punto de eliminar la cuenta <strong>{{ cuenta.nombre }}</strong>. 
+                Esta acción no se puede deshacer y podría afectar a los registros asociados.
+            </p>
+
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                    Sí, eliminar cuenta
+                </button>
+                <a href="{% url 'cuentas:lista_cuentas' %}" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200">
+                    Cancelar
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

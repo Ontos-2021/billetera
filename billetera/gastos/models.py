@@ -35,6 +35,7 @@ class Gasto(models.Model):
     fecha = models.DateTimeField(default=timezone.now)
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
+    cuenta = models.ForeignKey('cuentas.Cuenta', on_delete=models.SET_NULL, null=True, blank=True, related_name='gastos')
 
     def __str__(self):
         if self.moneda:

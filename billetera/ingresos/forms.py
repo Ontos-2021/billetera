@@ -5,7 +5,7 @@ from .models import Ingreso
 class IngresoForm(forms.ModelForm):
     class Meta:
         model = Ingreso
-        fields = ['descripcion', 'monto', 'moneda', 'categoria', 'fecha']
+        fields = ['descripcion', 'monto', 'moneda', 'categoria', 'fecha', 'cuenta']
         widgets = {
             'descripcion': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
@@ -28,6 +28,9 @@ class IngresoForm(forms.ModelForm):
                 'class': 'form-control form-control-lg',
                 'type': 'datetime-local'
             }),
+            'cuenta': forms.Select(attrs={
+                'class': 'form-select form-select-lg'
+            }),
         }
         labels = {
             'descripcion': 'Descripción del ingreso',
@@ -35,6 +38,7 @@ class IngresoForm(forms.ModelForm):
             'moneda': 'Moneda',
             'categoria': 'Categoría',
             'fecha': 'Fecha y Hora',
+            'cuenta': 'Cuenta de Destino',
         }
         help_texts = {
             'descripcion': 'Breve descripción de tu fuente de ingreso',

@@ -5,7 +5,7 @@ from .models import Gasto
 class GastoForm(forms.ModelForm):
     class Meta:
         model = Gasto
-        fields = ['descripcion', 'lugar', 'categoria', 'cantidad', 'monto', 'moneda', 'fecha']
+        fields = ['descripcion', 'lugar', 'categoria', 'cantidad', 'monto', 'moneda', 'fecha', 'cuenta']
         widgets = {
             'descripcion': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
@@ -38,6 +38,9 @@ class GastoForm(forms.ModelForm):
                 'class': 'form-control form-control-lg',
                 'type': 'datetime-local'
             }),
+            'cuenta': forms.Select(attrs={
+                'class': 'form-select form-select-lg'
+            }),
         }
         labels = {
             'descripcion': 'Descripción del gasto',
@@ -47,6 +50,7 @@ class GastoForm(forms.ModelForm):
             'monto': 'Monto Total',
             'moneda': 'Moneda',
             'fecha': 'Fecha y Hora',
+            'cuenta': 'Cuenta de Origen',
         }
         help_texts = {
             'descripcion': 'Breve descripción de en qué gastaste',

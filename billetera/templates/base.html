@@ -69,6 +69,9 @@
                         <a href="{% url 'gastos:lista_gastos' %}" class="text-gray-700 hover:text-expense font-medium transition-colors duration-200 flex items-center">
                             <span class="mr-2">💸</span>Gastos
                         </a>
+                        <a href="{% url 'cuentas:lista_cuentas' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-200 flex items-center">
+                            <span class="mr-2">💳</span>Cuentas
+                        </a>
                         <div class="flex items-center space-x-4">
                             <a href="{% url 'perfil_usuario' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors duration-200">
                                 <span class="text-sm font-medium">{{ user.username }}</span>
@@ -108,6 +111,9 @@
                     </a>
                     <a href="{% url 'gastos:lista_gastos' %}" class="block px-3 py-2 text-gray-700 hover:text-expense hover:bg-gray-100 rounded-lg transition-colors duration-200">
                         💸 Gastos
+                    </a>
+                    <a href="{% url 'cuentas:lista_cuentas' %}" class="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        💳 Cuentas
                     </a>
                     <a href="{% url 'perfil_usuario' %}" class="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors duration-200">
                         👤 {{ user.username }}

@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 
 from usuarios.backup import run_database_backup
+from cuentas.models import Cuenta
 
 
 def inicio(request):
@@ -29,6 +30,20 @@ def inicio(request):
         
         # Calcular el balance neto (ingresos - gastos)
         balance_neto = total_ingresos - total_gastos
+
+        # Calcular saldos por cuenta
+        cuentas = Cuenta.objects.filter(usuario=request.user)
+        cuentas_con_saldo = []
+        for cuenta in cuentas:
+            ingresos_cuenta = Ingreso.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
+            gastos_cuenta = Gasto.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
+            saldo_actual = cuenta.saldo_inicial + ingresos_cuenta - gastos_cuenta
+            cuentas_con_saldo.append({
+                'nombre': cuenta.nombre,
+                'tipo': cuenta.tipo.nombre if cuenta.tipo else 'Otro',
+                'moneda_simbolo': cuenta.moneda.simbolo,
+                'saldo': saldo_actual
+            })
 
         # Construir lista combinada de últimos movimientos (ingresos y gastos mezclados cronológicamente)
         # Tomamos más elementos de cada lado para que al mezclarlos haya suficiente para los 10 finales
@@ -65,6 +80,7 @@ def inicio(request):
             'total_gastos': total_gastos,
             'balance_neto': balance_neto,
             'movimientos': movimientos,
+            'cuentas_saldo': cuentas_con_saldo,
         }
 
     return render(request, 'usuarios/inicio.html', context)

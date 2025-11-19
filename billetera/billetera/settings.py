@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'gastos.apps.GastosConfig',
     'usuarios',
     'ingresos',
+    'cuentas',
 ]
 
 # Note: we reuse the existing `usuarios` app for auth/social functionality.

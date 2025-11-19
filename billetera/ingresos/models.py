@@ -55,6 +55,7 @@ class Ingreso(models.Model):
     fecha = models.DateTimeField(default=timezone.now)
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True, related_name='ingresos')
     categoria = models.ForeignKey(CategoriaIngreso, on_delete=models.CASCADE, null=True, blank=True, related_name='ingresos')
+    cuenta = models.ForeignKey('cuentas.Cuenta', on_delete=models.SET_NULL, null=True, blank=True, related_name='ingresos')
 
     def __str__(self):
         return f"{self.descripcion} - {self.monto} {self.moneda.simbolo}"

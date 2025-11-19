@@ -41,6 +41,7 @@ urlpatterns = [
     path('gastos/', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
     path('usuarios/', include('usuarios.urls')),
     path('ingresos/', include('ingresos.urls')),
+    path('cuentas/', include('cuentas.urls')),
     path('', usuarios_views.inicio, name='inicio_usuarios'),  # Esta es la nueva línea para la página de inicio
     path('api/me/', ProfileMe.as_view(), name='me'),
     # JWT token endpoints (SimpleJWT custom view)

@@ -153,6 +153,55 @@
         </div>
     </div>
 
+    <!-- Accounts Summary Section -->
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">💳 Mis Cuentas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for cuenta in cuentas_saldo %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center
+                        {% if cuenta.tipo == 'Efectivo' %}bg-green-100 text-green-600
+                        {% elif cuenta.tipo == 'Banco' %}bg-blue-100 text-blue-600
+                        {% elif cuenta.tipo == 'Billetera Virtual' %}bg-purple-100 text-purple-600
+                        {% elif cuenta.tipo == 'Crypto' %}bg-yellow-100 text-yellow-600
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">
+                        {% if cuenta.tipo == 'Efectivo' %}💵
+                        {% elif cuenta.tipo == 'Banco' %}🏦
+                        {% elif cuenta.tipo == 'Billetera Virtual' %}📱
+                        {% elif cuenta.tipo == 'Crypto' %}₿
+                        {% else %}💳{% endif %}
+                    </div>
+                    <span class="text-xs font-medium px-2.5 py-0.5 rounded-full
+                        {% if cuenta.saldo >= 0 %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                        {{ cuenta.moneda_simbolo }}
+                    </span>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ cuenta.nombre }}</h3>
+                <p class="text-sm text-gray-500 mb-3">{{ cuenta.tipo }}</p>
+                <p class="text-2xl font-bold font-numbers {% if cuenta.saldo >= 0 %}text-gray-900{% else %}text-red-600{% endif %}">
+                    ${{ cuenta.saldo|floatformat:2 }}
+                </p>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                <p class="text-gray-500">No tienes cuentas registradas.</p>
+                <a href="{% url 'cuentas:crear_cuenta' %}" class="text-primary hover:text-primary-dark font-medium mt-2 inline-block">
+                    + Crear mi primera cuenta
+                </a>
+            </div>
+            {% endfor %}
+            
+            <!-- Add Account Card -->
+            <a href="{% url 'cuentas:crear_cuenta' %}" class="group bg-gray-50 rounded-xl border border-dashed border-gray-300 p-6 hover:bg-gray-100 hover:border-primary transition-all duration-200 flex flex-col items-center justify-center text-center h-full min-h-[160px]">
+                <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <span class="text-2xl text-primary">+</span>
+                </div>
+                <span class="font-medium text-gray-600 group-hover:text-primary">Nueva Cuenta</span>
+            </a>
+        </div>
+    </div>
+
     <!-- Profile Card (At the bottom) -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mt-6 hover:shadow-md transition-shadow duration-200 card-hover">
         <div class="flex flex-wrap items-center justify-between">

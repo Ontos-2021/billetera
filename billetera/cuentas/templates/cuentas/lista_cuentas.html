@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Cuentas - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">💳 Mis Cuentas</h1>
+            <p class="text-gray-600">Administra tus fuentes de dinero</p>
+        </div>
+        <a href="{% url 'cuentas:crear_cuenta' %}" class="mt-4 md:mt-0 bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center">
+            <span class="mr-2 text-xl">+</span>
+            Nueva Cuenta
+        </a>
+    </div>
+
+    <!-- Accounts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for cuenta in cuentas %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 text-2xl">
+                            {% if cuenta.tipo.nombre == 'Efectivo' %}💵
+                            {% elif cuenta.tipo.nombre == 'Banco' %}🏦
+                            {% elif cuenta.tipo.nombre == 'Billetera Virtual' %}📱
+                            {% else %}💳{% endif %}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">{{ cuenta.nombre }}</h3>
+                            <p class="text-sm text-gray-500">{{ cuenta.tipo.nombre }}</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{% url 'cuentas:editar_cuenta' cuenta.pk %}" class="text-gray-400 hover:text-blue-600 transition-colors p-1" title="Editar">
+                            ✏️
+                        </a>
+                        <a href="{% url 'cuentas:eliminar_cuenta' cuenta.pk %}" class="text-gray-400 hover:text-red-600 transition-colors p-1" title="Eliminar">
+                            🗑️
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <p class="text-sm text-gray-500 mb-1">Saldo Inicial</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                        {{ cuenta.moneda.simbolo }} {{ cuenta.saldo_inicial }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+            <div class="text-6xl mb-4">💳</div>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">No tienes cuentas registradas</h3>
+            <p class="text-gray-500 mb-6">Agrega tu primera cuenta para empezar a organizar tu dinero</p>
+            <a href="{% url 'cuentas:crear_cuenta' %}" class="text-primary hover:text-primary-dark font-medium">
+                Crear mi primera cuenta &rarr;
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
