@@ -5,7 +5,7 @@ from .models import Gasto
 class GastoForm(forms.ModelForm):
     class Meta:
         model = Gasto
-        fields = ['descripcion', 'lugar', 'categoria', 'monto', 'moneda']
+        fields = ['descripcion', 'lugar', 'categoria', 'cantidad', 'monto', 'moneda', 'fecha']
         widgets = {
             'descripcion': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
@@ -20,6 +20,11 @@ class GastoForm(forms.ModelForm):
             'categoria': forms.Select(attrs={
                 'class': 'form-select form-select-lg'
             }),
+            'cantidad': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg number-input text-center',
+                'min': '1',
+                'step': '1'
+            }),
             'monto': forms.NumberInput(attrs={
                 'class': 'form-control form-control-lg number-input',
                 'placeholder': '0.00',
@@ -29,16 +34,22 @@ class GastoForm(forms.ModelForm):
             'moneda': forms.Select(attrs={
                 'class': 'form-select form-select-lg'
             }),
+            'fecha': forms.DateTimeInput(attrs={
+                'class': 'form-control form-control-lg',
+                'type': 'datetime-local'
+            }),
         }
         labels = {
             'descripcion': 'Descripción del gasto',
             'lugar': 'Lugar / Comercio',
             'categoria': 'Categoría',
-            'monto': 'Monto',
+            'cantidad': 'Cantidad',
+            'monto': 'Monto Total',
             'moneda': 'Moneda',
+            'fecha': 'Fecha y Hora',
         }
         help_texts = {
             'descripcion': 'Breve descripción de en qué gastaste',
             'lugar': 'Opcional: dónde se realizó la compra',
-            'monto': 'Ingresa el monto sin símbolos de moneda',
+            'monto': 'Ingresa el monto total sin símbolos de moneda',
         }
