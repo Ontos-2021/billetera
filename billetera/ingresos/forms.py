@@ -44,3 +44,9 @@ class IngresoForm(forms.ModelForm):
             'descripcion': 'Breve descripción de tu fuente de ingreso',
             'monto': 'Ingresa el monto sin símbolos de moneda',
         }
+
+    def clean_monto(self):
+        monto = self.cleaned_data.get('monto')
+        if monto is not None and monto < 0:
+            raise forms.ValidationError("El monto no puede ser negativo.")
+        return monto

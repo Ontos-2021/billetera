@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Compra Global - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'inicio_usuarios' %}" class="hover:text-primary transition-colors duration-200">Inicio</a></li>
+            <li class="before:content-['/'] before:mx-2">
+                <a href="{% url 'gastos:lista_gastos' %}" class="hover:text-primary transition-colors duration-200">Gastos</a>
+            </li>
+            <li class="before:content-['/'] before:mx-2 text-gray-900">Compra Global</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">🛒</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Registrar Compra Global</h1>
+        <p class="text-gray-600">Registra múltiples items de una sola compra de forma rápida.</p>
+    </div>
+
+    <form method="post" id="compra-global-form" class="space-y-8">
+        {% csrf_token %}
+        
+        <!-- Shared Details Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <span class="mr-2">📋</span> Datos del Ticket
+                </h2>
+            </div>
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Date -->
+                <div>
+                    <label for="{{ header_form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ header_form.fecha.label }}
+                    </label>
+                    {{ header_form.fecha }}
+                    {% if header_form.fecha.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ header_form.fecha.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Place -->
+                <div>
+                    <label for="{{ header_form.lugar.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ header_form.lugar.label }}
+                    </label>
+                    {{ header_form.lugar }}
+                    {% if header_form.lugar.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ header_form.lugar.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Account -->
+                <div>
+                    <label for="{{ header_form.cuenta.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ header_form.cuenta.label }}
+                    </label>
+                    {{ header_form.cuenta }}
+                    {% if header_form.cuenta.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ header_form.cuenta.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Currency -->
+                <div>
+                    <label for="{{ header_form.moneda.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ header_form.moneda.label }}
+                    </label>
+                    {{ header_form.moneda }}
+                    {% if header_form.moneda.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ header_form.moneda.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <span class="mr-2">🛍️</span> Items de la Compra
+                </h2>
+                <div class="text-sm font-medium text-gray-600">
+                    Total Estimado: <span id="total-display" class="text-expense font-bold text-lg">$0.00</span>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                {{ item_formset.management_form }}
+                
+                <div id="items-container" class="space-y-4">
+                    {% for form in item_formset %}
+                        <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition-all duration-200 relative group">
+                            <!-- Description -->
+                            <div class="col-span-12 md:col-span-4">
+                                <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Descripción</label>
+                                {{ form.descripcion }}
+                                {% if form.descripcion.errors %}
+                                    <p class="mt-1 text-xs text-expense">{{ form.descripcion.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Category -->
+                            <div class="col-span-12 md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Categoría</label>
+                                {{ form.categoria }}
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="col-span-12 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Cant.</label>
+                                {{ form.cantidad }}
+                            </div>
+
+                            <!-- Amount -->
+                            <div class="col-span-12 md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Monto</label>
+                                {{ form.monto }}
+                            </div>
+
+                            <!-- Delete Button -->
+                            <div class="col-span-12 md:col-span-1 flex justify-end md:justify-center items-center">
+                                <button type="button" class="delete-row text-gray-400 hover:text-expense transition-colors duration-200 p-2 rounded-full hover:bg-red-50 mb-1 md:mb-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                                <div class="hidden">
+                                    {{ form.DELETE }}
+                                </div>
+                            </div>
+                            
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-6 flex justify-center">
+                    <button type="button" id="add-item" class="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 font-medium">
+                        <span class="mr-2 text-xl">+</span> Agregar otro item
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end space-x-4 pt-4">
+            <a href="{% url 'gastos:lista_gastos' %}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors duration-200">
+                Cancelar
+            </a>
+            <button type="submit" class="px-8 py-3 bg-expense hover:bg-expense-dark text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 font-medium transform hover:-translate-y-0.5">
+                Guardar Compra Completa
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Template for new rows (hidden) -->
+<div id="empty-form" class="hidden">
+    <div class="item-row grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-start p-4 rounded-lg border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition-all duration-200 relative group">
+        <div class="col-span-12 md:col-span-4">
+            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Descripción</label>
+            {{ item_formset.empty_form.descripcion }}
+        </div>
+        <div class="col-span-12 md:col-span-3">
+            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Categoría</label>
+            {{ item_formset.empty_form.categoria }}
+        </div>
+        <div class="col-span-12 md:col-span-2">
+            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Cant.</label>
+            {{ item_formset.empty_form.cantidad }}
+        </div>
+        <div class="col-span-12 md:col-span-2">
+            <label class="block text-xs font-medium text-gray-500 mb-1 md:hidden">Monto</label>
+            {{ item_formset.empty_form.monto }}
+        </div>
+        <div class="col-span-12 md:col-span-1 flex justify-end md:justify-center items-center">
+            <button type="button" class="delete-row text-gray-400 hover:text-expense transition-colors duration-200 p-2 rounded-full hover:bg-red-50 mb-1 md:mb-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            </button>
+            <div class="hidden">
+                {{ item_formset.empty_form.DELETE }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('items-container');
+        const addButton = document.getElementById('add-item');
+        const totalDisplay = document.getElementById('total-display');
+        const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
+        const emptyFormTemplate = document.getElementById('empty-form').innerHTML;
+
+        // Function to update total
+        function updateTotal() {
+            let total = 0;
+            const rows = container.querySelectorAll('.item-row');
+            rows.forEach(row => {
+                // Check if row is deleted
+                const deleteInput = row.querySelector('input[name$="-DELETE"]');
+                if (deleteInput && deleteInput.checked) return;
+
+                const amountInput = row.querySelector('input[name$="-monto"]');
+                const quantityInput = row.querySelector('input[name$="-cantidad"]');
+                
+                let amount = 0;
+                let quantity = 1;
+
+                if (amountInput && amountInput.value) {
+                    amount = parseFloat(amountInput.value);
+                }
+                
+                if (quantityInput && quantityInput.value) {
+                    quantity = parseFloat(quantityInput.value);
+                }
+                
+                total += amount * quantity;
+            });
+            totalDisplay.textContent = '$' + total.toFixed(2);
+        }
+
+        // Add new row
+        addButton.addEventListener('click', function() {
+            const formIdx = parseInt(totalFormsInput.value);
+            const newRowHtml = emptyFormTemplate.replace(/__prefix__/g, formIdx);
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newRowHtml;
+            const newRow = tempDiv.firstElementChild;
+            
+            container.appendChild(newRow);
+            totalFormsInput.value = formIdx + 1;
+        });
+
+        // Delete row
+        container.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-row')) {
+                const row = e.target.closest('.item-row');
+                // If it's an existing form (has ID), mark as deleted
+                // If it's a dynamic new form, we could remove it, but Django formsets handle DELETE field
+                // For simplicity with Django formsets, we usually hide and check DELETE
+                
+                const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+                if (deleteCheckbox) {
+                    deleteCheckbox.checked = true;
+                    row.style.display = 'none';
+                    updateTotal();
+                }
+            }
+        });
+
+        // Event delegation for inputs (amount and quantity)
+        container.addEventListener('input', function(e) {
+            if (e.target.matches('input[name$="-monto"]') || e.target.matches('input[name$="-cantidad"]')) {
+                updateTotal();
+            }
+        });
+        
+        updateTotal();
+    });
+</script>
+{% endblock %}

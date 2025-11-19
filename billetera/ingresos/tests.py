@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Moneda, CategoriaIngreso, Ingreso
 from django.urls import reverse
+from django.utils import timezone
 
 
 class IngresoModelTestCase(TestCase):
@@ -24,7 +25,8 @@ class IngresoModelTestCase(TestCase):
             descripcion='Pago por proyecto freelance',
             monto=500.00,
             moneda=self.moneda_usd,
-            categoria=self.categoria_freelance
+            categoria=self.categoria_freelance,
+            fecha=timezone.now()
         )
 
     def test_crear_ingreso(self):
@@ -46,7 +48,8 @@ class IngresoModelTestCase(TestCase):
             usuario=self.usuario,
             descripcion='Ingreso sin moneda',
             monto=300.00,
-            categoria=self.categoria_salario
+            categoria=self.categoria_salario,
+            fecha=timezone.now()
         )
         self.assertIsNone(ingreso_sin_moneda.moneda)
 
@@ -69,7 +72,8 @@ class IngresoModelTestCase(TestCase):
             'descripcion': 'Ingreso negativo',
             'monto': '-100.00',
             'moneda': self.moneda_usd.id,
-            'categoria': self.categoria_salario.id
+            'categoria': self.categoria_salario.id,
+            'fecha': timezone.now().strftime('%Y-%m-%dT%H:%M')
         })
 
         # Verificar que el ingreso no fue creado
@@ -86,6 +90,7 @@ class IngresoModelTestCase(TestCase):
             'monto': '500.00',
             'moneda': self.moneda_usd.id,
             'categoria': self.categoria_freelance.id,
+            'fecha': timezone.now().strftime('%Y-%m-%dT%H:%M')
         })
 
         # Verificar que el ingreso ha sido editado

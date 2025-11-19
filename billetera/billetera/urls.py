@@ -28,6 +28,8 @@ from usuarios.jwt_views import WalletTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
+    # Backup manual (token o staff)
+    path('admin/tools/backup', usuarios_views.trigger_backup, name='admin_backup'),
     path('admin/', admin.site.urls),
     # Allauth (server-side templates based login flow)
     path('accounts/', include('allauth.urls')),
@@ -48,8 +50,6 @@ urlpatterns = [
     dj_path('api/token/', WalletTokenObtainPairView.as_view(), name='token_obtain_pair'),
     dj_path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     dj_path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
-    # Backup manual (token o staff)
-    path('admin/tools/backup', usuarios_views.trigger_backup, name='admin_backup'),
 ]
 
 if settings.DEBUG:
