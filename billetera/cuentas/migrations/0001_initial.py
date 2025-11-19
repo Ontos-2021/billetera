@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('gastos', '0004_gasto_cantidad_alter_gasto_fecha'),
+        ('gastos', '0003_create_initial_data'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
