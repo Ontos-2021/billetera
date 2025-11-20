@@ -1,6 +1,9 @@
 # MoneyFlow Mirror Dockerfile for Koyeb Deployment
 FROM python:3.11-slim
 
+# Usá Python sin buffer
+ENV PYTHONUNBUFFERED=1
+
 # Set working directory
 WORKDIR /app
 
@@ -21,9 +24,6 @@ RUN chmod +x /entrypoint.sh
 
 # Change to Django project directory
 WORKDIR /app/billetera
-
-# Expose port (Koyeb uses PORT environment variable)
-ENV PORT=8000
 
 # Run migrations, collect static, then start Gunicorn
 CMD ["/entrypoint.sh"]
