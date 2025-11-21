@@ -73,36 +73,67 @@
                     </div>
                 </div>
 
-                <!-- Address Field -->
+                <!-- Name Field (User.first_name) -->
                 <div>
-                    <label for="direccion" class="block text-sm font-medium text-gray-900 mb-2">
+                    <label for="nombre_pila" class="block text-sm font-medium text-gray-900 mb-2">
                         <span class="flex items-center">
-                            <span class="mr-2">🏠</span>
-                            Dirección
+                            <span class="mr-2">👋</span>
+                            Nombre / Apodo
                         </span>
                     </label>
                     <input type="text" 
-                           name="direccion" 
-                           id="direccion" 
+                           name="nombre_pila" 
+                           id="nombre_pila" 
                            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                           placeholder="Tu dirección completa"
-                           value="{{ perfil.direccion|default:'' }}">
+                           placeholder="Cómo quieres que te llamemos"
+                           value="{{ form.nombre_pila.value|default:'' }}">
                 </div>
 
-                <!-- Phone Field -->
+                <!-- Birth Date Field -->
                 <div>
-                    <label for="telefono" class="block text-sm font-medium text-gray-900 mb-2">
+                    <label for="fecha_nacimiento" class="block text-sm font-medium text-gray-900 mb-2">
                         <span class="flex items-center">
-                            <span class="mr-2">📞</span>
-                            Número de Teléfono
+                            <span class="mr-2">🎂</span>
+                            Fecha de Nacimiento
                         </span>
                     </label>
-                    <input type="tel" 
-                           name="telefono" 
-                           id="telefono" 
+                    <input type="date" 
+                           name="fecha_nacimiento" 
+                           id="fecha_nacimiento" 
                            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
-                           placeholder="+1 (555) 123-4567"
-                           value="{{ perfil.telefono|default:'' }}">
+                           value="{{ form.fecha_nacimiento.value|date:'Y-m-d'|default:'' }}">
+                </div>
+
+                <!-- Location Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="pais" class="block text-sm font-medium text-gray-900 mb-2">
+                            <span class="flex items-center">
+                                <span class="mr-2">🌍</span>
+                                País
+                            </span>
+                        </label>
+                        <input type="text" 
+                               name="pais" 
+                               id="pais" 
+                               class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                               placeholder="Ej: Argentina"
+                               value="{{ perfil.pais|default:'' }}">
+                    </div>
+                    <div>
+                        <label for="ciudad" class="block text-sm font-medium text-gray-900 mb-2">
+                            <span class="flex items-center">
+                                <span class="mr-2">🏙️</span>
+                                Ciudad
+                            </span>
+                        </label>
+                        <input type="text" 
+                               name="ciudad" 
+                               id="ciudad" 
+                               class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200"
+                               placeholder="Ej: Buenos Aires"
+                               value="{{ perfil.ciudad|default:'' }}">
+                    </div>
                 </div>
 
                 <!-- Submit Button -->

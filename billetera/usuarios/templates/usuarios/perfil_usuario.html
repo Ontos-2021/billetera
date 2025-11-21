@@ -34,7 +34,14 @@
                     </div>
 
                     <!-- User Info -->
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ user.username }}</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-1">
+                        {% if user.first_name %}
+                            {{ user.first_name }}
+                        {% else %}
+                            {{ user.username }}
+                        {% endif %}
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-2">@{{ user.username }}</p>
                     {% if user.email %}
                         <p class="text-gray-600 mb-4">{{ user.email }}</p>
                     {% endif %}
@@ -51,30 +58,35 @@
 
         <!-- Details Cards -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Contact Information -->
+            <!-- Personal Information -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <span class="mr-2">📧</span>
-                        Información de Contacto
+                        <span class="mr-2">📋</span>
+                        Datos Personales
                     </h3>
                 </div>
                 
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Correo Electrónico</label>
-                            <p class="text-gray-900">{{ user.email|default:"No especificado" }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Ubicación</label>
+                            <p class="text-gray-900 flex items-center">
+                                <span class="mr-2">🌍</span>
+                                {% if user.perfilusuario.ciudad or user.perfilusuario.pais %}
+                                    {{ user.perfilusuario.ciudad|default:"" }}{% if user.perfilusuario.ciudad and user.perfilusuario.pais %}, {% endif %}{{ user.perfilusuario.pais|default:"" }}
+                                {% else %}
+                                    <span class="text-gray-400 italic">No especificada</span>
+                                {% endif %}
+                            </p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Teléfono</label>
-                            <p class="text-gray-900">{{ user.perfilusuario.telefono|default:"No especificado" }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Fecha de Nacimiento</label>
+                            <p class="text-gray-900 flex items-center">
+                                <span class="mr-2">🎂</span>
+                                {{ user.perfilusuario.fecha_nacimiento|date:"d \d\e F Y"|default:"No especificada" }}
+                            </p>
                         </div>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-500 mb-1">Dirección</label>
-                        <p class="text-gray-900">{{ user.perfilusuario.direccion|default:"No especificada" }}</p>
                     </div>
                 </div>
             </div>
