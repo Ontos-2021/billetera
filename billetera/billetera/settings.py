@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'rest_framework',
     'whitenoise.runserver_nostatic',  # WhiteNoise para servir archivos estáticos en producción
     'storages',  # django-storages for Cloudflare R2

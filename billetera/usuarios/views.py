@@ -10,6 +10,8 @@ from ingresos.models import Ingreso
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
 import os
+from django.utils import timezone
+from datetime import timedelta
 
 from usuarios.backup import run_database_backup
 from cuentas.models import Cuenta
@@ -19,17 +21,41 @@ def inicio(request):
     context = {}
 
     if request.user.is_authenticated and not request.user.is_superuser:
-        # Últimos 5 registros para la lista del inicio
+        # --- Lógica de Filtrado por Rango de Tiempo ---
+        rango = request.GET.get('rango', 'mes')  # Default: mes actual
+        hoy = timezone.now()
+        fecha_inicio = None
+
+        if rango == 'hoy':
+            fecha_inicio = hoy.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif rango == 'semana':
+            fecha_inicio = hoy - timedelta(days=7)
+        elif rango == 'mes':
+            fecha_inicio = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif rango == 'anio':
+            fecha_inicio = hoy.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif rango == 'todo':
+            fecha_inicio = None  # Sin filtro de fecha
+
+        # Filtros base para totales (Usuario + Moneda ARS)
+        filtros_ingresos = {'usuario': request.user, 'moneda__codigo': 'ARS'}
+        filtros_gastos = {'usuario': request.user, 'moneda__codigo': 'ARS'}
+
+        # Aplicar filtro de fecha si corresponde
+        if fecha_inicio:
+            filtros_ingresos['fecha__gte'] = fecha_inicio
+            filtros_gastos['fecha__gte'] = fecha_inicio
+
+        # Calcular Totales Filtrados
+        total_ingresos = Ingreso.objects.filter(**filtros_ingresos).aggregate(Sum('monto'))['monto__sum'] or 0
+        total_gastos = Gasto.objects.filter(**filtros_gastos).aggregate(Sum('monto'))['monto__sum'] or 0
+        balance_neto = total_ingresos - total_gastos
+
+        # --- Fin Lógica de Filtrado ---
+
+        # Últimos 5 registros para la lista del inicio (Legacy, se puede mantener o quitar si no se usa)
         ultimos_ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:5]
         ultimos_gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:5]
-
-        # Total de todos los ingresos y registros solo con moneda de id 3 (Peso Argentino)
-
-        total_ingresos = Ingreso.objects.filter(usuario=request.user, moneda=3).aggregate(Sum('monto'))['monto__sum'] or 0
-        total_gastos = Gasto.objects.filter(usuario=request.user, moneda=3).aggregate(Sum('monto'))['monto__sum'] or 0
-        
-        # Calcular el balance neto (ingresos - gastos)
-        balance_neto = total_ingresos - total_gastos
 
         # Calcular saldos por cuenta
         cuentas = Cuenta.objects.filter(usuario=request.user)
@@ -43,6 +69,7 @@ def inicio(request):
                 'nombre': cuenta.nombre,
                 'tipo': cuenta.tipo.nombre if cuenta.tipo else 'Otro',
                 'moneda_simbolo': cuenta.moneda.simbolo,
+                'moneda_codigo': cuenta.moneda.codigo,
                 'saldo': saldo_actual
             })
 
@@ -82,6 +109,7 @@ def inicio(request):
             'balance_neto': balance_neto,
             'movimientos': movimientos,
             'cuentas_saldo': cuentas_con_saldo,
+            'rango_actual': rango, # Pasar el rango al template para resaltar el botón activo
         }
 
     return render(request, 'usuarios/inicio.html', context)
