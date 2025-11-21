@@ -39,6 +39,7 @@ def inicio(request):
             gastos_cuenta = Gasto.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
             saldo_actual = cuenta.saldo_inicial + ingresos_cuenta - gastos_cuenta
             cuentas_con_saldo.append({
+                'id': cuenta.id,
                 'nombre': cuenta.nombre,
                 'tipo': cuenta.tipo.nombre if cuenta.tipo else 'Otro',
                 'moneda_simbolo': cuenta.moneda.simbolo,

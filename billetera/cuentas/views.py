@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Cuenta
-from .forms import CuentaForm
+from .forms import CuentaForm, AjusteSaldoForm
 from django.contrib import messages
+from django.db.models import Sum
+from gastos.models import Gasto, Categoria as CategoriaGasto
+from ingresos.models import Ingreso, CategoriaIngreso, Moneda as IngresoMoneda
+from django.utils import timezone
 
 @login_required
 def lista_cuentas(request):
@@ -44,3 +48,65 @@ def eliminar_cuenta(request, pk):
         messages.success(request, 'Cuenta eliminada exitosamente.')
         return redirect('cuentas:lista_cuentas')
     return render(request, 'cuentas/eliminar_cuenta.html', {'cuenta': cuenta})
+
+@login_required
+def ajustar_saldo(request, pk):
+    cuenta = get_object_or_404(Cuenta, pk=pk, usuario=request.user)
+    
+    # Calculate current system balance
+    ingresos_cuenta = Ingreso.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
+    gastos_cuenta = Gasto.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
+    saldo_sistema = cuenta.saldo_inicial + ingresos_cuenta - gastos_cuenta
+    
+    if request.method == 'POST':
+        form = AjusteSaldoForm(request.POST)
+        if form.is_valid():
+            saldo_real = form.cleaned_data['saldo_real']
+            diferencia = saldo_real - saldo_sistema
+            
+            if diferencia > 0:
+                # Need to add Income
+                categoria, _ = CategoriaIngreso.objects.get_or_create(nombre='Ajuste de Saldo')
+                
+                # Find matching IngresoMoneda
+                ingreso_moneda, _ = IngresoMoneda.objects.get_or_create(
+                    codigo=cuenta.moneda.codigo,
+                    defaults={'nombre': cuenta.moneda.nombre, 'simbolo': cuenta.moneda.simbolo}
+                )
+
+                Ingreso.objects.create(
+                    usuario=request.user,
+                    cuenta=cuenta,
+                    monto=diferencia,
+                    categoria=categoria,
+                    descripcion='Ajuste manual de saldo (Positivo)',
+                    moneda=ingreso_moneda,
+                    fecha=timezone.now()
+                )
+                messages.success(request, f'Se registró un ingreso de ajuste por {diferencia}')
+                
+            elif diferencia < 0:
+                # Need to add Expense
+                categoria, _ = CategoriaGasto.objects.get_or_create(nombre='Ajuste de Saldo')
+                Gasto.objects.create(
+                    usuario=request.user,
+                    cuenta=cuenta,
+                    monto=abs(diferencia),
+                    categoria=categoria,
+                    descripcion='Ajuste manual de saldo (Negativo)',
+                    moneda=cuenta.moneda,
+                    fecha=timezone.now()
+                )
+                messages.success(request, f'Se registró un gasto de ajuste por {abs(diferencia)}')
+            else:
+                messages.info(request, 'El saldo real coincide con el del sistema. No se realizaron cambios.')
+                
+            return redirect('inicio_usuarios')
+    else:
+        form = AjusteSaldoForm(initial={'saldo_real': saldo_sistema})
+        
+    return render(request, 'cuentas/ajustar_saldo.html', {
+        'form': form,
+        'cuenta': cuenta,
+        'saldo_sistema': saldo_sistema
+    })

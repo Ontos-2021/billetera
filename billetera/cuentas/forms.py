@@ -28,3 +28,16 @@ class CuentaForm(forms.ModelForm):
             'moneda': 'Moneda',
             'saldo_inicial': 'Saldo Inicial',
         }
+
+class AjusteSaldoForm(forms.Form):
+    saldo_real = forms.DecimalField(
+        max_digits=15, 
+        decimal_places=2,
+        label='Saldo Real Actual',
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control form-control-lg number-input',
+            'placeholder': '0.00',
+            'step': '0.01'
+        }),
+        help_text='Ingresa la cantidad exacta de dinero que tienes en esta cuenta.',
+    )

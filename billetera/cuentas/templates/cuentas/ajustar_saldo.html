@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Ajustar Saldo - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'inicio_usuarios' %}" class="hover:text-primary transition-colors duration-200">Inicio</a></li>
+            <li class="before:content-['/'] before:mx-2 text-gray-900">Ajustar Saldo</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">⚖️</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Ajustar Saldo de Cuenta</h1>
+        <p class="text-gray-600">Actualiza el saldo real de tu cuenta para mantener tus finanzas sincronizadas</p>
+    </div>
+
+    <!-- Info Card -->
+    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-start">
+        <span class="text-2xl mr-3">ℹ️</span>
+        <div>
+            <h3 class="font-semibold text-blue-900">¿Cómo funciona?</h3>
+            <p class="text-sm text-blue-800 mt-1">
+                Ingresa el dinero real que tienes en esta cuenta. El sistema creará automáticamente un 
+                <strong>Ingreso</strong> o <strong>Gasto</strong> de tipo "Ajuste" por la diferencia.
+            </p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-primary text-white p-6 text-center">
+            <h2 class="text-xl font-semibold">{{ cuenta.nombre }}</h2>
+            <p class="text-primary-light text-sm mt-1">{{ cuenta.tipo }} - {{ cuenta.moneda.nombre }}</p>
+        </div>
+        
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <span class="text-gray-600 font-medium">Saldo en Sistema:</span>
+                <span class="text-xl font-bold text-gray-900">{{ cuenta.moneda.simbolo }}{{ saldo_sistema|floatformat:2 }}</span>
+            </div>
+
+            <form method="post" class="space-y-6" novalidate>
+                {% csrf_token %}
+                
+                <!-- Saldo Real Field -->
+                <div>
+                    <label for="{{ form.saldo_real.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        {{ form.saldo_real.label }}
+                    </label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">{{ cuenta.moneda.simbolo }}</span>
+                        </div>
+                        <input type="number" 
+                               name="{{ form.saldo_real.name }}" 
+                               id="{{ form.saldo_real.id_for_label }}"
+                               value="{{ form.saldo_real.value|default:'' }}"
+                               step="0.01"
+                               class="focus:ring-primary focus:border-primary block w-full pl-10 pr-12 sm:text-lg border-gray-300 rounded-md py-3"
+                               placeholder="0.00">
+                    </div>
+                    {% if form.saldo_real.help_text %}
+                        <p class="mt-2 text-sm text-gray-500">{{ form.saldo_real.help_text }}</p>
+                    {% endif %}
+                    {% if form.saldo_real.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.saldo_real.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-end space-x-4 pt-4 border-t border-gray-100">
+                    <a href="{% url 'inicio_usuarios' %}" class="text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200">Cancelar</a>
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center">
+                        <span class="mr-2">💾</span>
+                        Guardar Ajuste
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
