@@ -42,3 +42,9 @@ class Gasto(models.Model):
             return f"{self.descripcion} ({self.cantidad}) - {self.monto} {self.moneda.simbolo}"
         else:
             return f"{self.descripcion} ({self.cantidad}) - {self.monto}"
+
+    @property
+    def precio_unitario(self):
+        if self.cantidad > 0:
+            return self.monto / self.cantidad
+        return self.monto

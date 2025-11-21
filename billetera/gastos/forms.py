@@ -48,7 +48,7 @@ class GastoForm(forms.ModelForm):
             'lugar': 'Lugar / Comercio',
             'categoria': 'Categoría',
             'cantidad': 'Cantidad',
-            'monto': 'Monto Total',
+            'monto': 'Precio Unitario',
             'moneda': 'Moneda',
             'fecha': 'Fecha y Hora',
             'cuenta': 'Cuenta de Origen',
@@ -56,8 +56,28 @@ class GastoForm(forms.ModelForm):
         help_texts = {
             'descripcion': 'Breve descripción de en qué gastaste',
             'lugar': 'Opcional: dónde se realizó la compra',
-            'monto': 'Ingresa el monto total sin símbolos de moneda',
+            'monto': 'Ingresa el precio por unidad',
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            # If editing, show unit price instead of total amount
+            self.initial['monto'] = self.instance.precio_unitario
+
+    def save(self, commit=True):
+        gasto = super().save(commit=False)
+        # Calculate total amount: Unit Price * Quantity
+        # self.cleaned_data['monto'] contains the unit price input by user
+        unit_price = self.cleaned_data.get('monto')
+        quantity = self.cleaned_data.get('cantidad', 1)
+        
+        if unit_price is not None:
+            gasto.monto = unit_price * quantity
+            
+        if commit:
+            gasto.save()
+        return gasto
 
 
 class CompraGlobalHeaderForm(forms.ModelForm):

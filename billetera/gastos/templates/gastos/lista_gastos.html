@@ -69,7 +69,12 @@
                                 <!-- Amount Display -->
                                 <div class="text-right ml-4">
                                     <p class="text-2xl font-numbers font-bold text-expense">-${{ gasto.monto }}</p>
-                                    <p class="text-xs text-gray-500">{{ gasto.moneda.codigo }}</p>
+                                    <p class="text-xs text-gray-500 mb-1">{{ gasto.moneda.codigo }}</p>
+                                    {% if gasto.cantidad > 1 %}
+                                        <p class="text-xs text-gray-500" title="Precio unitario: ${{ gasto.precio_unitario|floatformat:2 }}">
+                                            ({{ gasto.cantidad }} u. x ${{ gasto.precio_unitario|floatformat:2 }})
+                                        </p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
