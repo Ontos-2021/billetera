@@ -23,7 +23,7 @@ def inicio(request):
     if request.user.is_authenticated and not request.user.is_superuser:
         # --- Lógica de Filtrado por Rango de Tiempo ---
         rango = request.GET.get('rango', 'mes')  # Default: mes actual
-        hoy = timezone.now()
+        hoy = timezone.localtime(timezone.now())
         fecha_inicio = None
 
         if rango == 'hoy':

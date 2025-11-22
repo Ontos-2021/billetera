@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from decimal import Decimal
 from datetime import timedelta
+import datetime
+from unittest.mock import patch
 from gastos.models import Gasto, Moneda as MonedaGasto, Categoria
 from ingresos.models import Ingreso, Moneda as MonedaIngreso, CategoriaIngreso
 
@@ -22,8 +24,8 @@ class DashboardFiltrosTest(TestCase):
         self.categoria_gasto = Categoria.objects.create(nombre='General')
         self.categoria_ingreso = CategoriaIngreso.objects.create(nombre='Salario')
 
-        # Fechas de referencia
-        self.ahora = timezone.now()
+        # Fechas de referencia (usando Local Time para coincidir con la vista)
+        self.ahora = timezone.localtime(timezone.now())
         self.inicio_mes = self.ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         self.inicio_anio = self.ahora.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
 
@@ -104,6 +106,28 @@ class DashboardFiltrosTest(TestCase):
         
         # Debe sumar hoy + inicio año (1500)
         self.assertEqual(response.context['total_ingresos'], Decimal('1500.00'))
+
+    @patch('django.utils.timezone.now')
+    def test_filtro_hoy_timezone_fix(self, mock_now):
+        """
+        Prueba crítica: Verifica que el filtro 'hoy' funcione correctamente
+        cuando en Argentina es de noche (ej: 22:00) pero en UTC ya es el día siguiente (01:00).
+        """
+        # Simular: 21 de Noviembre a las 22:00 PM (Argentina, UTC-3)
+        # En UTC esto es 22 de Noviembre a las 01:00 AM
+        now_utc = datetime.datetime(2025, 11, 22, 1, 0, 0, tzinfo=datetime.timezone.utc)
+        mock_now.return_value = now_utc
+        
+        # El usuario hizo un gasto "hoy" (21 de Noviembre) a las 10:00 AM Local
+        # En UTC esto es 21 de Noviembre a las 13:00 PM
+        gasto_date = datetime.datetime(2025, 11, 21, 13, 0, 0, tzinfo=datetime.timezone.utc)
+        
+        self.crear_gasto(1000, gasto_date)
+        
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'hoy'})
+        
+        # El gasto DEBE aparecer (antes del fix daba 0)
+        self.assertEqual(response.context['total_gastos'], Decimal('1000.00'))
 
     def test_filtro_todo(self):
         # Ingreso HOY
