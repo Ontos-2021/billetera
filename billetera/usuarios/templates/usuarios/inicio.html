@@ -7,7 +7,7 @@
 {% if user.is_authenticated and not user.is_superuser %}
     <!-- Welcome Section -->
     <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">¡Bienvenido/a, {{ user.username }}! 👋</h1>
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">¡Bienvenido/a, {{ user.first_name|default:user.username }}! 👋</h1>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">Tu panel principal para gestionar tus finanzas con confianza y claridad.</p>
     </div>
 
