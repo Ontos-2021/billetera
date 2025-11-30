@@ -1,6 +1,7 @@
 from django import forms
 from django.utils import timezone
-from .models import Gasto
+
+from .models import Gasto, Moneda
 
 
 class GastoForm(forms.ModelForm):
@@ -61,9 +62,18 @@ class GastoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self._prefill_moneda_default()
         if self.instance and self.instance.pk:
             # If editing, show unit price instead of total amount
             self.initial['monto'] = self.instance.precio_unitario
+
+    def _prefill_moneda_default(self):
+        if self.fields['moneda'].initial:
+            return
+        ars = Moneda.objects.filter(codigo='ARS').first()
+        if ars:
+            self.fields['moneda'].initial = ars.pk
 
     def save(self, commit=True):
         gasto = super().save(commit=False)
@@ -85,6 +95,10 @@ class CompraGlobalHeaderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if not self.initial.get('fecha'):
             self.initial['fecha'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M')
+        if not self.initial.get('moneda'):
+            ars = Moneda.objects.filter(codigo='ARS').first()
+            if ars:
+                self.fields['moneda'].initial = ars.pk
 
     class Meta:
         model = Gasto

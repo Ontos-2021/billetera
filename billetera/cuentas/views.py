@@ -1,12 +1,15 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Cuenta
-from .forms import CuentaForm, AjusteSaldoForm
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Sum
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
 from gastos.models import Gasto, Categoria as CategoriaGasto
 from ingresos.models import Ingreso, CategoriaIngreso, Moneda as IngresoMoneda
-from django.utils import timezone
+
+from .forms import AjusteSaldoForm, CuentaForm, TransferenciaForm
+from .models import Cuenta, TransferenciaCuenta
 
 @login_required
 def lista_cuentas(request):
@@ -109,4 +112,74 @@ def ajustar_saldo(request, pk):
         'form': form,
         'cuenta': cuenta,
         'saldo_sistema': saldo_sistema
+    })
+
+
+@login_required
+def transferir_cuentas(request):
+    if request.method == 'POST':
+        form = TransferenciaForm(request.POST, usuario=request.user)
+        if form.is_valid():
+            datos = form.cleaned_data
+            cuenta_origen = datos['cuenta_origen']
+            cuenta_destino = datos['cuenta_destino']
+            monto_origen = datos['monto_origen']
+            monto_destino = datos['monto_destino']
+            tasa = datos['tasa_manual']
+            nota = datos.get('nota', '')
+
+            try:
+                with transaction.atomic():
+                    categoria_gasto, _ = CategoriaGasto.objects.get_or_create(nombre='Transferencia Saliente')
+                    categoria_ingreso, _ = CategoriaIngreso.objects.get_or_create(nombre='Transferencia Entrante')
+
+                    fecha_mov = timezone.now()
+
+                    gasto = Gasto.objects.create(
+                        usuario=request.user,
+                        descripcion=f'Transferencia a {cuenta_destino.nombre}',
+                        monto=monto_origen,
+                        categoria=categoria_gasto,
+                        moneda=cuenta_origen.moneda,
+                        cuenta=cuenta_origen,
+                        fecha=fecha_mov,
+                    )
+
+                    ingreso_moneda, _ = IngresoMoneda.objects.get_or_create(
+                        codigo=cuenta_destino.moneda.codigo,
+                        defaults={'nombre': cuenta_destino.moneda.nombre, 'simbolo': cuenta_destino.moneda.simbolo}
+                    )
+
+                    ingreso = Ingreso.objects.create(
+                        usuario=request.user,
+                        descripcion=f'Transferencia desde {cuenta_origen.nombre}',
+                        monto=monto_destino,
+                        categoria=categoria_ingreso,
+                        moneda=ingreso_moneda,
+                        cuenta=cuenta_destino,
+                        fecha=fecha_mov,
+                    )
+
+                    TransferenciaCuenta.objects.create(
+                        usuario=request.user,
+                        cuenta_origen=cuenta_origen,
+                        cuenta_destino=cuenta_destino,
+                        monto_origen=monto_origen,
+                        monto_destino=monto_destino,
+                        tasa_manual=tasa,
+                        nota=nota,
+                        fecha=fecha_mov,
+                        gasto=gasto,
+                        ingreso=ingreso,
+                    )
+
+                messages.success(request, 'Transferencia registrada exitosamente.')
+                return redirect('inicio_usuarios')
+            except Exception as exc:
+                messages.error(request, f'No se pudo registrar la transferencia: {exc}')
+    else:
+        form = TransferenciaForm(usuario=request.user)
+
+    return render(request, 'cuentas/transferir.html', {
+        'form': form,
     })

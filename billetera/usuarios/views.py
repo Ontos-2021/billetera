@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -12,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.utils import timezone
 from datetime import timedelta
+from django.urls import reverse
 
 from usuarios.backup import run_database_backup
 from cuentas.models import Cuenta
@@ -28,6 +31,8 @@ def inicio(request):
 
         if rango == 'hoy':
             fecha_inicio = hoy.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif rango == '3dias':
+            fecha_inicio = hoy - timedelta(days=3)
         elif rango == 'semana':
             fecha_inicio = hoy - timedelta(days=7)
         elif rango == 'mes':
@@ -38,8 +43,16 @@ def inicio(request):
             fecha_inicio = None  # Sin filtro de fecha
 
         # Filtros base para totales (Usuario + Moneda ARS)
-        filtros_ingresos = {'usuario': request.user, 'moneda__codigo': 'ARS'}
-        filtros_gastos = {'usuario': request.user, 'moneda__codigo': 'ARS'}
+        filtros_ingresos = {
+            'usuario': request.user,
+            'moneda__codigo': 'ARS',
+            'transferencias_generadas__isnull': True,
+        }
+        filtros_gastos = {
+            'usuario': request.user,
+            'moneda__codigo': 'ARS',
+            'transferencias_generadas__isnull': True,
+        }
 
         # Aplicar filtro de fecha si corresponde
         if fecha_inicio:
@@ -60,10 +73,11 @@ def inicio(request):
         # Calcular saldos por cuenta
         cuentas = Cuenta.objects.filter(usuario=request.user)
         cuentas_con_saldo = []
+        totales_por_moneda = {}
         for cuenta in cuentas:
-            ingresos_cuenta = Ingreso.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
-            gastos_cuenta = Gasto.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or 0
-            saldo_actual = cuenta.saldo_inicial + ingresos_cuenta - gastos_cuenta
+            ingresos_cuenta = Ingreso.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or Decimal('0.00')
+            gastos_cuenta = Gasto.objects.filter(cuenta=cuenta).aggregate(Sum('monto'))['monto__sum'] or Decimal('0.00')
+            saldo_actual = cuenta.saldo_inicial + Decimal(ingresos_cuenta) - Decimal(gastos_cuenta)
             cuentas_con_saldo.append({
                 'id': cuenta.id,
                 'nombre': cuenta.nombre,
@@ -72,6 +86,18 @@ def inicio(request):
                 'moneda_codigo': cuenta.moneda.codigo,
                 'saldo': saldo_actual
             })
+            codigo = cuenta.moneda.codigo
+            if codigo not in totales_por_moneda:
+                totales_por_moneda[codigo] = {
+                    'codigo': codigo,
+                    'simbolo': cuenta.moneda.simbolo,
+                    'nombre': cuenta.moneda.nombre,
+                    'total': Decimal('0.00'),
+                }
+            totales_por_moneda[codigo]['total'] += saldo_actual
+
+        totals_list = sorted(totales_por_moneda.values(), key=lambda item: item['codigo'])
+        moneda_default = 'ARS' if 'ARS' in totales_por_moneda else (totals_list[0]['codigo'] if totals_list else None)
 
         # Construir lista combinada de últimos movimientos (ingresos y gastos mezclados cronológicamente)
         # Tomamos más elementos de cada lado para que al mezclarlos haya suficiente para los 10 finales
@@ -87,6 +113,8 @@ def inicio(request):
                 'monto': ing.monto,
                 'fecha': ing.fecha,
                 'obj': ing,
+                'cuenta_nombre': ing.cuenta.nombre if ing.cuenta else None,
+                'url': reverse('ingresos:editar_ingreso', args=[ing.id]),
             })
         for gas in gastos_para_mezcla:
             movimientos.append({
@@ -96,6 +124,8 @@ def inicio(request):
                 'monto': gas.monto,
                 'fecha': gas.fecha,
                 'obj': gas,
+                'cuenta_nombre': gas.cuenta.nombre if gas.cuenta else None,
+                'url': reverse('gastos:editar_gasto', args=[gas.id]),
             })
 
         # Orden descendente por fecha y limitar a 10
@@ -110,6 +140,8 @@ def inicio(request):
             'movimientos': movimientos,
             'cuentas_saldo': cuentas_con_saldo,
             'rango_actual': rango, # Pasar el rango al template para resaltar el botón activo
+            'totales_cuentas': totals_list,
+            'totales_cuentas_default': moneda_default,
         }
 
     return render(request, 'usuarios/inicio.html', context)

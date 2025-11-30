@@ -13,12 +13,14 @@ class PerfilUsuarioForm(forms.ModelForm):
 
     class Meta:
         model = PerfilUsuario
-        fields = ['imagen_perfil', 'fecha_nacimiento', 'pais', 'ciudad']
+        fields = ['imagen_perfil', 'fecha_nacimiento', 'pais', 'ciudad', 'direccion', 'telefono']
         widgets = {
             'imagen_perfil': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'pais': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Argentina'}),
             'ciudad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Buenos Aires'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Calle Falsa 123'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+54 9 11 1234 5678'}),
         }
 
     def __init__(self, *args, **kwargs):

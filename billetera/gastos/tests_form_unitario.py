@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Gasto, Moneda, Categoria
-from .forms import GastoForm
+from .forms import GastoForm, CompraGlobalHeaderForm
 from decimal import Decimal
 
 class GastoFormUnitTest(TestCase):
@@ -47,3 +47,13 @@ class GastoFormUnitTest(TestCase):
         form = GastoForm(instance=gasto)
         # The initial value for 'monto' field should be 1000 (4000/4)
         self.assertEqual(form.initial['monto'], Decimal('1000.00'))
+
+    def test_gasto_form_defaults_to_ars(self):
+        """When creating un nuevo gasto, la moneda ARS se selecciona por defecto."""
+        form = GastoForm()
+        self.assertEqual(form.fields['moneda'].initial, self.moneda.id)
+
+    def test_compra_global_header_prefills_ars(self):
+        """La cabecera de compra global arranca en ARS para coherencia con el dashboard."""
+        form = CompraGlobalHeaderForm()
+        self.assertEqual(form.fields['moneda'].initial, self.moneda.id)

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transferir entre Cuentas - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <p class="text-sm text-gray-500 mb-1">Movimiento interno</p>
+            <h1 class="text-3xl font-bold text-gray-900">🔄 Transferir entre cuentas</h1>
+            <p class="text-gray-600">Mueve dinero entre tus cuentas registrando la tasa manual utilizada.</p>
+        </div>
+        <a href="{% url 'cuentas:lista_cuentas' %}" class="text-sm font-medium text-primary hover:text-primary-dark transition-colors">
+            ← Volver a mis cuentas
+        </a>
+    </div>
+
+    <form method="post" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="bg-expense-light bg-opacity-10 border border-expense-light text-expense-dark rounded-lg p-4 text-sm">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">Cuenta de origen</h2>
+                {{ form.cuenta_origen.label_tag }}
+                {{ form.cuenta_origen }}
+                {% if form.cuenta_origen.errors %}
+                    <p class="text-sm text-expense mt-1">{{ form.cuenta_origen.errors|join:', ' }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">Cuenta de destino</h2>
+                {{ form.cuenta_destino.label_tag }}
+                {{ form.cuenta_destino }}
+                {% if form.cuenta_destino.errors %}
+                    <p class="text-sm text-expense mt-1">{{ form.cuenta_destino.errors|join:', ' }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form.monto_origen.label_tag }}
+                {{ form.monto_origen }}
+                {% if form.monto_origen.help_text %}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.monto_origen.help_text }}</p>
+                {% endif %}
+                {% if form.monto_origen.errors %}
+                    <p class="text-sm text-expense mt-1">{{ form.monto_origen.errors|join:', ' }}</p>
+                {% endif %}
+            </div>
+            <div>
+                {{ form.monto_destino.label_tag }}
+                {{ form.monto_destino }}
+                {% if form.monto_destino.help_text %}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.monto_destino.help_text }}</p>
+                {% endif %}
+                {% if form.monto_destino.errors %}
+                    <p class="text-sm text-expense mt-1">{{ form.monto_destino.errors|join:', ' }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form.tasa_manual.label_tag }}
+                {{ form.tasa_manual }}
+                {% if form.tasa_manual.help_text %}
+                    <p class="text-xs text-gray-500 mt-1">{{ form.tasa_manual.help_text }}</p>
+                {% endif %}
+                {% if form.tasa_manual.errors %}
+                    <p class="text-sm text-expense mt-1">{{ form.tasa_manual.errors|join:', ' }}</p>
+                {% endif %}
+            </div>
+            <div>
+                {{ form.nota.label_tag }}
+                {{ form.nota }}
+                {% if form.nota.errors %}
+                    <p class="text-sm text-expense mt-1">{{ form.nota.errors|join:', ' }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-600">
+            <p class="font-medium text-gray-900 mb-1">Tip</p>
+            <p>Si las cuentas usan distintas monedas, ingresa la tasa utilizada para dejar un registro claro. El monto destino se puede recalcular automáticamente al hacer clic en "Calcular" o dejarlo vacío para que lo hagamos por vos.</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">Registrar transferencia</button>
+            <button type="button" id="calcular-transferencia" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Calcular monto destino</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    (function () {
+        const montoOrigen = document.getElementById('{{ form.monto_origen.auto_id }}');
+        const tasaManual = document.getElementById('{{ form.tasa_manual.auto_id }}');
+        const montoDestino = document.getElementById('{{ form.monto_destino.auto_id }}');
+        const trigger = document.getElementById('calcular-transferencia');
+
+        if (!montoOrigen || !tasaManual || !montoDestino || !trigger) {
+            return;
+        }
+
+        const calcular = () => {
+            const origen = parseFloat(montoOrigen.value);
+            const tasa = parseFloat(tasaManual.value);
+            if (!isFinite(origen) || !isFinite(tasa)) {
+                return;
+            }
+            const resultado = origen * tasa;
+            montoDestino.value = resultado.toFixed(2);
+        };
+
+        trigger.addEventListener('click', calcular);
+        montoOrigen.addEventListener('change', calcular);
+        tasaManual.addEventListener('change', calcular);
+    })();
+</script>
+{% endblock %}

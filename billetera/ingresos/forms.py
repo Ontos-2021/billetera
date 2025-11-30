@@ -1,5 +1,6 @@
 from django import forms
-from .models import Ingreso
+
+from .models import Ingreso, Moneda
 
 
 class IngresoForm(forms.ModelForm):
@@ -50,3 +51,10 @@ class IngresoForm(forms.ModelForm):
         if monto is not None and monto < 0:
             raise forms.ValidationError("El monto no puede ser negativo.")
         return monto
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk and not self.initial.get('moneda'):
+            ars = Moneda.objects.filter(codigo='ARS').first()
+            if ars:
+                self.fields['moneda'].initial = ars.pk

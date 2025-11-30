@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %} 
+{% load static %}
 {% block title %}Lista de Gastos - MoneyFlow Mirror{% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
     </div>
 
     {% if gastos %}
-        <!-- Summary Section (moved to top) -->
+        <!-- Summary Section -->
         <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -40,39 +40,39 @@
         </div>
 
         <!-- Expenses Grid -->
-        <div class="grid gap-4">
+        <div class="grid gap-3">
             {% for gasto in gastos %}
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover border-l-4 border-l-expense">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover border-l-4 border-l-expense">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <!-- Expense Info -->
-                        <div class="flex-1 mb-4 sm:mb-0">
-                            <div class="flex items-start justify-between sm:justify-start">
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between sm:justify-start gap-3">
                                 <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 text-lg mb-1">{{ gasto.descripcion }}</h3>
+                                    <h3 class="font-semibold text-gray-900 text-base mb-1">{{ gasto.descripcion }}</h3>
                                     {% if gasto.lugar %}
-                                        <p class="text-sm text-gray-600 mb-1 flex items-center">
+                                        <p class="text-xs text-gray-500 mb-1 flex items-center">
                                             <span class="mr-1">📍</span>{{ gasto.lugar }}
                                         </p>
                                     {% endif %}
-                                    <div class="flex flex-wrap gap-2 text-sm text-gray-500">
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    <div class="flex flex-wrap gap-1 text-xs text-gray-500">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-800">
                                             📁 {{ gasto.categoria }}
                                         </span>
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-100 text-blue-800">
                                             💱 {{ gasto.moneda.codigo }}
                                         </span>
-                                        <span class="text-xs text-gray-400">
-                                            📅 {{ gasto.fecha|date:"d M Y" }}
+                                        <span class="text-[11px] text-gray-400">
+                                            📅 {{ gasto.fecha|date:"d M" }} · {{ gasto.fecha|date:"H:i" }}
                                         </span>
                                     </div>
                                 </div>
                                 <!-- Amount Display -->
                                 <div class="text-right ml-4">
-                                    <p class="text-2xl font-numbers font-bold text-expense">-${{ gasto.monto }}</p>
-                                    <p class="text-xs text-gray-500 mb-1">{{ gasto.moneda.codigo }}</p>
+                                    <p class="text-xl font-numbers font-bold text-expense">-${{ gasto.monto }}</p>
+                                    <p class="text-xs text-gray-400 mb-1">{{ gasto.moneda.codigo }}</p>
                                     {% if gasto.cantidad > 1 %}
-                                        <p class="text-xs text-gray-500" title="Precio unitario: ${{ gasto.precio_unitario|floatformat:2 }}">
-                                            ({{ gasto.cantidad }} u. x ${{ gasto.precio_unitario|floatformat:2 }})
+                                        <p class="text-[11px] text-gray-500" title="Precio unitario: ${{ gasto.precio_unitario|floatformat:2 }}">
+                                            {{ gasto.cantidad }}u · ${{ gasto.precio_unitario|floatformat:2 }}
                                         </p>
                                     {% endif %}
                                 </div>
@@ -80,13 +80,13 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex space-x-2 pt-4 sm:pt-0 sm:ml-6">
+                        <div class="flex space-x-2 sm:ml-4 text-sm">
                             <a href="{% url 'gastos:editar_gasto' gasto.id %}" 
-                               class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 text-sm">
+                               class="bg-primary hover:bg-primary-dark text-white font-medium px-3 py-2 rounded-lg transition-colors duration-200">
                                 ✏️ Editar
                             </a>
                             <a href="{% url 'gastos:eliminar_gasto' gasto.id %}" 
-                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200 text-sm">
+                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-3 py-2 rounded-lg transition-colors duration-200">
                                 🗑️ Eliminar
                             </a>
                         </div>

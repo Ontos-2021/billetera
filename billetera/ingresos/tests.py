@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from .forms import IngresoForm
 from .models import Moneda, CategoriaIngreso, Ingreso
 from django.urls import reverse
 from django.utils import timezone
@@ -11,6 +12,7 @@ class IngresoModelTestCase(TestCase):
         self.usuario = User.objects.create_user(username='testuser', password='12345')
 
         # Crear algunas monedas si no existen
+        self.moneda_ars, _ = Moneda.objects.get_or_create(nombre='Peso Argentino', codigo='ARS', simbolo='$')
         self.moneda_usd, created = Moneda.objects.get_or_create(nombre='Dólar Estadounidense', codigo='USD',
                                                                 simbolo='$')
         self.moneda_eur, created = Moneda.objects.get_or_create(nombre='Euro', codigo='EUR', simbolo='€')
@@ -131,4 +133,9 @@ class IngresoModelTestCase(TestCase):
 
         # Verificar que la redirección es hacia la vista de lista de ingresos
         self.assertRedirects(response_post, reverse('ingresos:lista_ingresos'))
+
+    def test_ingreso_form_defaults_to_ars(self):
+        """La nueva UI preselecciona ARS cuando el usuario abre el formulario."""
+        form = IngresoForm()
+        self.assertEqual(form.fields['moneda'].initial, self.moneda_ars.id)
 
