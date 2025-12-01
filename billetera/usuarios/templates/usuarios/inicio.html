@@ -13,8 +13,8 @@
 
     <!-- Quick Actions Section -->
     <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 text-center mb-6">⚡ Acciones Rápidas</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">⚡ Acciones Rápidas</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mx-auto">
             <!-- Quick Add Expense -->
             <a href="{% url 'gastos:crear_gasto' %}" 
                class="group bg-gradient-to-br from-expense to-expense-dark hover:from-expense-dark hover:to-expense text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
@@ -100,9 +100,9 @@
                 + Nueva Cuenta
             </a>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {% for cuenta in cuentas_saldo %}
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-5 hover:shadow-md transition-shadow duration-200">
                 <div class="flex justify-between items-start mb-3">
                     <div>
                         <h3 class="font-semibold text-gray-900">{{ cuenta.nombre }}</h3>
@@ -140,8 +140,8 @@
     <!-- Financial Summary Cards -->
     <div class="mb-8">
         <!-- Time Range Filter -->
-        <div class="flex justify-center mb-6">
-            <div class="bg-gray-100 p-1 rounded-xl inline-flex">
+        <div class="flex justify-center mb-6 overflow-x-auto pb-2">
+            <div class="bg-gray-100 p-1 rounded-xl inline-flex whitespace-nowrap">
                 <a href="?rango=hoy" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'hoy' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">Hoy</a>
                 <a href="?rango=3dias" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == '3dias' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">3 Días</a>
                 <a href="?rango=semana" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'semana' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">7 Días</a>
@@ -153,7 +153,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Total Income Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-success-dark mb-1">💰 Total Ingresos</p>
@@ -167,7 +167,7 @@
             </div>
 
             <!-- Total Expenses Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-expense-dark mb-1">💸 Total Gastos</p>
@@ -181,7 +181,7 @@
             </div>
 
             <!-- Net Balance Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-primary-dark mb-1">💼 Balance Neto</p>

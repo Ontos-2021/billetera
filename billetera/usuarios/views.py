@@ -32,9 +32,9 @@ def inicio(request):
         if rango == 'hoy':
             fecha_inicio = hoy.replace(hour=0, minute=0, second=0, microsecond=0)
         elif rango == '3dias':
-            fecha_inicio = hoy - timedelta(days=3)
+            fecha_inicio = (hoy - timedelta(days=3)).replace(hour=0, minute=0, second=0, microsecond=0)
         elif rango == 'semana':
-            fecha_inicio = hoy - timedelta(days=7)
+            fecha_inicio = (hoy - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
         elif rango == 'mes':
             fecha_inicio = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         elif rango == 'anio':
