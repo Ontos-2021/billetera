@@ -6,25 +6,27 @@
 {% block content %}
 {% if user.is_authenticated and not user.is_superuser %}
     <!-- Welcome Section -->
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-900 mb-4">¡Bienvenido/a, {{ user.first_name|default:user.username }}! 👋</h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">Tu panel principal para gestionar tus finanzas con confianza y claridad.</p>
+    <div class="text-center mb-6 sm:mb-8">
+        <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">¡Bienvenido/a, {{ user.first_name|default:user.username }}! 👋</h1>
+        <p class="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto px-2">Tu panel principal para gestionar tus finanzas con confianza y claridad.</p>
     </div>
 
     <!-- Quick Actions Section -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">⚡ Acciones Rápidas</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mx-auto">
+    <div class="mb-6 sm:mb-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">⚡ Acciones Rápidas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <!-- Quick Add Expense -->
             <a href="{% url 'gastos:crear_gasto' %}" 
-               class="group bg-gradient-to-br from-expense to-expense-dark hover:from-expense-dark hover:to-expense text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 group-hover:bg-opacity-30 transition-all duration-300">
-                        <span class="text-3xl">💸</span>
+               class="group bg-gradient-to-br from-expense to-expense-dark hover:from-expense-dark hover:to-expense text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] sm:hover:scale-105">
+                <div class="flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-0">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center sm:mb-4 group-hover:bg-opacity-30 transition-all duration-300 flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl">💸</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Registrar Gasto</h3>
-                    <p class="text-expense-light opacity-90">Anota un gasto al instante</p>
-                    <div class="mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
+                    <div class="flex-1 sm:flex-none">
+                        <h3 class="text-lg sm:text-xl font-bold sm:mb-2">Registrar Gasto</h3>
+                        <p class="text-expense-light opacity-90 text-sm sm:text-base">Anota un gasto al instante</p>
+                    </div>
+                    <div class="hidden sm:block mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
                         <span class="text-sm font-medium">+ Agregar ahora</span>
                     </div>
                 </div>
@@ -32,14 +34,16 @@
 
             <!-- Quick Add Income -->
             <a href="{% url 'ingresos:crear_ingreso' %}" 
-               class="group bg-gradient-to-br from-success to-success-dark hover:from-success-dark hover:to-success text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 group-hover:bg-opacity-30 transition-all duration-300">
-                        <span class="text-3xl">💰</span>
+               class="group bg-gradient-to-br from-success to-success-dark hover:from-success-dark hover:to-success text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] sm:hover:scale-105">
+                <div class="flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-0">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center sm:mb-4 group-hover:bg-opacity-30 transition-all duration-300 flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl">💰</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Registrar Ingreso</h3>
-                    <p class="text-success-light opacity-90">Celebra un nuevo ingreso</p>
-                    <div class="mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
+                    <div class="flex-1 sm:flex-none">
+                        <h3 class="text-lg sm:text-xl font-bold sm:mb-2">Registrar Ingreso</h3>
+                        <p class="text-success-light opacity-90 text-sm sm:text-base">Celebra un nuevo ingreso</p>
+                    </div>
+                    <div class="hidden sm:block mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
                         <span class="text-sm font-medium">+ Agregar ahora</span>
                     </div>
                 </div>
@@ -47,14 +51,16 @@
 
             <!-- Global Purchase -->
             <a href="{% url 'gastos:compra_global' %}" 
-               class="group bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-500 text-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-4 group-hover:bg-opacity-30 transition-all duration-300">
-                        <span class="text-3xl">🛒</span>
+               class="group bg-gradient-to-br from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-500 text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] sm:hover:scale-105">
+                <div class="flex flex-row sm:flex-col items-center sm:text-center gap-4 sm:gap-0">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center sm:mb-4 group-hover:bg-opacity-30 transition-all duration-300 flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl">🛒</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Compra Global</h3>
-                    <p class="text-blue-200 opacity-90">Carga tu ticket completo</p>
-                    <div class="mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
+                    <div class="flex-1 sm:flex-none">
+                        <h3 class="text-lg sm:text-xl font-bold sm:mb-2">Compra Global</h3>
+                        <p class="text-blue-200 opacity-90 text-sm sm:text-base">Carga tu ticket completo</p>
+                    </div>
+                    <div class="hidden sm:block mt-4 bg-white bg-opacity-20 rounded-lg px-4 py-2 group-hover:bg-opacity-30 transition-all duration-300">
                         <span class="text-sm font-medium">+ Iniciar compra</span>
                     </div>
                 </div>
@@ -64,26 +70,26 @@
 
     {% if totales_cuentas %}
     <!-- Total Balance Across Currencies -->
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
         <div id="total-cuentas-card"
              data-default-currency="{{ totales_cuentas_default|default_if_none:'' }}"
-             class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 card-hover cursor-pointer">
+             class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover cursor-pointer">
             <div class="flex items-center justify-between">
-                <div>
+                <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-primary-dark mb-1">💼 Total de Cuentas</p>
-                    <p id="total-cuentas-valor" class="text-3xl font-numbers font-bold text-gray-900"></p>
+                    <p id="total-cuentas-valor" class="text-2xl sm:text-3xl font-numbers font-bold text-gray-900 truncate"></p>
                     <p id="total-cuentas-moneda" class="text-xs text-gray-500 mt-1"></p>
                 </div>
-                <div class="text-right">
-                    <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center">
-                        <span class="text-2xl">🔁</span>
+                <div class="text-right flex-shrink-0 ml-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center">
+                        <span class="text-xl sm:text-2xl">🔁</span>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">Click para cambiar</p>
+                    <p class="text-xs text-gray-400 mt-2 hidden sm:block">Click para cambiar</p>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-2 mt-4">
+            <div class="flex flex-wrap gap-2 mt-3 sm:mt-4">
                 {% for total in totales_cuentas %}
-                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    <span class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                         {{ total.simbolo }}{{ total.total|floatformat:2 }} · {{ total.codigo }}
                     </span>
                 {% endfor %}
@@ -93,14 +99,14 @@
     {% endif %}
 
     <!-- Mis Cuentas Section -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-900">💳 Mis Cuentas</h2>
+    <div class="mb-6 sm:mb-8">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900">💳 Mis Cuentas</h2>
             <a href="{% url 'cuentas:crear_cuenta' %}" class="text-sm text-primary hover:text-primary-dark font-medium">
-                + Nueva Cuenta
+                + Nueva
             </a>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             {% for cuenta in cuentas_saldo %}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-5 hover:shadow-md transition-shadow duration-200">
                 <div class="flex justify-between items-start mb-3">
@@ -138,77 +144,79 @@
     </div>
 
     <!-- Financial Summary Cards -->
-    <div class="mb-8">
+    <div class="mb-6 sm:mb-8">
         <!-- Time Range Filter -->
-        <div class="flex justify-center mb-6 overflow-x-auto pb-2">
-            <div class="bg-gray-100 p-1 rounded-xl inline-flex whitespace-nowrap">
-                <a href="?rango=hoy" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'hoy' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">Hoy</a>
-                <a href="?rango=3dias" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == '3dias' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">3 Días</a>
-                <a href="?rango=semana" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'semana' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">7 Días</a>
-                <a href="?rango=mes" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'mes' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">Mes</a>
-                <a href="?rango=anio" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'anio' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">Año</a>
-                <a href="?rango=todo" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {% if rango_actual == 'todo' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">Todo</a>
+        <div class="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto pb-2 mb-4 sm:mb-6">
+            <div class="flex sm:justify-center">
+                <div class="bg-gray-100 p-1 rounded-xl inline-flex whitespace-nowrap min-w-max">
+                    <a href="?rango=24h" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 {% if rango_actual == '24h' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">24h</a>
+                    <a href="?rango=3d" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 {% if rango_actual == '3d' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">3d</a>
+                    <a href="?rango=7d" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 {% if rango_actual == '7d' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">7d</a>
+                    <a href="?rango=30d" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 {% if rango_actual == '30d' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">30d</a>
+                    <a href="?rango=365d" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 {% if rango_actual == '365d' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">1a</a>
+                    <a href="?rango=todo" class="px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 {% if rango_actual == 'todo' %}bg-white text-primary shadow-sm{% else %}text-gray-500 hover:text-gray-700{% endif %}">Todo</a>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <!-- Total Income Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-success-dark mb-1">💰 Total Ingresos</p>
-                        <p class="text-3xl font-numbers font-bold text-success">+${{ total_ingresos|floatformat:2 }}</p>
-                        <p class="text-xs text-gray-500 mt-1">ARS • {% if rango_actual == 'hoy' %}Hoy{% elif rango_actual == 'semana' %}Últimos 7 días{% elif rango_actual == 'mes' %}Este mes{% elif rango_actual == 'anio' %}Este año{% else %}Histórico{% endif %}</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs sm:text-sm font-medium text-success-dark mb-1">💰 Total Ingresos</p>
+                        <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-success truncate">+${{ total_ingresos|floatformat:2 }}</p>
+                        <p class="text-xs text-gray-500 mt-1">ARS</p>
                     </div>
-                    <div class="w-12 h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center">
-                        <span class="text-2xl">📈</span>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                        <span class="text-xl sm:text-2xl">📈</span>
                     </div>
                 </div>
             </div>
 
             <!-- Total Expenses Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-expense-dark mb-1">💸 Total Gastos</p>
-                        <p class="text-3xl font-numbers font-bold text-expense">-${{ total_gastos|floatformat:2 }}</p>
-                        <p class="text-xs text-gray-500 mt-1">ARS • {% if rango_actual == 'hoy' %}Hoy{% elif rango_actual == 'semana' %}Últimos 7 días{% elif rango_actual == 'mes' %}Este mes{% elif rango_actual == 'anio' %}Este año{% else %}Histórico{% endif %}</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs sm:text-sm font-medium text-expense-dark mb-1">💸 Total Gastos</p>
+                        <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-expense truncate">-${{ total_gastos|floatformat:2 }}</p>
+                        <p class="text-xs text-gray-500 mt-1">ARS</p>
                     </div>
-                    <div class="w-12 h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center">
-                        <span class="text-2xl">📉</span>
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                        <span class="text-xl sm:text-2xl">📉</span>
                     </div>
                 </div>
             </div>
 
             <!-- Net Balance Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
                 <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-primary-dark mb-1">💼 Balance Neto</p>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs sm:text-sm font-medium text-primary-dark mb-1">💼 Balance Neto</p>
                         {% if balance_neto > 0 %}
-                            <p class="text-3xl font-numbers font-bold text-success">
+                            <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-success truncate">
                                 +${{ balance_neto|floatformat:2 }}
                             </p>
-                            <p class="text-xs text-success-dark mt-1">Balance positivo 📈</p>
+                            <p class="text-xs text-success-dark mt-1">Positivo 📈</p>
                         {% elif balance_neto < 0 %}
-                            <p class="text-3xl font-numbers font-bold text-expense">
+                            <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-expense truncate">
                                 ${{ balance_neto|floatformat:2 }}
                             </p>
-                            <p class="text-xs text-expense-dark mt-1">Balance negativo 📉</p>
+                            <p class="text-xs text-expense-dark mt-1">Negativo 📉</p>
                         {% else %}
-                            <p class="text-3xl font-numbers font-bold text-primary">
+                            <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-primary truncate">
                                 ${{ balance_neto|floatformat:2 }}
                             </p>
-                            <p class="text-xs text-primary-dark mt-1">Balance equilibrado ⚖️</p>
+                            <p class="text-xs text-primary-dark mt-1">Equilibrado ⚖️</p>
                         {% endif %}
                     </div>
-                    <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
                         {% if balance_neto > 0 %}
-                            <span class="text-2xl">📈</span>
+                            <span class="text-xl sm:text-2xl">📈</span>
                         {% elif balance_neto < 0 %}
-                            <span class="text-2xl">📉</span>
+                            <span class="text-xl sm:text-2xl">📉</span>
                         {% else %}
-                            <span class="text-2xl">⚖️</span>
+                            <span class="text-xl sm:text-2xl">⚖️</span>
                         {% endif %}
                     </div>
                 </div>
@@ -218,36 +226,36 @@
 
     <!-- Últimos Movimientos -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-        <div class="p-6 border-b border-gray-100">
-            <h3 class="text-lg font-bold text-gray-900">Últimos Movimientos</h3>
+        <div class="p-4 sm:p-6 border-b border-gray-100">
+            <h3 class="text-base sm:text-lg font-bold text-gray-900">Últimos Movimientos</h3>
         </div>
         
         <div class="divide-y divide-gray-100">
             {% if movimientos %}
                 {% for mov in movimientos %}
-                    <a href="{{ mov.url }}" class="block p-4 hover:bg-gray-50 transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-primary rounded-none">
-                        <div class="flex items-center justify-between">
+                    <a href="{{ mov.url }}" class="block p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-primary rounded-none">
+                        <div class="flex items-center justify-between gap-2">
                             <!-- Icon & Info -->
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
                                 <!-- Icon Circle -->
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 
                                     {% if mov.tipo == 'ingreso' %}bg-success-light bg-opacity-20 text-success-dark{% else %}bg-expense-light bg-opacity-20 text-expense-dark{% endif %}">
                                     {% if mov.tipo == 'ingreso' %}
-                                        <span class="text-xl">💰</span>
+                                        <span class="text-lg sm:text-xl">💰</span>
                                     {% else %}
-                                        <span class="text-xl">💸</span>
+                                        <span class="text-lg sm:text-xl">💸</span>
                                     {% endif %}
                                 </div>
                                 
                                 <!-- Text Info -->
-                                <div>
-                                    <p class="font-semibold text-gray-900">{{ mov.descripcion }}</p>
-                                    <div class="flex items-center text-xs text-gray-500 space-x-2">
-                                        <span class="capitalize">{{ mov.categoria }}</span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ mov.descripcion }}</p>
+                                    <div class="flex items-center text-xs text-gray-500 space-x-1 sm:space-x-2">
+                                        <span class="capitalize truncate">{{ mov.categoria }}</span>
                                         {% if mov.cuenta_nombre %}
-                                            <span>•</span>
-                                            <span class="flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <span class="hidden sm:inline">•</span>
+                                            <span class="hidden sm:flex items-center truncate">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                                 </svg>
                                                 {{ mov.cuenta_nombre }}
@@ -258,11 +266,11 @@
                             </div>
 
                             <!-- Amount & Date -->
-                            <div class="text-right">
-                                <p class="font-numbers font-bold text-lg {% if mov.tipo == 'ingreso' %}text-success{% else %}text-expense{% endif %}">
+                            <div class="text-right flex-shrink-0">
+                                <p class="font-numbers font-bold text-base sm:text-lg {% if mov.tipo == 'ingreso' %}text-success{% else %}text-expense{% endif %}">
                                     {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}${{ mov.monto|floatformat:2 }}
                                 </p>
-                                <p class="text-xs text-gray-400">{{ mov.fecha|date:"d M • H:i" }}</p>
+                                <p class="text-xs text-gray-400">{{ mov.fecha|date:"d M" }}</p>
                             </div>
                         </div>
                     </a>
@@ -279,17 +287,17 @@
         </div>
 
         <!-- Footer Actions -->
-        <div class="bg-gray-50 p-4 border-t border-gray-100 flex justify-center space-x-4">
-            <a href="{% url 'gastos:lista_gastos' %}" class="text-sm font-medium text-gray-600 hover:text-expense transition-colors flex items-center">
-                <span>Ver todos los gastos</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-gray-50 p-3 sm:p-4 border-t border-gray-100 flex justify-center space-x-3 sm:space-x-4">
+            <a href="{% url 'gastos:lista_gastos' %}" class="text-xs sm:text-sm font-medium text-gray-600 hover:text-expense transition-colors flex items-center">
+                <span>Ver gastos</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </a>
             <span class="text-gray-300">|</span>
-            <a href="{% url 'ingresos:lista_ingresos' %}" class="text-sm font-medium text-gray-600 hover:text-success transition-colors flex items-center">
-                <span>Ver todos los ingresos</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="{% url 'ingresos:lista_ingresos' %}" class="text-xs sm:text-sm font-medium text-gray-600 hover:text-success transition-colors flex items-center">
+                <span>Ver ingresos</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </a>
@@ -297,19 +305,19 @@
     </div>
 
     <!-- Profile Card (At the bottom) -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mt-6 hover:shadow-md transition-shadow duration-200 card-hover">
-        <div class="flex flex-wrap items-center justify-between">
-            <div class="flex items-center mb-4 md:mb-0">
-                <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mr-4">
-                    <span class="text-2xl">👤</span>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 mt-6 hover:shadow-md transition-shadow duration-200 card-hover">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center min-w-0 flex-1">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
+                    <span class="text-xl sm:text-2xl">👤</span>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Mi Perfil</h3>
-                    <p class="text-sm text-gray-600">Gestionar mi información personal</p>
+                <div class="min-w-0">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Mi Perfil</h3>
+                    <p class="text-xs sm:text-sm text-gray-600 truncate">Gestionar información</p>
                 </div>
             </div>
-            <a href="{% url 'perfil_usuario' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-block text-sm">
-                Ver Perfil
+            <a href="{% url 'perfil_usuario' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md text-xs sm:text-sm flex-shrink-0">
+                Ver
             </a>
         </div>
     </div>

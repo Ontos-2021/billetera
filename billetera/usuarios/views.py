@@ -24,23 +24,26 @@ def inicio(request):
     context = {}
 
     if request.user.is_authenticated and not request.user.is_superuser:
-        # --- Lógica de Filtrado por Rango de Tiempo ---
-        rango = request.GET.get('rango', 'mes')  # Default: mes actual
-        hoy = timezone.localtime(timezone.now())
+        # --- Lógica de Filtrado por Rango de Tiempo (Rolling Windows) ---
+        rango = request.GET.get('rango', '30d')  # Default: últimos 30 días
+        ahora = timezone.localtime(timezone.now())
         fecha_inicio = None
 
-        if rango == 'hoy':
-            fecha_inicio = hoy.replace(hour=0, minute=0, second=0, microsecond=0)
-        elif rango == '3dias':
-            fecha_inicio = (hoy - timedelta(days=3)).replace(hour=0, minute=0, second=0, microsecond=0)
-        elif rango == 'semana':
-            fecha_inicio = (hoy - timedelta(days=7)).replace(hour=0, minute=0, second=0, microsecond=0)
-        elif rango == 'mes':
-            fecha_inicio = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        elif rango == 'anio':
-            fecha_inicio = hoy.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        if rango == '24h':
+            fecha_inicio = ahora - timedelta(hours=24)
+        elif rango == '3d':
+            fecha_inicio = ahora - timedelta(hours=72)
+        elif rango == '7d':
+            fecha_inicio = ahora - timedelta(days=7)
+        elif rango == '30d':
+            fecha_inicio = ahora - timedelta(days=30)
+        elif rango == '365d':
+            fecha_inicio = ahora - timedelta(days=365)
         elif rango == 'todo':
             fecha_inicio = None  # Sin filtro de fecha
+        else:
+            # Fallback para parámetros legacy o inválidos
+            fecha_inicio = ahora - timedelta(days=30)
 
         # Filtros base para totales (Usuario + Moneda ARS)
         filtros_ingresos = {

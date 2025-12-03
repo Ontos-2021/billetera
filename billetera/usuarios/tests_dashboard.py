@@ -93,9 +93,11 @@ class DashboardCuentasTest(TestCase):
         self.assertEqual(totals_map['USD'], Decimal('250.00'))
         self.assertEqual(response.context['totales_cuentas_default'], 'ARS')
 
-    def test_rango_3dias_filters_ingresos(self):
-        reciente = timezone.now() - timedelta(days=1)
-        antiguo = timezone.now() - timedelta(days=5)
+    def test_rango_3d_filters_ingresos(self):
+        """Test 3d filter uses 72-hour rolling window."""
+        ahora = timezone.now()
+        reciente = ahora - timedelta(hours=48)  # Dentro de las últimas 72h
+        antiguo = ahora - timedelta(hours=80)   # Fuera de las últimas 72h
 
         Ingreso.objects.create(
             usuario=self.user,
@@ -114,7 +116,7 @@ class DashboardCuentasTest(TestCase):
             cuenta=self.cuenta
         )
 
-        response = self.client.get(f"{reverse('inicio_usuarios')}?rango=3dias")
+        response = self.client.get(f"{reverse('inicio_usuarios')}?rango=3d")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['total_ingresos'], Decimal('200.00'))
 

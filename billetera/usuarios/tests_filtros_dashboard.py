@@ -24,10 +24,8 @@ class DashboardFiltrosTest(TestCase):
         self.categoria_gasto = Categoria.objects.create(nombre='General')
         self.categoria_ingreso = CategoriaIngreso.objects.create(nombre='Salario')
 
-        # Fechas de referencia (usando Local Time para coincidir con la vista)
+        # Fecha de referencia (usando Local Time para coincidir con la vista)
         self.ahora = timezone.localtime(timezone.now())
-        self.inicio_mes = self.ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        self.inicio_anio = self.ahora.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
 
     def crear_ingreso(self, monto, fecha):
         Ingreso.objects.create(
@@ -49,68 +47,65 @@ class DashboardFiltrosTest(TestCase):
             categoria=self.categoria_gasto
         )
 
-    def test_filtro_hoy(self):
-        # Ingreso HOY
-        self.crear_ingreso(1000, self.ahora)
-        # Ingreso AYER (fuera de hoy)
-        self.crear_ingreso(500, self.ahora - timedelta(days=1))
+    def test_filtro_24h(self):
+        """Test filtro 24h - ventana móvil de últimas 24 horas."""
+        # Ingreso hace 12 horas (dentro de 24h)
+        self.crear_ingreso(1000, self.ahora - timedelta(hours=12))
+        # Ingreso hace 30 horas (fuera de 24h)
+        self.crear_ingreso(500, self.ahora - timedelta(hours=30))
 
-        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'hoy'})
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': '24h'})
         self.assertEqual(response.status_code, 200)
         
-        # Solo debe sumar el de hoy (1000)
+        # Solo debe sumar el de las últimas 24h (1000)
         self.assertEqual(response.context['total_ingresos'], Decimal('1000.00'))
 
-    def test_filtro_semana(self):
-        # Ingreso HOY (dentro de semana)
-        self.crear_ingreso(1000, self.ahora)
-        # Ingreso hace 5 días (dentro de semana)
+    def test_filtro_7d(self):
+        """Test filtro 7d - ventana móvil de últimos 7 días."""
+        # Ingreso hace 2 días (dentro de 7d)
+        self.crear_ingreso(1000, self.ahora - timedelta(days=2))
+        # Ingreso hace 5 días (dentro de 7d)
         self.crear_ingreso(500, self.ahora - timedelta(days=5))
-        # Ingreso hace 8 días (fuera de semana)
+        # Ingreso hace 8 días (fuera de 7d)
         self.crear_ingreso(200, self.ahora - timedelta(days=8))
 
-        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'semana'})
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': '7d'})
         
-        # Debe sumar hoy + hace 5 días (1500)
+        # Debe sumar los de últimos 7 días (1500)
         self.assertEqual(response.context['total_ingresos'], Decimal('1500.00'))
 
-    def test_filtro_mes(self):
-        # Ingreso HOY (dentro del mes)
-        self.crear_ingreso(1000, self.ahora)
-        
-        # Ingreso el día 1 del mes (dentro del mes)
-        # Nota: Si hoy es día 1, esto es lo mismo que hoy, pero sirve igual.
-        self.crear_ingreso(500, self.inicio_mes + timedelta(hours=1))
+    def test_filtro_30d(self):
+        """Test filtro 30d - ventana móvil de últimos 30 días."""
+        # Ingreso hace 10 días (dentro de 30d)
+        self.crear_ingreso(1000, self.ahora - timedelta(days=10))
+        # Ingreso hace 25 días (dentro de 30d)
+        self.crear_ingreso(500, self.ahora - timedelta(days=25))
+        # Ingreso hace 35 días (fuera de 30d)
+        self.crear_ingreso(200, self.ahora - timedelta(days=35))
 
-        # Ingreso el mes pasado (fuera del mes)
-        fecha_mes_pasado = self.inicio_mes - timedelta(days=1)
-        self.crear_ingreso(200, fecha_mes_pasado)
-
-        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'mes'})
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': '30d'})
         
-        # Debe sumar hoy + inicio mes (1500)
+        # Debe sumar los de últimos 30 días (1500)
         self.assertEqual(response.context['total_ingresos'], Decimal('1500.00'))
 
-    def test_filtro_anio(self):
-        # Ingreso HOY (dentro del año)
-        self.crear_ingreso(1000, self.ahora)
-        
-        # Ingreso el 1 de Enero (dentro del año)
-        self.crear_ingreso(500, self.inicio_anio + timedelta(hours=1))
+    def test_filtro_365d(self):
+        """Test filtro 365d - ventana móvil de últimos 365 días."""
+        # Ingreso hace 100 días (dentro de 365d)
+        self.crear_ingreso(1000, self.ahora - timedelta(days=100))
+        # Ingreso hace 300 días (dentro de 365d)
+        self.crear_ingreso(500, self.ahora - timedelta(days=300))
+        # Ingreso hace 400 días (fuera de 365d)
+        self.crear_ingreso(200, self.ahora - timedelta(days=400))
 
-        # Ingreso el año pasado (fuera del año)
-        fecha_anio_pasado = self.inicio_anio - timedelta(days=1)
-        self.crear_ingreso(200, fecha_anio_pasado)
-
-        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'anio'})
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': '365d'})
         
-        # Debe sumar hoy + inicio año (1500)
+        # Debe sumar los de últimos 365 días (1500)
         self.assertEqual(response.context['total_ingresos'], Decimal('1500.00'))
 
     @patch('django.utils.timezone.now')
-    def test_filtro_hoy_timezone_fix(self, mock_now):
+    def test_filtro_24h_timezone_fix(self, mock_now):
         """
-        Prueba crítica: Verifica que el filtro 'hoy' funcione correctamente
+        Prueba crítica: Verifica que el filtro '24h' funcione correctamente
         cuando en Argentina es de noche (ej: 22:00) pero en UTC ya es el día siguiente (01:00).
         """
         # Simular: 21 de Noviembre a las 22:00 PM (Argentina, UTC-3)
@@ -118,23 +113,23 @@ class DashboardFiltrosTest(TestCase):
         now_utc = datetime.datetime(2025, 11, 22, 1, 0, 0, tzinfo=datetime.timezone.utc)
         mock_now.return_value = now_utc
         
-        # El usuario hizo un gasto "hoy" (21 de Noviembre) a las 10:00 AM Local
+        # El usuario hizo un gasto hace 12 horas (dentro de 24h)
         # En UTC esto es 21 de Noviembre a las 13:00 PM
         gasto_date = datetime.datetime(2025, 11, 21, 13, 0, 0, tzinfo=datetime.timezone.utc)
         
         self.crear_gasto(1000, gasto_date)
         
-        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'hoy'})
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': '24h'})
         
-        # El gasto DEBE aparecer (antes del fix daba 0)
+        # El gasto DEBE aparecer
         self.assertEqual(response.context['total_gastos'], Decimal('1000.00'))
 
     def test_filtro_todo(self):
-        # Ingreso HOY
-        self.crear_ingreso(1000, self.ahora)
-        # Ingreso Año Pasado
-        fecha_anio_pasado = self.inicio_anio - timedelta(days=1)
-        self.crear_ingreso(500, fecha_anio_pasado)
+        """Test filtro todo - sin límite de tiempo."""
+        # Ingreso reciente
+        self.crear_ingreso(1000, self.ahora - timedelta(days=5))
+        # Ingreso hace mucho tiempo
+        self.crear_ingreso(500, self.ahora - timedelta(days=500))
 
         response = self.client.get(reverse('inicio_usuarios'), {'rango': 'todo'})
         
@@ -142,16 +137,17 @@ class DashboardFiltrosTest(TestCase):
         self.assertEqual(response.context['total_ingresos'], Decimal('1500.00'))
 
     def test_balance_neto_filtrado(self):
-        # Ingreso HOY: 1000
-        self.crear_ingreso(1000, self.ahora)
-        # Gasto HOY: 200
-        self.crear_gasto(200, self.ahora)
+        """Test que el balance neto se calcula correctamente con filtros."""
+        # Ingreso hace 6 horas: 1000 (dentro de 24h)
+        self.crear_ingreso(1000, self.ahora - timedelta(hours=6))
+        # Gasto hace 6 horas: 200 (dentro de 24h)
+        self.crear_gasto(200, self.ahora - timedelta(hours=6))
         
-        # Ingreso AYER: 500
-        self.crear_ingreso(500, self.ahora - timedelta(days=1))
+        # Ingreso hace 30 horas: 500 (fuera de 24h)
+        self.crear_ingreso(500, self.ahora - timedelta(hours=30))
 
-        # Test Rango HOY
-        response = self.client.get(reverse('inicio_usuarios'), {'rango': 'hoy'})
+        # Test Rango 24h
+        response = self.client.get(reverse('inicio_usuarios'), {'rango': '24h'})
         # Balance = 1000 - 200 = 800
         self.assertEqual(response.context['balance_neto'], Decimal('800.00'))
 
