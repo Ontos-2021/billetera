@@ -49,12 +49,27 @@ def eliminar_ingreso(request, ingreso_id):
 # Vista para listar los ingresos de un usuario
 @login_required
 def lista_ingresos(request):
+    from decimal import Decimal
     ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')
     
-    # Calcular total de ingresos
-    total_ingresos = ingresos.aggregate(total=Sum('monto'))['total'] or 0
+    # Calcular totales por moneda
+    totales_por_moneda = {}
+    for ingreso in ingresos:
+        codigo = ingreso.moneda.codigo
+        if codigo not in totales_por_moneda:
+            totales_por_moneda[codigo] = {
+                'codigo': codigo,
+                'simbolo': ingreso.moneda.simbolo,
+                'nombre': ingreso.moneda.nombre,
+                'total': Decimal('0.00'),
+            }
+        totales_por_moneda[codigo]['total'] += ingreso.monto
+    
+    totales_list = sorted(totales_por_moneda.values(), key=lambda x: x['codigo'])
+    moneda_default = 'ARS' if 'ARS' in totales_por_moneda else (totales_list[0]['codigo'] if totales_list else None)
     
     return render(request, 'ingresos/lista_ingresos.html', {
         'ingresos': ingresos,
-        'total_ingresos': total_ingresos
+        'totales_ingresos': totales_list,
+        'totales_ingresos_default': moneda_default,
     })

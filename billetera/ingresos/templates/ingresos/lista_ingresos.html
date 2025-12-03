@@ -18,20 +18,30 @@
 
     {% if ingresos %}
         <!-- Summary Section (moved to top) -->
-        <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {% if totales_ingresos %}
+        <div id="total-ingresos-card"
+             data-default-currency="{{ totales_ingresos_default|default_if_none:'' }}"
+             class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-1">🎉 Total de Ingresos</h3>
                     <p class="text-sm text-gray-500">Suma de todos los ingresos registrados</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-3xl font-numbers font-bold text-success">
-                        +${{ total_ingresos|floatformat:2 }}
-                    </p>
-                    <p class="text-xs text-gray-500">Total acumulado</p>
+                    <p id="total-ingresos-valor" class="text-3xl font-numbers font-bold text-success"></p>
+                    <p id="total-ingresos-moneda" class="text-xs text-gray-500"></p>
                 </div>
             </div>
+            <div class="flex flex-wrap gap-2 mt-4">
+                {% for total in totales_ingresos %}
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-success-dark">
+                        {{ total.simbolo }}{{ total.total|floatformat:2 }} · {{ total.codigo }}
+                    </span>
+                {% endfor %}
+            </div>
+            <p class="text-xs text-gray-400 mt-2 text-center">Tap para cambiar moneda</p>
         </div>
+        {% endif %}
 
         <!-- Income Grid -->
         <div class="grid gap-3">
@@ -97,4 +107,30 @@
         </div>
     {% endif %}
 </div>
+{% if totales_ingresos %}
+    {{ totales_ingresos|json_script:"totales-ingresos-data" }}
+    <script>
+        (function () {
+            const card = document.getElementById('total-ingresos-card');
+            const totalsNode = document.getElementById('totales-ingresos-data');
+            if (!card || !totalsNode) return;
+            const totals = JSON.parse(totalsNode.textContent || '[]');
+            if (!totals.length) return;
+            const valueEl = document.getElementById('total-ingresos-valor');
+            const labelEl = document.getElementById('total-ingresos-moneda');
+            let index = Math.max(0, totals.findIndex(t => t.codigo === card.dataset.defaultCurrency));
+            if (index === -1) index = 0;
+            const render = () => {
+                const current = totals[index];
+                valueEl.textContent = `+${current.simbolo}${Number(current.total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                labelEl.textContent = `Mostrando ${current.codigo}`;
+            };
+            render();
+            card.addEventListener('click', () => {
+                index = (index + 1) % totals.length;
+                render();
+            });
+        })();
+    </script>
+{% endif %}
 {% endblock %}

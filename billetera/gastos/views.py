@@ -21,12 +21,27 @@ def obtener_gastos(request):
 def lista_gastos(request):
     gastos = obtener_gastos(request)  # Obtiene los gastos correspondientes al usuario
     
-    # Calcular total de gastos
-    total_gastos = gastos.aggregate(total=Sum('monto'))['total'] or 0
+    # Calcular totales por moneda
+    from decimal import Decimal
+    totales_por_moneda = {}
+    for gasto in gastos:
+        codigo = gasto.moneda.codigo
+        if codigo not in totales_por_moneda:
+            totales_por_moneda[codigo] = {
+                'codigo': codigo,
+                'simbolo': gasto.moneda.simbolo,
+                'nombre': gasto.moneda.nombre,
+                'total': Decimal('0.00'),
+            }
+        totales_por_moneda[codigo]['total'] += gasto.monto
+    
+    totales_list = sorted(totales_por_moneda.values(), key=lambda x: x['codigo'])
+    moneda_default = 'ARS' if 'ARS' in totales_por_moneda else (totales_list[0]['codigo'] if totales_list else None)
     
     return render(request, 'gastos/lista_gastos.html', {
         'gastos': gastos,
-        'total_gastos': total_gastos
+        'totales_gastos': totales_list,
+        'totales_gastos_default': moneda_default,
     })
 
 
