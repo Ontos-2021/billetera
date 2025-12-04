@@ -21,10 +21,13 @@ def obtener_gastos(request):
 def lista_gastos(request):
     gastos = obtener_gastos(request)  # Obtiene los gastos correspondientes al usuario
     
-    # Calcular totales por moneda
+    # Calcular totales por moneda (excluyendo transferencias)
     from decimal import Decimal
     totales_por_moneda = {}
     for gasto in gastos:
+        # Excluir gastos que son transferencias
+        if hasattr(gasto, 'transferencias_generadas') and gasto.transferencias_generadas.exists():
+            continue
         codigo = gasto.moneda.codigo
         if codigo not in totales_por_moneda:
             totales_por_moneda[codigo] = {

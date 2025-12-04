@@ -52,9 +52,12 @@ def lista_ingresos(request):
     from decimal import Decimal
     ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')
     
-    # Calcular totales por moneda
+    # Calcular totales por moneda (excluyendo transferencias)
     totales_por_moneda = {}
     for ingreso in ingresos:
+        # Excluir ingresos que son transferencias
+        if hasattr(ingreso, 'transferencias_generadas') and ingreso.transferencias_generadas.exists():
+            continue
         codigo = ingreso.moneda.codigo
         if codigo not in totales_por_moneda:
             totales_por_moneda[codigo] = {
