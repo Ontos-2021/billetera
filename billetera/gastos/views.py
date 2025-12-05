@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Gasto
+from .models import Gasto, Compra
 from .forms import GastoForm, CompraGlobalHeaderForm, CompraGlobalItemForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -90,7 +90,13 @@ def eliminar_gasto(request, id):
         return redirect('gastos:lista_gastos')  # Redirige si el usuario no tiene permisos
 
     if request.method == 'POST':
+        compra = gasto.compra  # Guardar referencia a la compra antes de eliminar
         gasto.delete()  # Elimina el gasto de la base de datos
+        
+        # Si el gasto pertenecía a una compra y era el último ítem, eliminar la compra
+        if compra and compra.items.count() == 0:
+            compra.delete()
+        
         return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
 
@@ -107,12 +113,18 @@ def compra_global(request):
         if header_form.is_valid() and item_formset.is_valid():
             try:
                 with transaction.atomic():
-                    # Get header data but don't save yet (it's not a model instance we want to save directly as is)
-                    # Actually header_form is a ModelForm for Gasto, but we want to use its cleaned_data 
-                    # to populate multiple Gasto instances.
-                    
                     header_data = header_form.cleaned_data
                     
+                    # Crear objeto Compra para agrupar los gastos
+                    compra = Compra.objects.create(
+                        usuario=request.user,
+                        fecha=header_data['fecha'],
+                        lugar=header_data['lugar'] or '',
+                        cuenta=header_data['cuenta'],
+                        moneda=header_data['moneda'],
+                    )
+                    
+                    items_created = 0
                     for form in item_formset:
                         if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                             gasto = form.save(commit=False)
@@ -122,6 +134,8 @@ def compra_global(request):
                             gasto.lugar = header_data['lugar']
                             gasto.cuenta = header_data['cuenta']
                             gasto.moneda = header_data['moneda']
+                            # Asociar a la compra
+                            gasto.compra = compra
 
                             # Calculate total amount (Unit Price * Quantity)
                             unit_price = form.cleaned_data.get('monto')
@@ -130,6 +144,11 @@ def compra_global(request):
                                 gasto.monto = unit_price * quantity
 
                             gasto.save()
+                            items_created += 1
+                    
+                    # Si no se creó ningún item, eliminar la compra vacía
+                    if items_created == 0:
+                        compra.delete()
                             
                     return redirect('gastos:lista_gastos')
             except Exception as e:
@@ -145,3 +164,21 @@ def compra_global(request):
         'item_formset': item_formset
     })
 
+
+# Detalle de compra (retorna HTML partial para modal)
+@login_required
+def detalle_compra(request, pk):
+    """
+    Retorna un HTML partial con el detalle de una compra para ser
+    cargado en un modal vía fetch.
+    """
+    compra = get_object_or_404(Compra, pk=pk)
+    
+    # Verificar que el usuario sea el dueño o superusuario
+    if not request.user.is_superuser and compra.usuario != request.user:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("No tienes permiso para ver esta compra.")
+    
+    return render(request, 'gastos/_detalle_compra_partial.html', {
+        'compra': compra,
+    })

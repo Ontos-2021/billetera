@@ -7,7 +7,7 @@ from .models import PerfilUsuario
 from .forms import PerfilUsuarioForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
-from gastos.models import Gasto
+from gastos.models import Gasto, Compra
 from ingresos.models import Ingreso
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
@@ -102,10 +102,13 @@ def inicio(request):
         totals_list = sorted(totales_por_moneda.values(), key=lambda item: item['codigo'])
         moneda_default = 'ARS' if 'ARS' in totales_por_moneda else (totals_list[0]['codigo'] if totals_list else None)
 
-        # Construir lista combinada de últimos movimientos (ingresos y gastos mezclados cronológicamente)
+        # Construir lista combinada de últimos movimientos (ingresos, gastos individuales y compras agrupadas)
         # Tomamos más elementos de cada lado para que al mezclarlos haya suficiente para los 10 finales
         ingresos_para_mezcla = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:10]
-        gastos_para_mezcla = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:10]
+        # Gastos individuales (sin compra asociada)
+        gastos_individuales = Gasto.objects.filter(usuario=request.user, compra__isnull=True).order_by('-fecha')[:10]
+        # Compras (agrupan gastos)
+        compras_para_mezcla = Compra.objects.filter(usuario=request.user).order_by('-fecha')[:10]
 
         movimientos = []
         for ing in ingresos_para_mezcla:
@@ -121,7 +124,7 @@ def inicio(request):
                 'moneda_simbolo': ing.moneda.simbolo if ing.moneda else '$',
                 'url': reverse('ingresos:editar_ingreso', args=[ing.id]),
             })
-        for gas in gastos_para_mezcla:
+        for gas in gastos_individuales:
             movimientos.append({
                 'tipo': 'gasto',
                 'descripcion': gas.descripcion,
@@ -133,6 +136,21 @@ def inicio(request):
                 'moneda_codigo': gas.moneda.codigo if gas.moneda else 'ARS',
                 'moneda_simbolo': gas.moneda.simbolo if gas.moneda else '$',
                 'url': reverse('gastos:editar_gasto', args=[gas.id]),
+            })
+        for compra in compras_para_mezcla:
+            movimientos.append({
+                'tipo': 'compra',
+                'descripcion': f"Compra en {compra.lugar}" if compra.lugar else "Compra",
+                'categoria': '',  # Las compras agrupan varias categorías
+                'monto': compra.total,
+                'fecha': compra.fecha,
+                'obj': compra,
+                'cuenta_nombre': compra.cuenta.nombre if compra.cuenta else None,
+                'moneda_codigo': compra.moneda.codigo if compra.moneda else 'ARS',
+                'moneda_simbolo': compra.moneda.simbolo if compra.moneda else '$',
+                'items_count': compra.items_count,
+                'compra_id': compra.id,
+                'url': '#',  # No navega directamente, abre modal
             })
 
         # Orden descendente por fecha y limitar a 10

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 from django.contrib.auth.models import User  # Importar el modelo de usuario
 from django.utils import timezone  # Importar timezone
 
@@ -22,6 +23,37 @@ class Categoria(models.Model):
         return self.nombre
 
 
+class Compra(models.Model):
+    """
+    Agrupa múltiples gastos de una misma compra/ticket.
+    Permite mostrar compras globales como un único movimiento.
+    """
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='compras')
+    fecha = models.DateTimeField(default=timezone.now)
+    lugar = models.CharField(max_length=120, blank=True, help_text='Lugar o comercio donde se realizó la compra')
+    cuenta = models.ForeignKey('cuentas.Cuenta', on_delete=models.SET_NULL, null=True, blank=True, related_name='compras')
+    moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, related_name='compras')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-fecha']
+
+    def __str__(self):
+        items_count = self.items.count()
+        return f"Compra en {self.lugar or 'Sin lugar'} - {items_count} items ({self.fecha.strftime('%d/%m/%Y')})"
+
+    @property
+    def total(self):
+        """Retorna la suma de todos los gastos asociados a esta compra."""
+        result = self.items.aggregate(total=Sum('monto'))
+        return result['total'] or 0
+
+    @property
+    def items_count(self):
+        """Retorna la cantidad de ítems en esta compra."""
+        return self.items.count()
+
+
 class Gasto(models.Model):
     usuario = models.ForeignKey(User,
                                 on_delete=models.CASCADE,
@@ -36,6 +68,8 @@ class Gasto(models.Model):
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
     cuenta = models.ForeignKey('cuentas.Cuenta', on_delete=models.SET_NULL, null=True, blank=True, related_name='gastos')
+    compra = models.ForeignKey(Compra, on_delete=models.CASCADE, null=True, blank=True, related_name='items',
+                               help_text='Compra global a la que pertenece este gasto')
 
     def __str__(self):
         if self.moneda:

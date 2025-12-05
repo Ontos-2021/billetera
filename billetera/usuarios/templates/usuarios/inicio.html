@@ -233,6 +233,66 @@
         <div class="divide-y divide-gray-100">
             {% if movimientos %}
                 {% for mov in movimientos %}
+                    {% if mov.tipo == 'compra' %}
+                    <!-- Compra Global (clickable para abrir modal) -->
+                    <div onclick="abrirModalCompra({{ mov.compra_id }})" class="block p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-primary rounded-none cursor-pointer">
+                        <div class="flex flex-col gap-2">
+                            <!-- Top Row: Icon, Description & Amount -->
+                            <div class="flex items-center justify-between gap-2">
+                                <!-- Icon & Description -->
+                                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                    <!-- Icon Circle (Carrito para compras) -->
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-expense-light bg-opacity-20 text-expense-dark">
+                                        <span class="text-lg sm:text-xl">🛒</span>
+                                    </div>
+                                    
+                                    <!-- Description -->
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ mov.descripcion }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Amount -->
+                                <div class="text-right flex-shrink-0">
+                                    <p class="font-numbers font-bold text-base sm:text-lg text-expense">
+                                        -{{ mov.moneda_simbolo }}{{ mov.monto|floatformat:2 }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom Row: Metadata Badges -->
+                            <div class="flex flex-wrap items-center gap-1.5 ml-12 sm:ml-14">
+                                <!-- Items count badge -->
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-primary-light bg-opacity-20 text-primary-dark">
+                                    {{ mov.items_count }} item{{ mov.items_count|pluralize:"s" }}
+                                </span>
+                                
+                                <!-- Cuenta (if exists) -->
+                                {% if mov.cuenta_nombre %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                                    {{ mov.cuenta_nombre }}
+                                </span>
+                                {% endif %}
+                                
+                                <!-- Moneda -->
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                                    {{ mov.moneda_codigo }}
+                                </span>
+                                
+                                <!-- Fecha y Hora -->
+                                <span class="text-[11px] text-gray-400">
+                                    {{ mov.fecha|date:"d M" }} · {{ mov.fecha|time:"H:i" }}
+                                </span>
+                                
+                                <!-- Click hint -->
+                                <span class="text-[11px] text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    Click para ver detalle →
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Ingreso o Gasto Individual -->
                     <a href="{{ mov.url }}" class="block p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-primary rounded-none">
                         <div class="flex flex-col gap-2">
                             <!-- Top Row: Icon, Description & Amount -->
@@ -264,9 +324,11 @@
                             <!-- Bottom Row: Metadata Badges (sobrio, sin colores) -->
                             <div class="flex flex-wrap items-center gap-1.5 ml-12 sm:ml-14">
                                 <!-- Categoría -->
+                                {% if mov.categoria %}
                                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
                                     {{ mov.categoria }}
                                 </span>
+                                {% endif %}
                                 
                                 <!-- Cuenta (if exists) -->
                                 {% if mov.cuenta_nombre %}
@@ -287,6 +349,7 @@
                             </div>
                         </div>
                     </a>
+                    {% endif %}
                 {% endfor %}
             {% else %}
                 <div class="p-12 text-center">
@@ -411,6 +474,96 @@
                 render();
             });
         })();
+    </script>
+
+    <!-- Modal Container para Detalle de Compra -->
+    <div id="modal-compra-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4" onclick="cerrarModalCompraOverlay(event)">
+        <div id="modal-compra-container" class="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
+            <!-- Content loaded via fetch -->
+            <div id="modal-compra-content">
+                <!-- Loading state -->
+                <div class="p-8 text-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p class="text-gray-500">Cargando detalle...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal de Detalle de Compra
+        async function abrirModalCompra(compraId) {
+            const overlay = document.getElementById('modal-compra-overlay');
+            const container = document.getElementById('modal-compra-container');
+            const content = document.getElementById('modal-compra-content');
+            
+            // Show overlay with loading state
+            overlay.classList.remove('hidden');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            
+            // Fetch content
+            try {
+                const response = await fetch(`/gastos/compra/${compraId}/detalle/`);
+                if (response.ok) {
+                    content.innerHTML = await response.text();
+                } else {
+                    content.innerHTML = `
+                        <div class="p-8 text-center text-expense">
+                            <span class="text-3xl mb-2 block">❌</span>
+                            <p>Error al cargar el detalle</p>
+                            <button onclick="cerrarModalCompra()" class="mt-4 px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="p-8 text-center text-expense">
+                        <span class="text-3xl mb-2 block">❌</span>
+                        <p>Error de conexión</p>
+                        <button onclick="cerrarModalCompra()" class="mt-4 px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button>
+                    </div>
+                `;
+            }
+        }
+        
+        function cerrarModalCompra() {
+            const overlay = document.getElementById('modal-compra-overlay');
+            const container = document.getElementById('modal-compra-container');
+            
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                // Reset content to loading state
+                document.getElementById('modal-compra-content').innerHTML = `
+                    <div class="p-8 text-center">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                        <p class="text-gray-500">Cargando detalle...</p>
+                    </div>
+                `;
+            }, 200);
+        }
+        
+        function cerrarModalCompraOverlay(event) {
+            // Only close if clicking on the overlay itself, not the modal content
+            if (event.target.id === 'modal-compra-overlay') {
+                cerrarModalCompra();
+            }
+        }
+        
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const overlay = document.getElementById('modal-compra-overlay');
+                if (overlay && !overlay.classList.contains('hidden')) {
+                    cerrarModalCompra();
+                }
+            }
+        });
     </script>
 {% endif %}
 {% endblock %}

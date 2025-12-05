@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from cuentas.models import Cuenta, TipoCuenta, TransferenciaCuenta
-from gastos.models import Gasto, Moneda as MonedaGasto, Categoria
+from gastos.models import Gasto, Moneda as MonedaGasto, Categoria, Compra
 from ingresos.models import Ingreso, Moneda as MonedaIngreso, CategoriaIngreso
 from django.urls import reverse
 from decimal import Decimal
@@ -173,3 +173,201 @@ class DashboardCuentasTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['total_gastos'], Decimal('0.00'))
         self.assertEqual(response.context['total_ingresos'], Decimal('0.00'))
+
+
+class DashboardMovimientosAgrupados(TestCase):
+    """Tests para verificar que las compras aparecen agrupadas en últimos movimientos."""
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client = Client()
+        self.client.login(username='testuser', password='password')
+        
+        self.moneda, _ = MonedaGasto.objects.get_or_create(
+            codigo='ARS', defaults={'nombre': 'Peso', 'simbolo': '$'}
+        )
+        self.categoria = Categoria.objects.create(nombre='Alimentación')
+        self.tipo_cuenta, _ = TipoCuenta.objects.get_or_create(nombre='Efectivo')
+        self.cuenta = Cuenta.objects.create(
+            usuario=self.user,
+            nombre='Billetera',
+            tipo=self.tipo_cuenta,
+            saldo_inicial=Decimal('10000.00'),
+            moneda=self.moneda
+        )
+    
+    def test_movimientos_agrupa_compra(self):
+        """Test: Compra con 3 gastos aparece como 1 solo movimiento."""
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=timezone.now(),
+            lugar='Supermercado',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        for i in range(3):
+            Gasto.objects.create(
+                usuario=self.user,
+                descripcion=f'Item {i+1}',
+                monto=Decimal('100.00'),
+                categoria=self.categoria,
+                moneda=self.moneda,
+                cuenta=self.cuenta,
+                compra=compra
+            )
+        
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        
+        # Debe haber 1 movimiento tipo 'compra', no 3 gastos individuales
+        tipos = [m['tipo'] for m in movimientos]
+        self.assertEqual(tipos.count('compra'), 1)
+        self.assertEqual(tipos.count('gasto'), 0)
+    
+    def test_movimientos_compra_muestra_total(self):
+        """Test: Movimiento tipo compra muestra suma de ítems."""
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=timezone.now(),
+            lugar='Tienda',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Item 1',
+            monto=Decimal('150.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Item 2',
+            monto=Decimal('350.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+        
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        
+        mov_compra = [m for m in movimientos if m['tipo'] == 'compra'][0]
+        self.assertEqual(mov_compra['monto'], Decimal('500.00'))
+    
+    def test_movimientos_compra_tiene_icono_correcto(self):
+        """Test: HTML contiene emoji 🛒 para movimientos tipo compra."""
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=timezone.now(),
+            lugar='Mercado',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Producto',
+            monto=Decimal('100.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+        
+        response = self.client.get(reverse('inicio_usuarios'))
+        content = response.content.decode('utf-8')
+        
+        self.assertIn('🛒', content)
+    
+    def test_movimientos_gasto_individual_sin_cambios(self):
+        """Test: Gasto sin compra asociada sigue apareciendo normal."""
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Gasto suelto',
+            monto=Decimal('200.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=None  # Sin compra
+        )
+        
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        
+        tipos = [m['tipo'] for m in movimientos]
+        self.assertEqual(tipos.count('gasto'), 1)
+        self.assertEqual(tipos.count('compra'), 0)
+    
+    def test_movimientos_mezcla_compras_y_gastos(self):
+        """Test: Lista ordenada correctamente mezclando compras y gastos individuales."""
+        ahora = timezone.now()
+        
+        # Gasto individual reciente
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Gasto reciente',
+            monto=Decimal('50.00'),
+            fecha=ahora,
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=None
+        )
+        
+        # Compra antigua
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=ahora - timedelta(hours=2),
+            lugar='Tienda antigua',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Item compra',
+            monto=Decimal('100.00'),
+            fecha=ahora - timedelta(hours=2),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+        
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        
+        # El gasto reciente debe aparecer primero
+        self.assertEqual(movimientos[0]['tipo'], 'gasto')
+        self.assertEqual(movimientos[0]['descripcion'], 'Gasto reciente')
+        
+        # La compra debe aparecer después
+        self.assertEqual(movimientos[1]['tipo'], 'compra')
+    
+    def test_movimientos_compra_tiene_items_count(self):
+        """Test: Movimiento tipo compra incluye items_count."""
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=timezone.now(),
+            lugar='Super',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        for i in range(4):
+            Gasto.objects.create(
+                usuario=self.user,
+                descripcion=f'Item {i}',
+                monto=Decimal('25.00'),
+                categoria=self.categoria,
+                moneda=self.moneda,
+                cuenta=self.cuenta,
+                compra=compra
+            )
+        
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        
+        mov_compra = [m for m in movimientos if m['tipo'] == 'compra'][0]
+        self.assertEqual(mov_compra['items_count'], 4)

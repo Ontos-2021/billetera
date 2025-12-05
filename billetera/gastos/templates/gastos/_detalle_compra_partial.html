@@ -1,0 +1,120 @@
+<!-- Modal Content: Detalle de Compra -->
+<div class="p-6 border-b border-gray-100">
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-4">
+        <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center">
+                <span class="text-2xl">🛒</span>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">
+                    Compra en {{ compra.lugar|default:"Sin lugar" }}
+                </h2>
+                <p class="text-sm text-gray-500">
+                    {{ compra.fecha|date:"d M Y" }} · {{ compra.fecha|time:"H:i" }}
+                </p>
+            </div>
+        </div>
+        <button type="button" onclick="cerrarModalCompra()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+    </div>
+    
+    <!-- Metadata badges -->
+    <div class="flex flex-wrap gap-2 mb-2">
+        {% if compra.cuenta %}
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+            💳 {{ compra.cuenta.nombre }}
+        </span>
+        {% endif %}
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+            {{ compra.moneda.codigo }}
+        </span>
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary-light bg-opacity-20 text-primary-dark">
+            {{ compra.items_count }} item{{ compra.items_count|pluralize:"s" }}
+        </span>
+    </div>
+</div>
+
+<!-- Items List -->
+<div class="max-h-[50vh] overflow-y-auto">
+    <div class="divide-y divide-gray-100">
+        {% for gasto in compra.items.all %}
+        <div class="p-4 hover:bg-gray-50 transition-colors duration-200 group">
+            <div class="flex items-center justify-between">
+                <!-- Item info -->
+                <div class="flex-1 min-w-0 mr-4">
+                    <p class="font-medium text-gray-900 truncate">{{ gasto.descripcion }}</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                            {{ gasto.categoria.nombre }}
+                        </span>
+                        {% if gasto.cantidad > 1 %}
+                        <span class="text-xs text-gray-500">
+                            x{{ gasto.cantidad }} · {{ compra.moneda.simbolo }}{{ gasto.precio_unitario|floatformat:2 }} c/u
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Amount & Actions -->
+                <div class="flex items-center space-x-3">
+                    <p class="font-numbers font-bold text-expense whitespace-nowrap">
+                        -{{ compra.moneda.simbolo }}{{ gasto.monto|floatformat:2 }}
+                    </p>
+                    
+                    <!-- Action buttons (visible on hover) -->
+                    <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <a href="{% url 'gastos:editar_gasto' gasto.id %}" 
+                           class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary-light hover:bg-opacity-20 rounded-full transition-colors duration-200"
+                           title="Editar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </a>
+                        {% if compra.items_count > 1 %}
+                        <a href="{% url 'gastos:eliminar_gasto' gasto.id %}" 
+                           class="p-1.5 text-gray-400 hover:text-expense hover:bg-expense-light hover:bg-opacity-20 rounded-full transition-colors duration-200"
+                           title="Eliminar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </a>
+                        {% else %}
+                        <span class="p-1.5 text-gray-300 cursor-not-allowed" title="No puedes eliminar el único ítem">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-8 text-center text-gray-500">
+            <span class="text-3xl mb-2 block">📭</span>
+            <p>Esta compra no tiene ítems</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Footer with Total -->
+<div class="p-6 bg-gray-50 border-t border-gray-100">
+    <div class="flex items-center justify-between">
+        <span class="text-sm font-medium text-gray-600">Total de la compra</span>
+        <p class="text-2xl font-numbers font-bold text-expense">
+            -{{ compra.moneda.simbolo }}{{ compra.total|floatformat:2 }}
+        </p>
+    </div>
+    
+    <div class="mt-4 flex justify-end">
+        <button type="button" onclick="cerrarModalCompra()" 
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors duration-200">
+            Cerrar
+        </button>
+    </div>
+</div>

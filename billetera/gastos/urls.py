@@ -18,6 +18,7 @@ urlpatterns = [
     path('', views.lista_gastos, name='lista_gastos'),
     path('crear/', views.crear_gasto, name='crear_gasto'),
     path('compra-global/', views.compra_global, name='compra_global'),
+    path('compra/<int:pk>/detalle/', views.detalle_compra, name='detalle_compra'),
     path('editar/<int:id>/', views.editar_gasto, name='editar_gasto'),
     path('eliminar/<int:id>/', views.eliminar_gasto, name='eliminar_gasto'),
 ]
