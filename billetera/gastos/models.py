@@ -23,6 +23,18 @@ class Categoria(models.Model):
         return self.nombre
 
 
+class Tienda(models.Model):
+    nombre = models.CharField(max_length=120)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tiendas', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('nombre', 'usuario')
+
+    def __str__(self):
+        return self.nombre
+
+
 class Compra(models.Model):
     """
     Agrupa múltiples gastos de una misma compra/ticket.
@@ -31,6 +43,7 @@ class Compra(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='compras')
     fecha = models.DateTimeField(default=timezone.now)
     lugar = models.CharField(max_length=120, blank=True, help_text='Lugar o comercio donde se realizó la compra')
+    tienda = models.ForeignKey(Tienda, on_delete=models.SET_NULL, null=True, blank=True, related_name='compras')
     cuenta = models.ForeignKey('cuentas.Cuenta', on_delete=models.SET_NULL, null=True, blank=True, related_name='compras')
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, related_name='compras')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -62,8 +75,10 @@ class Gasto(models.Model):
                                 blank=True)
     descripcion = models.CharField(max_length=255)
     lugar = models.CharField(max_length=120, null=True, blank=True, help_text='Lugar o comercio donde se realizó la compra (ej: Carrefour, Kiosco, etc.)')
+    tienda = models.ForeignKey(Tienda, on_delete=models.SET_NULL, null=True, blank=True, related_name='gastos')
     cantidad = models.PositiveIntegerField(default=1)
     monto = models.DecimalField(max_digits=10, decimal_places=2)
+    descuento = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True, help_text='Monto de descuento aplicado')
     fecha = models.DateTimeField(default=timezone.now)
     moneda = models.ForeignKey(Moneda, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, null=True, blank=True, related_name='gastos')

@@ -1,5 +1,12 @@
 from django.contrib import admin
-from .models import Gasto, Moneda, Categoria, Compra
+from .models import Gasto, Moneda, Categoria, Compra, Tienda
+
+
+@admin.register(Tienda)
+class TiendaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'usuario')
+    search_fields = ('nombre', 'usuario__username')
+    list_filter = ('usuario',)
 
 
 class GastoInline(admin.TabularInline):

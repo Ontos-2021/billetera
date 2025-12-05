@@ -1,25 +1,33 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Gasto, Moneda
+from .models import Gasto, Moneda, Tienda
 from cuentas.models import Cuenta
 
 
 class GastoForm(forms.ModelForm):
+    tienda_nombre = forms.CharField(
+        required=False,
+        label='Tienda / Comercio',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Ej: Carrefour, Kiosco',
+            'list': 'tiendas-list',
+            'autocomplete': 'off'
+        }),
+        help_text='Selecciona una tienda existente o escribe una nueva.'
+    )
+
     class Meta:
         model = Gasto
-        fields = ['descripcion', 'lugar', 'categoria', 'cantidad', 'monto', 'moneda', 'fecha', 'cuenta']
+        fields = ['descripcion', 'tienda_nombre', 'categoria', 'cantidad', 'monto', 'descuento', 'moneda', 'fecha', 'cuenta']
         widgets = {
             'descripcion': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
                 'placeholder': 'Ej: Compra en supermercado',
                 'maxlength': '255'
             }),
-            'lugar': forms.TextInput(attrs={
-                'class': 'form-control form-control-lg',
-                'placeholder': 'Ej: Carrefour, Kiosco Don Pepe',
-                'maxlength': '120'
-            }),
+            # 'lugar' removed from widgets as it is replaced by tienda_nombre logic
             'categoria': forms.Select(attrs={
                 'class': 'form-select form-select-lg'
             }),
@@ -29,6 +37,12 @@ class GastoForm(forms.ModelForm):
                 'step': '1'
             }),
             'monto': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg number-input',
+                'placeholder': '0.00',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'descuento': forms.NumberInput(attrs={
                 'class': 'form-control form-control-lg number-input',
                 'placeholder': '0.00',
                 'step': '0.01',
@@ -47,31 +61,34 @@ class GastoForm(forms.ModelForm):
         }
         labels = {
             'descripcion': 'Descripción del gasto',
-            'lugar': 'Lugar / Comercio',
-            'categoria': 'Categoría',
-            'cantidad': 'Cantidad',
             'monto': 'Precio Unitario',
+            'descuento': 'Descuento Total',
             'moneda': 'Moneda',
             'fecha': 'Fecha y Hora',
             'cuenta': 'Cuenta de Origen',
         }
         help_texts = {
             'descripcion': 'Breve descripción de en qué gastaste',
-            'lugar': 'Opcional: dónde se realizó la compra',
             'monto': 'Ingresa el precio por unidad',
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        if user:
-            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=user)
+        if self.user:
+            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=self.user)
         
-        if not self.instance.pk:
-            self._prefill_moneda_default()
         if self.instance and self.instance.pk:
+            if self.instance.tienda:
+                self.fields['tienda_nombre'].initial = self.instance.tienda.nombre
+            elif self.instance.lugar:
+                self.fields['tienda_nombre'].initial = self.instance.lugar
+            
             # If editing, show unit price instead of total amount
             self.initial['monto'] = self.instance.precio_unitario
+
+        if not self.instance.pk:
+            self._prefill_moneda_default()
 
     def _prefill_moneda_default(self):
         if self.fields['moneda'].initial:
@@ -82,6 +99,23 @@ class GastoForm(forms.ModelForm):
 
     def save(self, commit=True):
         gasto = super().save(commit=False)
+        
+        # 1. Handle Tienda logic
+        tienda_nombre = self.cleaned_data.get('tienda_nombre')
+        
+        if tienda_nombre and self.user:
+            tienda, created = Tienda.objects.get_or_create(
+                nombre__iexact=tienda_nombre,
+                usuario=self.user,
+                defaults={'nombre': tienda_nombre}
+            )
+            gasto.tienda = tienda
+            gasto.lugar = tienda.nombre  # Keep legacy field in sync
+        else:
+            gasto.tienda = None
+            gasto.lugar = ""
+
+        # 2. Handle Amount Calculation logic
         # Calculate total amount: Unit Price * Quantity
         # self.cleaned_data['monto'] contains the unit price input by user
         unit_price = self.cleaned_data.get('monto')

@@ -47,18 +47,26 @@
                 </div>
 
                 <!-- Lugar -->
+                <!-- Tienda Field -->
                 <div>
-                    <label for="{{ form.lugar.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        📍 {{ form.lugar.label }}
+                    <label for="{{ form.tienda_nombre.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        📍 {{ form.tienda_nombre.label }}
                     </label>
                     <input type="text" 
-                           name="{{ form.lugar.name }}" 
-                           id="{{ form.lugar.id_for_label }}"
-                           value="{{ form.lugar.value|default:'' }}"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-expense focus:border-expense transition-colors duration-200 {% if form.lugar.errors %}border-red-500{% endif %}"
-                           placeholder="Ej: Carrefour, Kiosco Don Pepe">
-                    {% if form.lugar.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ form.lugar.errors.0 }}</p>
+                           name="{{ form.tienda_nombre.name }}" 
+                           id="{{ form.tienda_nombre.id_for_label }}"
+                           list="tiendas-list"
+                           autocomplete="off"
+                           value="{{ form.tienda_nombre.value|default:'' }}"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-expense focus:border-expense transition-colors duration-200 {% if form.tienda_nombre.errors %}border-red-500{% endif %}"
+                           placeholder="Ej: Carrefour, Kiosco">
+                    <datalist id="tiendas-list">
+                        {% for tienda in tiendas %}
+                            <option value="{{ tienda.nombre }}">
+                        {% endfor %}
+                    </datalist>
+                    {% if form.tienda_nombre.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.tienda_nombre.errors.0 }}</p>
                     {% endif %}
                 </div>
 

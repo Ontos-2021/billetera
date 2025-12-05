@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Gasto, Compra
+from .models import Gasto, Compra, Tienda
 from .forms import GastoForm, CompraGlobalHeaderForm, CompraGlobalItemForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
@@ -72,7 +72,9 @@ def crear_gasto(request):
             return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
         form = GastoForm(user=request.user)  # Crea un formulario de gasto vacío
-    return render(request, 'gastos/crear_gasto.html', {'form': form})
+    
+    tiendas = Tienda.objects.filter(usuario=request.user)
+    return render(request, 'gastos/crear_gasto.html', {'form': form, 'tiendas': tiendas})
 
 
 # Editar gasto
@@ -90,7 +92,9 @@ def editar_gasto(request, id):
             return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
         form = GastoForm(instance=gasto, user=request.user)  # Crea un formulario con los datos del gasto para editar
-    return render(request, 'gastos/editar_gasto.html', {'form': form, 'gasto': gasto})
+    
+    tiendas = Tienda.objects.filter(usuario=request.user)
+    return render(request, 'gastos/editar_gasto.html', {'form': form, 'gasto': gasto, 'tiendas': tiendas})
 
 
 # Eliminar gasto
