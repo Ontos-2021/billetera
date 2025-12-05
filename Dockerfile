@@ -11,9 +11,16 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& pip install --no-cache-dir -r requirements.txt
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
+    libffi-dev \
+    shared-mime-info \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .

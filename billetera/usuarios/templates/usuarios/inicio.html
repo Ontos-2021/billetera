@@ -98,6 +98,68 @@
     </div>
     {% endif %}
 
+    <!-- Chart Section -->
+    <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Evolución Financiera (Últimos 6 meses)</h3>
+        <div class="relative h-64">
+            <canvas id="financeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('financeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ chart_labels|safe }},
+                    datasets: [
+                        {
+                            label: 'Ingresos',
+                            data: {{ chart_ingresos|safe }},
+                            borderColor: '#34a853',
+                            backgroundColor: 'rgba(52, 168, 83, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Gastos',
+                            data: {{ chart_gastos|safe }},
+                            borderColor: '#ea4335',
+                            backgroundColor: 'rgba(234, 67, 53, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                borderDash: [2, 4]
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
     <!-- Mis Cuentas Section -->
     <div class="mb-6 sm:mb-8">
         <div class="flex items-center justify-between mb-3 sm:mb-4">

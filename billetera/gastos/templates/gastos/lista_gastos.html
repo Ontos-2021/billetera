@@ -11,6 +11,10 @@
             <p class="text-gray-600">Controla y gestiona todos tus gastos de manera consciente</p>
         </div>
         <div class="flex space-x-3 mt-4 sm:mt-0">
+            <a href="{% url 'gastos:exportar_gastos_pdf' %}?{{ request.GET.urlencode }}" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
+                <span class="mr-2">📄</span>
+                PDF
+            </a>
             <a href="{% url 'gastos:compra_global' %}" class="bg-white border border-expense text-expense hover:bg-expense-light hover:text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
                 <span class="mr-2">🛒</span>
                 Compra Global
@@ -20,6 +24,33 @@
                 Nuevo Gasto
             </a>
         </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+                {{ filter.form.descripcion }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+                {{ filter.form.categoria }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Desde</label>
+                {{ filter.form.fecha_inicio }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Hasta</label>
+                {{ filter.form.fecha_fin }}
+            </div>
+            <div>
+                <button type="submit" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                    🔍 Filtrar
+                </button>
+            </div>
+        </form>
     </div>
 
     {% if gastos %}

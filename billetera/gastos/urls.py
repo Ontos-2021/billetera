@@ -21,4 +21,5 @@ urlpatterns = [
     path('compra/<int:pk>/detalle/', views.detalle_compra, name='detalle_compra'),
     path('editar/<int:id>/', views.editar_gasto, name='editar_gasto'),
     path('eliminar/<int:id>/', views.eliminar_gasto, name='eliminar_gasto'),
+    path('exportar-pdf/', views.exportar_gastos_pdf, name='exportar_gastos_pdf'),
 ]

@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.db.models import Sum
 from .models import Ingreso
 from .forms import IngresoForm
+from .filters import IngresoFilter
 
 
 # Vista para crear un nuevo ingreso
@@ -50,8 +51,12 @@ def eliminar_ingreso(request, ingreso_id):
 @login_required
 def lista_ingresos(request):
     from decimal import Decimal
-    ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')
+    queryset = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')
     
+    # Aplicar filtros
+    ingresos_filter = IngresoFilter(request.GET, queryset=queryset)
+    ingresos = ingresos_filter.qs
+
     # Calcular totales por moneda (excluyendo transferencias)
     totales_por_moneda = {}
     for ingreso in ingresos:
@@ -73,6 +78,7 @@ def lista_ingresos(request):
     
     return render(request, 'ingresos/lista_ingresos.html', {
         'ingresos': ingresos,
+        'filter': ingresos_filter,
         'totales_ingresos': totales_list,
         'totales_ingresos_default': moneda_default,
     })

@@ -16,6 +16,33 @@
         </a>
     </div>
 
+    <!-- Filters Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
+                {{ filter.form.descripcion }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Categoría</label>
+                {{ filter.form.categoria }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Desde</label>
+                {{ filter.form.fecha_inicio }}
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Hasta</label>
+                {{ filter.form.fecha_fin }}
+            </div>
+            <div>
+                <button type="submit" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                    🔍 Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
     {% if ingresos %}
         <!-- Summary Section (moved to top) -->
         {% if totales_ingresos %}

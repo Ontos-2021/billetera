@@ -67,6 +67,45 @@ def inicio(request):
         total_gastos = Gasto.objects.filter(**filtros_gastos).aggregate(Sum('monto'))['monto__sum'] or 0
         balance_neto = total_ingresos - total_gastos
 
+        # --- Datos para el Gráfico (Últimos 6 meses) ---
+        chart_labels = []
+        chart_ingresos = []
+        chart_gastos = []
+        
+        # Iterar sobre los últimos 6 meses
+        for i in range(5, -1, -1):
+            mes_inicio = (ahora.replace(day=1) - timedelta(days=i*30)).replace(day=1)
+            # Calcular fin de mes (inicio del siguiente mes - 1 segundo)
+            if mes_inicio.month == 12:
+                mes_fin = mes_inicio.replace(year=mes_inicio.year + 1, month=1)
+            else:
+                mes_fin = mes_inicio.replace(month=mes_inicio.month + 1)
+            
+            # Nombre del mes para el label
+            chart_labels.append(mes_inicio.strftime('%b'))
+            
+            # Filtros para el mes
+            filtros_mes_ingresos = {
+                'usuario': request.user,
+                'moneda__codigo': 'ARS',
+                'transferencias_generadas__isnull': True,
+                'fecha__gte': mes_inicio,
+                'fecha__lt': mes_fin,
+            }
+            filtros_mes_gastos = {
+                'usuario': request.user,
+                'moneda__codigo': 'ARS',
+                'transferencias_generadas__isnull': True,
+                'fecha__gte': mes_inicio,
+                'fecha__lt': mes_fin,
+            }
+            
+            ingresos_mes = Ingreso.objects.filter(**filtros_mes_ingresos).aggregate(Sum('monto'))['monto__sum'] or 0
+            gastos_mes = Gasto.objects.filter(**filtros_mes_gastos).aggregate(Sum('monto'))['monto__sum'] or 0
+            
+            chart_ingresos.append(float(ingresos_mes))
+            chart_gastos.append(float(gastos_mes))
+
         # --- Fin Lógica de Filtrado ---
 
         # Últimos 5 registros para la lista del inicio (Legacy, se puede mantener o quitar si no se usa)
@@ -167,6 +206,9 @@ def inicio(request):
             'rango_actual': rango, # Pasar el rango al template para resaltar el botón activo
             'totales_cuentas': totals_list,
             'totales_cuentas_default': moneda_default,
+            'chart_labels': chart_labels,
+            'chart_ingresos': chart_ingresos,
+            'chart_gastos': chart_gastos,
         }
 
     return render(request, 'usuarios/inicio.html', context)

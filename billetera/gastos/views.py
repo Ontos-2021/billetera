@@ -5,21 +5,32 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.forms import formset_factory
 from django.db import transaction
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.conf import settings
+# import weasyprint  -- Moved inside the view to avoid dependency issues on dev
+from .filters import GastoFilter
 
 
 # Función para obtener los gastos filtrados por usuario o superusuario
 def obtener_gastos(request):
     # Los superusuarios pueden ver todos los gastos
     if request.user.is_superuser:
-        return Gasto.objects.all().order_by('-fecha')
-    # Los usuarios normales solo pueden ver sus propios gastos
-    return Gasto.objects.filter(usuario=request.user).order_by('-fecha')
+        queryset = Gasto.objects.all().order_by('-fecha')
+    else:
+        # Los usuarios normales solo pueden ver sus propios gastos
+        queryset = Gasto.objects.filter(usuario=request.user).order_by('-fecha')
+    
+    # Aplicar filtros
+    filter_set = GastoFilter(request.GET, queryset=queryset)
+    return filter_set
 
 
 # Lista de gastos
 @login_required  # Requiere que el usuario esté autenticado
 def lista_gastos(request):
-    gastos = obtener_gastos(request)  # Obtiene los gastos correspondientes al usuario
+    gastos_filter = obtener_gastos(request)  # Obtiene el objeto FilterSet
+    gastos = gastos_filter.qs # Obtiene el queryset filtrado
     
     # Calcular totales por moneda (excluyendo transferencias)
     from decimal import Decimal
@@ -43,6 +54,7 @@ def lista_gastos(request):
     
     return render(request, 'gastos/lista_gastos.html', {
         'gastos': gastos,
+        'filter': gastos_filter, # Pasar el filtro al template
         'totales_gastos': totales_list,
         'totales_gastos_default': moneda_default,
     })
@@ -98,6 +110,26 @@ def eliminar_gasto(request, id):
             compra.delete()
         
         return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
+
+
+@login_required
+def exportar_gastos_pdf(request):
+    import weasyprint
+    gastos_filter = obtener_gastos(request)
+    gastos = gastos_filter.qs
+    total_general = gastos.aggregate(Sum('monto'))['monto__sum'] or 0
+    
+    html_string = render_to_string('gastos/reporte_pdf.html', {
+        'gastos': gastos,
+        'total_general': total_general,
+        'user': request.user,
+    })
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="reporte_gastos.pdf"'
+
+    weasyprint.HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(response)
+    return response
     return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
 
 
