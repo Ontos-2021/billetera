@@ -9,12 +9,14 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from gastos.models import Gasto, Compra
 from ingresos.models import Ingreso
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.utils import timezone
 from datetime import timedelta
 from django.urls import reverse
+from django.template.loader import render_to_string
+# import weasyprint  <-- Moved inside function to avoid crash on Windows dev env
 
 from usuarios.backup import run_database_backup
 from cuentas.models import Cuenta
@@ -316,3 +318,110 @@ def trigger_backup(request):
 
     result = run_database_backup()
     return JsonResponse({'status': 'ok', **result})
+
+
+@login_required
+def exportar_reporte_pdf(request):
+    rango = request.GET.get('rango', '30d')
+    ahora = timezone.localtime(timezone.now())
+    fecha_inicio = None
+    rango_label = "Últimos 30 días"
+
+    if rango == '24h':
+        fecha_inicio = ahora - timedelta(hours=24)
+        rango_label = "Últimas 24 horas"
+    elif rango == '3d':
+        fecha_inicio = ahora - timedelta(hours=72)
+        rango_label = "Últimos 3 días"
+    elif rango == '7d':
+        fecha_inicio = ahora - timedelta(days=7)
+        rango_label = "Últimos 7 días"
+    elif rango == '30d':
+        fecha_inicio = ahora - timedelta(days=30)
+        rango_label = "Últimos 30 días"
+    elif rango == '365d':
+        fecha_inicio = ahora - timedelta(days=365)
+        rango_label = "Último año"
+    elif rango == 'todo':
+        fecha_inicio = None
+        rango_label = "Histórico Completo"
+    else:
+        fecha_inicio = ahora - timedelta(days=30)
+
+    filtros_ingresos = {'usuario': request.user}
+    filtros_gastos = {'usuario': request.user}
+    filtros_compras = {'usuario': request.user}
+
+    if fecha_inicio:
+        filtros_ingresos['fecha__gte'] = fecha_inicio
+        filtros_gastos['fecha__gte'] = fecha_inicio
+        filtros_compras['fecha__gte'] = fecha_inicio
+
+    # Totales
+    total_ingresos = Ingreso.objects.filter(**filtros_ingresos).aggregate(Sum('monto'))['monto__sum'] or 0
+    total_gastos = Gasto.objects.filter(**filtros_gastos).aggregate(Sum('monto'))['monto__sum'] or 0
+    balance_neto = total_ingresos - total_gastos
+
+    # Movimientos
+    ingresos = Ingreso.objects.filter(**filtros_ingresos).order_by('-fecha')
+    gastos_individuales = Gasto.objects.filter(**filtros_gastos, compra__isnull=True).order_by('-fecha')
+    compras = Compra.objects.filter(**filtros_compras).order_by('-fecha')
+
+    movimientos = []
+    for ing in ingresos:
+        movimientos.append({
+            'tipo': 'ingreso',
+            'descripcion': ing.descripcion,
+            'categoria': getattr(ing, 'categoria', ''),
+            'monto': ing.monto,
+            'fecha': ing.fecha,
+            'cuenta_nombre': ing.cuenta.nombre if ing.cuenta else None,
+            'moneda_simbolo': ing.moneda.simbolo if ing.moneda else '$',
+        })
+    for gas in gastos_individuales:
+        movimientos.append({
+            'tipo': 'gasto',
+            'descripcion': gas.descripcion,
+            'categoria': getattr(gas, 'categoria', ''),
+            'monto': gas.monto,
+            'fecha': gas.fecha,
+            'cuenta_nombre': gas.cuenta.nombre if gas.cuenta else None,
+            'moneda_simbolo': gas.moneda.simbolo if gas.moneda else '$',
+        })
+    for compra in compras:
+        movimientos.append({
+            'tipo': 'compra',
+            'descripcion': f"Compra en {compra.lugar}" if compra.lugar else "Compra",
+            'categoria': '',
+            'monto': compra.total,
+            'fecha': compra.fecha,
+            'cuenta_nombre': compra.cuenta.nombre if compra.cuenta else None,
+            'moneda_simbolo': compra.moneda.simbolo if compra.moneda else '$',
+            'items_count': compra.items_count,
+        })
+
+    # Ordenar y limitar (opcional, para PDF quizás queremos todos o un límite razonable)
+    movimientos = sorted(movimientos, key=lambda x: x['fecha'], reverse=True)
+    
+    # Si son muchos, limitamos a 100 para no explotar el PDF
+    if len(movimientos) > 100:
+        movimientos = movimientos[:100]
+
+    context = {
+        'user': request.user,
+        'rango_label': rango_label,
+        'total_ingresos': total_ingresos,
+        'total_gastos': total_gastos,
+        'balance_neto': balance_neto,
+        'movimientos': movimientos,
+    }
+
+    import weasyprint
+    html_string = render_to_string('usuarios/reporte_pdf.html', context)
+    html = weasyprint.HTML(string=html_string, base_url=request.build_absolute_uri())
+    result = html.write_pdf()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="reporte_{rango}.pdf"'
+    response.write(result)
+    return response

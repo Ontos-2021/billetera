@@ -116,13 +116,14 @@ class GastoForm(forms.ModelForm):
             gasto.lugar = ""
 
         # 2. Handle Amount Calculation logic
-        # Calculate total amount: Unit Price * Quantity
+        # Calculate total amount: (Unit Price * Quantity) - Discount
         # self.cleaned_data['monto'] contains the unit price input by user
         unit_price = self.cleaned_data.get('monto')
         quantity = self.cleaned_data.get('cantidad', 1)
+        descuento = self.cleaned_data.get('descuento') or 0
         
         if unit_price is not None:
-            gasto.monto = unit_price * quantity
+            gasto.monto = (unit_price * quantity) - descuento
             
         if commit:
             gasto.save()

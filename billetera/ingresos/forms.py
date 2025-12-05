@@ -52,20 +52,15 @@ class IngresoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.user:
             self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=self.user)
+        
+        # Prefill currency with ARS if not set
+        if not self.instance.pk and not self.initial.get('moneda'):
+            ars = Moneda.objects.filter(codigo='ARS').first()
+            if ars:
+                self.fields['moneda'].initial = ars.pk
 
     def clean_monto(self):
         monto = self.cleaned_data.get('monto')
         if monto is not None and monto < 0:
             raise forms.ValidationError("El monto no puede ser negativo.")
         return monto
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        if user:
-            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=user)
-
-        if not self.instance.pk and not self.initial.get('moneda'):
-            ars = Moneda.objects.filter(codigo='ARS').first()
-            if ars:
-                self.fields['moneda'].initial = ars.pk

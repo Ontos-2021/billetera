@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Financiero - MoneyFlow Mirror</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.5;
+            font-size: 12pt;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4F46E5; /* Primary color */
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            color: #4F46E5;
+            margin: 0;
+            font-size: 24pt;
+        }
+        .header p {
+            color: #666;
+            margin: 5px 0 0;
+        }
+        .meta-info {
+            margin-bottom: 20px;
+            font-size: 10pt;
+            color: #555;
+        }
+        .summary-cards {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .card {
+            display: table-cell;
+            width: 30%;
+            padding: 15px;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .card.income { border-left: 4px solid #10B981; }
+        .card.expense { border-left: 4px solid #EF4444; }
+        .card.balance { border-left: 4px solid #3B82F6; }
+        
+        .card h3 { margin: 0 0 10px; font-size: 10pt; text-transform: uppercase; color: #666; }
+        .card p { margin: 0; font-size: 16pt; font-weight: bold; }
+        .text-success { color: #10B981; }
+        .text-expense { color: #EF4444; }
+        .text-primary { color: #3B82F6; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 10pt;
+        }
+        th, td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6;
+            font-weight: bold;
+            color: #374151;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .amount {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 8pt;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MoneyFlow Mirror</h1>
+        <p>Reporte Financiero Personal</p>
+    </div>
+
+    <div class="meta-info">
+        <p><strong>Usuario:</strong> {{ user.get_full_name|default:user.username }}</p>
+        <p><strong>Fecha de Emisión:</strong> {% now "d/m/Y H:i" %}</p>
+        <p><strong>Período:</strong> {{ rango_label }}</p>
+    </div>
+
+    <div class="summary-cards">
+        <div class="card income">
+            <h3>Ingresos</h3>
+            <p class="text-success">+${{ total_ingresos|floatformat:2 }}</p>
+        </div>
+        <div class="card expense">
+            <h3>Gastos</h3>
+            <p class="text-expense">-${{ total_gastos|floatformat:2 }}</p>
+        </div>
+        <div class="card balance">
+            <h3>Balance Neto</h3>
+            <p class="{% if balance_neto >= 0 %}text-primary{% else %}text-expense{% endif %}">
+                ${{ balance_neto|floatformat:2 }}
+            </p>
+        </div>
+    </div>
+
+    <h2>Últimos Movimientos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Cuenta</th>
+                <th class="amount">Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mov in movimientos %}
+            <tr>
+                <td>{{ mov.fecha|date:"d/m/Y" }}</td>
+                <td>
+                    {{ mov.descripcion }}
+                    {% if mov.tipo == 'compra' %}
+                        <span style="font-size: 8pt; color: #666;">({{ mov.items_count }} items)</span>
+                    {% endif %}
+                </td>
+                <td>{{ mov.categoria|default:"-" }}</td>
+                <td>{{ mov.cuenta_nombre|default:"-" }}</td>
+                <td class="amount {% if mov.tipo == 'ingreso' %}text-success{% else %}text-expense{% endif %}">
+                    {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}{{ mov.moneda_simbolo }}{{ mov.monto|floatformat:2 }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 20px;">No hay movimientos en este período.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Generado automáticamente por MoneyFlow Mirror.
+    </div>
+</body>
+</html>
