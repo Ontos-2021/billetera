@@ -47,6 +47,12 @@ class IngresoForm(forms.ModelForm):
             'monto': 'Ingresa el monto sin símbolos de moneda',
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=self.user)
+
     def clean_monto(self):
         monto = self.cleaned_data.get('monto')
         if monto is not None and monto < 0:
