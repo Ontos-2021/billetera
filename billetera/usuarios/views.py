@@ -117,6 +117,8 @@ def inicio(request):
                 'fecha': ing.fecha,
                 'obj': ing,
                 'cuenta_nombre': ing.cuenta.nombre if ing.cuenta else None,
+                'moneda_codigo': ing.moneda.codigo if ing.moneda else 'ARS',
+                'moneda_simbolo': ing.moneda.simbolo if ing.moneda else '$',
                 'url': reverse('ingresos:editar_ingreso', args=[ing.id]),
             })
         for gas in gastos_para_mezcla:
@@ -128,6 +130,8 @@ def inicio(request):
                 'fecha': gas.fecha,
                 'obj': gas,
                 'cuenta_nombre': gas.cuenta.nombre if gas.cuenta else None,
+                'moneda_codigo': gas.moneda.codigo if gas.moneda else 'ARS',
+                'moneda_simbolo': gas.moneda.simbolo if gas.moneda else '$',
                 'url': reverse('gastos:editar_gasto', args=[gas.id]),
             })
 

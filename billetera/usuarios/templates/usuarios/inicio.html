@@ -234,43 +234,56 @@
             {% if movimientos %}
                 {% for mov in movimientos %}
                     <a href="{{ mov.url }}" class="block p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200 group focus:outline-none focus:ring-2 focus:ring-primary rounded-none">
-                        <div class="flex items-center justify-between gap-2">
-                            <!-- Icon & Info -->
-                            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
-                                <!-- Icon Circle -->
-                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 
-                                    {% if mov.tipo == 'ingreso' %}bg-success-light bg-opacity-20 text-success-dark{% else %}bg-expense-light bg-opacity-20 text-expense-dark{% endif %}">
-                                    {% if mov.tipo == 'ingreso' %}
-                                        <span class="text-lg sm:text-xl">💰</span>
-                                    {% else %}
-                                        <span class="text-lg sm:text-xl">💸</span>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Text Info -->
-                                <div class="min-w-0 flex-1">
-                                    <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ mov.descripcion }}</p>
-                                    <div class="flex items-center text-xs text-gray-500 space-x-1 sm:space-x-2">
-                                        <span class="capitalize truncate">{{ mov.categoria }}</span>
-                                        {% if mov.cuenta_nombre %}
-                                            <span class="hidden sm:inline">•</span>
-                                            <span class="hidden sm:flex items-center truncate">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                                </svg>
-                                                {{ mov.cuenta_nombre }}
-                                            </span>
+                        <div class="flex flex-col gap-2">
+                            <!-- Top Row: Icon, Description & Amount -->
+                            <div class="flex items-center justify-between gap-2">
+                                <!-- Icon & Description -->
+                                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                    <!-- Icon Circle -->
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 
+                                        {% if mov.tipo == 'ingreso' %}bg-success-light bg-opacity-20 text-success-dark{% else %}bg-expense-light bg-opacity-20 text-expense-dark{% endif %}">
+                                        {% if mov.tipo == 'ingreso' %}
+                                            <span class="text-lg sm:text-xl">💰</span>
+                                        {% else %}
+                                            <span class="text-lg sm:text-xl">💸</span>
                                         {% endif %}
                                     </div>
+                                    
+                                    <!-- Description -->
+                                    <p class="font-semibold text-gray-900 text-sm sm:text-base truncate min-w-0 flex-1">{{ mov.descripcion }}</p>
+                                </div>
+
+                                <!-- Amount -->
+                                <div class="text-right flex-shrink-0">
+                                    <p class="font-numbers font-bold text-base sm:text-lg {% if mov.tipo == 'ingreso' %}text-success{% else %}text-expense{% endif %}">
+                                        {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}{{ mov.moneda_simbolo }}{{ mov.monto|floatformat:2 }}
+                                    </p>
                                 </div>
                             </div>
-
-                            <!-- Amount & Date -->
-                            <div class="text-right flex-shrink-0">
-                                <p class="font-numbers font-bold text-base sm:text-lg {% if mov.tipo == 'ingreso' %}text-success{% else %}text-expense{% endif %}">
-                                    {% if mov.tipo == 'ingreso' %}+{% else %}-{% endif %}${{ mov.monto|floatformat:2 }}
-                                </p>
-                                <p class="text-xs text-gray-400">{{ mov.fecha|date:"d M" }}</p>
+                            
+                            <!-- Bottom Row: Metadata Badges (sobrio, sin colores) -->
+                            <div class="flex flex-wrap items-center gap-1.5 ml-12 sm:ml-14">
+                                <!-- Categoría -->
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                                    {{ mov.categoria }}
+                                </span>
+                                
+                                <!-- Cuenta (if exists) -->
+                                {% if mov.cuenta_nombre %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                                    {{ mov.cuenta_nombre }}
+                                </span>
+                                {% endif %}
+                                
+                                <!-- Moneda -->
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600">
+                                    {{ mov.moneda_codigo }}
+                                </span>
+                                
+                                <!-- Fecha y Hora -->
+                                <span class="text-[11px] text-gray-400">
+                                    {{ mov.fecha|date:"d M" }} · {{ mov.fecha|time:"H:i" }}
+                                </span>
                             </div>
                         </div>
                     </a>
