@@ -52,14 +52,14 @@ def lista_gastos(request):
 @login_required  # Requiere que el usuario esté autenticado
 def crear_gasto(request):
     if request.method == 'POST':
-        form = GastoForm(request.POST)
+        form = GastoForm(request.POST, user=request.user)
         if form.is_valid():
             gasto = form.save(commit=False)  # Crea un objeto Gasto sin guardarlo aún
             gasto.usuario = request.user  # Asocia el gasto con el usuario autenticado
             gasto.save()  # Guarda el gasto en la base de datos
             return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
-        form = GastoForm()  # Crea un formulario de gasto vacío
+        form = GastoForm(user=request.user)  # Crea un formulario de gasto vacío
     return render(request, 'gastos/crear_gasto.html', {'form': form})
 
 
@@ -72,12 +72,12 @@ def editar_gasto(request, id):
         return redirect('gastos:lista_gastos')  # Redirige si el usuario no tiene permisos
 
     if request.method == 'POST':
-        form = GastoForm(request.POST, instance=gasto)  # Crea un formulario con los datos del gasto existente
+        form = GastoForm(request.POST, instance=gasto, user=request.user)  # Crea un formulario con los datos del gasto existente
         if form.is_valid():
             form.save()  # Guarda los cambios realizados en el gasto
             return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
     else:
-        form = GastoForm(instance=gasto)  # Crea un formulario con los datos del gasto para editar
+        form = GastoForm(instance=gasto, user=request.user)  # Crea un formulario con los datos del gasto para editar
     return render(request, 'gastos/editar_gasto.html', {'form': form, 'gasto': gasto})
 
 

@@ -1,6 +1,7 @@
 from django import forms
 
 from .models import Ingreso, Moneda
+from cuentas.models import Cuenta
 
 
 class IngresoForm(forms.ModelForm):
@@ -53,7 +54,11 @@ class IngresoForm(forms.ModelForm):
         return monto
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        if user:
+            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=user)
+
         if not self.instance.pk and not self.initial.get('moneda'):
             ars = Moneda.objects.filter(codigo='ARS').first()
             if ars:

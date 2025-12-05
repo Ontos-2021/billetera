@@ -161,32 +161,36 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <!-- Total Income Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
-                <div class="flex items-center justify-between">
-                    <div class="min-w-0 flex-1">
-                        <p class="text-xs sm:text-sm font-medium text-success-dark mb-1">💰 Total Ingresos</p>
-                        <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-success truncate">+${{ total_ingresos|floatformat:2 }}</p>
-                        <p class="text-xs text-gray-500 mt-1">ARS</p>
-                    </div>
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
-                        <span class="text-xl sm:text-2xl">📈</span>
+            <a href="{% url 'ingresos:lista_ingresos' %}" class="block">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover h-full">
+                    <div class="flex items-center justify-between">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs sm:text-sm font-medium text-success-dark mb-1">💰 Total Ingresos</p>
+                            <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-success truncate">+${{ total_ingresos|floatformat:2 }}</p>
+                            <p class="text-xs text-gray-500 mt-1">ARS</p>
+                        </div>
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                            <span class="text-xl sm:text-2xl">📈</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Total Expenses Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover">
-                <div class="flex items-center justify-between">
-                    <div class="min-w-0 flex-1">
-                        <p class="text-xs sm:text-sm font-medium text-expense-dark mb-1">💸 Total Gastos</p>
-                        <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-expense truncate">-${{ total_gastos|floatformat:2 }}</p>
-                        <p class="text-xs text-gray-500 mt-1">ARS</p>
-                    </div>
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
-                        <span class="text-xl sm:text-2xl">📉</span>
+            <a href="{% url 'gastos:lista_gastos' %}" class="block">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover h-full">
+                    <div class="flex items-center justify-between">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-xs sm:text-sm font-medium text-expense-dark mb-1">💸 Total Gastos</p>
+                            <p class="text-xl sm:text-2xl md:text-3xl font-numbers font-bold text-expense truncate">-${{ total_gastos|floatformat:2 }}</p>
+                            <p class="text-xs text-gray-500 mt-1">ARS</p>
+                        </div>
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                            <span class="text-xl sm:text-2xl">📉</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Net Balance Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 card-hover">

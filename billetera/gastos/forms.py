@@ -2,6 +2,7 @@ from django import forms
 from django.utils import timezone
 
 from .models import Gasto, Moneda
+from cuentas.models import Cuenta
 
 
 class GastoForm(forms.ModelForm):
@@ -61,7 +62,11 @@ class GastoForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        if user:
+            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=user)
+        
         if not self.instance.pk:
             self._prefill_moneda_default()
         if self.instance and self.instance.pk:

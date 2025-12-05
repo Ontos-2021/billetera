@@ -11,14 +11,14 @@ from .forms import IngresoForm
 @login_required
 def crear_ingreso(request):
     if request.method == 'POST':
-        form = IngresoForm(request.POST)
+        form = IngresoForm(request.POST, user=request.user)
         if form.is_valid():
             ingreso = form.save(commit=False)
             ingreso.usuario = request.user  # Asignar el usuario actual
             ingreso.save()
             return redirect('ingresos:lista_ingresos')  # Redirigir a la lista de ingresos
     else:
-        form = IngresoForm()
+        form = IngresoForm(user=request.user)
     return render(request, 'ingresos/crear_ingreso.html', {'form': form})
 
 
@@ -27,12 +27,12 @@ def crear_ingreso(request):
 def editar_ingreso(request, ingreso_id):
     ingreso = get_object_or_404(Ingreso, id=ingreso_id, usuario=request.user)
     if request.method == 'POST':
-        form = IngresoForm(request.POST, instance=ingreso)
+        form = IngresoForm(request.POST, instance=ingreso, user=request.user)
         if form.is_valid():
             form.save()
             return redirect('ingresos:lista_ingresos')  # Redireccionar a la lista de ingresos
     else:
-        form = IngresoForm(instance=ingreso)
+        form = IngresoForm(instance=ingreso, user=request.user)
     return render(request, 'ingresos/editar_ingreso.html', {'form': form, 'ingreso': ingreso})
 
 
