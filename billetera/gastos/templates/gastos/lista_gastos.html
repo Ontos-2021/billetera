@@ -5,30 +5,30 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">💸 Lista de Gastos</h1>
-            <p class="text-gray-600">Controla y gestiona todos tus gastos de manera consciente</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div class="mb-4 sm:mb-0">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">💸 Lista de Gastos</h1>
+            <p class="text-sm sm:text-base text-gray-600">Controla y gestiona todos tus gastos de manera consciente</p>
         </div>
-        <div class="flex space-x-3 mt-4 sm:mt-0">
-            <a href="{% url 'gastos:exportar_gastos_pdf' %}?{{ request.GET.urlencode }}" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
-                <span class="mr-2">📄</span>
+        <div class="flex flex-wrap gap-2 sm:flex-nowrap sm:space-x-3">
+            <a href="{% url 'gastos:exportar_gastos_pdf' %}?{{ request.GET.urlencode }}" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center text-sm sm:text-base">
+                <span class="mr-1 sm:mr-2">📄</span>
                 PDF
             </a>
-            <a href="{% url 'gastos:compra_global' %}" class="bg-white border border-expense text-expense hover:bg-expense-light hover:text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
-                <span class="mr-2">🛒</span>
-                Compra Global
+            <a href="{% url 'gastos:compra_global' %}" class="bg-white border border-expense text-expense hover:bg-expense-light hover:text-white font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center text-sm sm:text-base">
+                <span class="mr-1 sm:mr-2">🛒</span>
+                <span class="hidden xs:inline">Compra </span>Global
             </a>
-            <a href="{% url 'gastos:crear_gasto' %}" class="bg-expense hover:bg-expense-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center">
-                <span class="mr-2">+</span>
-                Nuevo Gasto
+            <a href="{% url 'gastos:crear_gasto' %}" class="bg-expense hover:bg-expense-dark text-white font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center text-sm sm:text-base">
+                <span class="mr-1 sm:mr-2">+</span>
+                <span class="hidden xs:inline">Nuevo </span>Gasto
             </a>
         </div>
     </div>
 
     <!-- Filters Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-        <form method="get" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 mb-4 sm:mb-6">
+        <form method="get" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4 items-end">
             <div>
                 <label class="block text-xs font-medium text-gray-700 mb-1">Descripción</label>
                 {{ filter.form.descripcion }}
@@ -58,14 +58,14 @@
         {% if totales_gastos %}
         <div id="total-gastos-card"
              data-default-currency="{{ totales_gastos_default|default_if_none:'' }}"
-             class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer">
+             class="mb-6 sm:mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 hover:shadow-md transition-shadow duration-200 cursor-pointer">
             <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-1">💰 Total de Gastos</h3>
-                    <p class="text-sm text-gray-500">Suma de todos los gastos registrados</p>
+                <div class="min-w-0 flex-1">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-1">💰 Total de Gastos</h3>
+                    <p class="text-xs sm:text-sm text-gray-500 hidden sm:block">Suma de todos los gastos registrados</p>
                 </div>
-                <div class="text-right">
-                    <p id="total-gastos-valor" class="text-3xl font-numbers font-bold text-expense"></p>
+                <div class="text-right flex-shrink-0 ml-2">
+                    <p id="total-gastos-valor" class="text-xl sm:text-3xl font-numbers font-bold text-expense"></p>
                     <p id="total-gastos-moneda" class="text-xs text-gray-500"></p>
                 </div>
             </div>
@@ -81,15 +81,15 @@
         {% endif %}
 
         <!-- Expenses Grid -->
-        <div class="grid gap-3">
+        <div class="grid gap-2 sm:gap-3">
             {% for gasto in gastos %}
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover border-l-4 border-l-expense">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow duration-200 card-hover border-l-4 border-l-expense">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
                         <!-- Expense Info -->
-                        <div class="flex-1">
-                            <div class="flex items-start justify-between sm:justify-start gap-3">
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-gray-900 text-base mb-1">{{ gasto.descripcion }}</h3>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-2 sm:gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-semibold text-gray-900 text-sm sm:text-base mb-1 truncate">{{ gasto.descripcion }}</h3>
                                     {% if gasto.lugar %}
                                         <p class="text-xs text-gray-500 mb-1 flex items-center">
                                             <span class="mr-1">📍</span>{{ gasto.lugar }}
@@ -111,11 +111,11 @@
                                     </div>
                                 </div>
                                 <!-- Amount Display -->
-                                <div class="text-right ml-4">
-                                    <p class="text-xl font-numbers font-bold text-expense">-${{ gasto.monto }}</p>
-                                    <p class="text-xs text-gray-400 mb-1">{{ gasto.moneda.codigo }}</p>
+                                <div class="text-right ml-2 sm:ml-4 flex-shrink-0">
+                                    <p class="text-lg sm:text-xl font-numbers font-bold text-expense">-${{ gasto.monto }}</p>
+                                    <p class="text-[10px] sm:text-xs text-gray-400">{{ gasto.moneda.codigo }}</p>
                                     {% if gasto.cantidad > 1 %}
-                                        <p class="text-[11px] text-gray-500" title="Precio unitario: ${{ gasto.precio_unitario|floatformat:2 }}">
+                                        <p class="text-[10px] sm:text-[11px] text-gray-500" title="Precio unitario: ${{ gasto.precio_unitario|floatformat:2 }}">
                                             {{ gasto.cantidad }}u · ${{ gasto.precio_unitario|floatformat:2 }}
                                         </p>
                                     {% endif %}
@@ -124,14 +124,14 @@
                         </div>
 
                         <!-- Action Buttons -->
-                        <div class="flex space-x-2 sm:ml-4 text-sm">
+                        <div class="flex space-x-2 text-xs sm:text-sm">
                             <a href="{% url 'gastos:editar_gasto' gasto.id %}" 
-                               class="bg-primary hover:bg-primary-dark text-white font-medium px-3 py-2 rounded-lg transition-colors duration-200">
-                                ✏️ Editar
+                               class="bg-primary hover:bg-primary-dark text-white font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors duration-200">
+                                ✏️ <span class="hidden sm:inline">Editar</span>
                             </a>
                             <a href="{% url 'gastos:eliminar_gasto' gasto.id %}" 
-                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-3 py-2 rounded-lg transition-colors duration-200">
-                                🗑️ Eliminar
+                               class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg transition-colors duration-200">
+                                🗑️ <span class="hidden sm:inline">Eliminar</span>
                             </a>
                         </div>
                     </div>
