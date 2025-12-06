@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Editar Cuenta - MoneyFlow Mirror{% endblock %}
+{% block title %}Editar {{ cuenta.nombre }} - MoneyFlow Mirror{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
@@ -16,33 +16,125 @@
         </ol>
     </nav>
 
+    <!-- Header -->
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">✏️ Editar Cuenta</h1>
+        <div class="w-16 h-16 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">✏️</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Editar Cuenta</h1>
         <p class="text-gray-600">Modifica los datos de tu cuenta</p>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover">
+        <div class="bg-primary text-white p-6 text-center">
+            <h2 class="text-xl font-semibold">✏️ {{ cuenta.nombre }}</h2>
+        </div>
+        
         <div class="p-6">
-            <form method="post" class="space-y-6">
+            <form method="post" class="space-y-6" novalidate>
                 {% csrf_token %}
                 
-                {% for field in form %}
+                <!-- Nombre Field -->
                 <div>
-                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
-                        {{ field.label }}
+                    <label for="{{ form.nombre.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">🏷️</span>
+                            Nombre de la Cuenta
+                            <span class="text-expense ml-1">*</span>
+                        </span>
                     </label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ field.errors.0 }}</p>
+                    <input type="text" 
+                           name="{{ form.nombre.name }}" 
+                           id="{{ form.nombre.id_for_label }}"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 font-medium"
+                           placeholder="Ej: Banco Galicia, MercadoPago"
+                           value="{{ form.nombre.value|default:'' }}"
+                           required>
+                    {% if form.nombre.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.nombre.errors.0 }}</p>
                     {% endif %}
                 </div>
-                {% endfor %}
 
-                <div class="flex space-x-4 pt-4">
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
-                        Guardar Cambios
+                <!-- Tipo Field -->
+                <div>
+                    <label for="{{ form.tipo.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📁</span>
+                            Tipo de Cuenta
+                        </span>
+                    </label>
+                    <select name="{{ form.tipo.name }}" 
+                            id="{{ form.tipo.id_for_label }}"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200">
+                        <option value="">Selecciona un tipo</option>
+                        {% for choice in form.tipo.field.queryset %}
+                            <option value="{{ choice.pk }}" {% if form.tipo.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>
+                                {% if choice.nombre == 'Efectivo' %}💵{% elif choice.nombre == 'Banco' %}🏦{% elif choice.nombre == 'Billetera Virtual' %}📱{% elif choice.nombre == 'Crypto' %}🪙{% else %}💳{% endif %} {{ choice.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.tipo.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.tipo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Moneda Field -->
+                <div>
+                    <label for="{{ form.moneda.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">💱</span>
+                            Moneda
+                        </span>
+                    </label>
+                    <select name="{{ form.moneda.name }}" 
+                            id="{{ form.moneda.id_for_label }}"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200">
+                        {% for choice in form.moneda.field.queryset %}
+                            <option value="{{ choice.pk }}" {% if form.moneda.value|stringformat:"s" == choice.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ choice.codigo }} - {{ choice.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.moneda.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.moneda.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Saldo Inicial Field -->
+                <div>
+                    <label for="{{ form.saldo_inicial.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">💰</span>
+                            Saldo Inicial
+                        </span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                        <input type="number" 
+                               name="{{ form.saldo_inicial.name }}" 
+                               id="{{ form.saldo_inicial.id_for_label }}"
+                               class="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-primary focus:border-primary transition-colors duration-200 font-numbers text-lg"
+                               placeholder="0.00"
+                               step="0.01"
+                               value="{{ form.saldo_inicial.value|default:'' }}">
+                    </div>
+                    {% if form.saldo_inicial.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.saldo_inicial.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-6">
+                    <button type="submit" 
+                            class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium px-6 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md text-lg transform hover:scale-[1.02]">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-2">💾</span>
+                            Guardar Cambios
+                        </span>
                     </button>
-                    <a href="{% url 'cuentas:lista_cuentas' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200">
+                    <a href="{% url 'cuentas:lista_cuentas' %}" 
+                       class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-4 rounded-lg transition-colors duration-200 text-center">
                         Cancelar
                     </a>
                 </div>

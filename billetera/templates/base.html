@@ -72,6 +72,9 @@
                         <a href="{% url 'cuentas:lista_cuentas' %}" class="text-gray-700 hover:text-primary font-medium transition-colors duration-200 flex items-center">
                             <span class="mr-2">💳</span>Cuentas
                         </a>
+                        <a href="{% url 'deudas:lista_deudas' %}" class="text-gray-700 hover:text-warning font-medium transition-colors duration-200 flex items-center">
+                            <span class="mr-2">🤝</span>Deudas
+                        </a>
                         <div class="flex items-center space-x-4">
                             <a href="{% url 'perfil_usuario' %}" class="flex items-center space-x-2 text-gray-700 hover:text-primary transition-colors duration-200">
                                 <span class="text-sm font-medium">{{ user.first_name|default:user.username }}</span>
@@ -114,6 +117,9 @@
                     </a>
                     <a href="{% url 'cuentas:lista_cuentas' %}" class="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors duration-200">
                         💳 Cuentas
+                    </a>
+                    <a href="{% url 'deudas:lista_deudas' %}" class="block px-3 py-2 text-gray-700 hover:text-warning hover:bg-gray-100 rounded-lg transition-colors duration-200">
+                        🤝 Deudas
                     </a>
                     <a href="{% url 'perfil_usuario' %}" class="block px-3 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded-lg transition-colors duration-200">
                         👤 {{ user.first_name|default:user.username }}

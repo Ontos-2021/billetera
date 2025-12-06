@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{% if object %}Editar{% else %}Nueva{% endif %} Deuda - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'inicio_usuarios' %}" class="hover:text-primary transition-colors duration-200">Inicio</a></li>
+            <li class="before:content-['/'] before:mx-2">
+                <a href="{% url 'deudas:lista_deudas' %}" class="hover:text-primary transition-colors duration-200">Deudas</a>
+            </li>
+            <li class="before:content-['/'] before:mx-2 text-gray-900">{% if object %}Editar{% else %}Nueva{% endif %}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-warning bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">🤝</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">{% if object %}Editar Deuda{% else %}Nueva Deuda{% endif %}</h1>
+        <p class="text-gray-600">{% if object %}Modifica los datos de la deuda{% else %}Registra una nueva cuenta por cobrar o pagar{% endif %}</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover">
+        <div class="bg-warning text-white p-6 text-center">
+            <h2 class="text-xl font-semibold">🤝 {% if object %}Editar{% else %}Nueva{% endif %} Deuda</h2>
+        </div>
+        
+        <div class="p-6">
+            <form method="post" class="space-y-6" novalidate>
+                {% csrf_token %}
+                
+                <!-- Persona Field -->
+                <div>
+                    <label for="{{ form.persona.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">👤</span>
+                            {{ form.persona.label }}
+                            <span class="text-expense ml-1">*</span>
+                        </span>
+                    </label>
+                    <input type="text" 
+                           name="{{ form.persona.name }}" 
+                           id="{{ form.persona.id_for_label }}"
+                           class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200 font-medium"
+                           placeholder="Ej: Juan Pérez"
+                           {% if form.persona.value %}value="{{ form.persona.value }}"{% endif %}
+                           required>
+                    {% if form.persona.help_text %}
+                        <p class="mt-1 text-sm text-gray-500">{{ form.persona.help_text }}</p>
+                    {% endif %}
+                    {% if form.persona.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.persona.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Tipo Field -->
+                <div>
+                    <label for="{{ form.tipo.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📋</span>
+                            {{ form.tipo.label }}
+                            <span class="text-expense ml-1">*</span>
+                        </span>
+                    </label>
+                    <select name="{{ form.tipo.name }}" 
+                            id="{{ form.tipo.id_for_label }}"
+                            class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200">
+                        <option value="">Selecciona el tipo</option>
+                        {% for choice in form.tipo.field.choices %}
+                            {% if choice.0 %}
+                                <option value="{{ choice.0 }}" {% if form.tipo.value == choice.0 %}selected{% endif %}>
+                                    {% if choice.0 == 'POR_COBRAR' %}💵 Me deben (Por Cobrar){% else %}💸 Yo debo (Por Pagar){% endif %}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.tipo.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.tipo.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Amount and Currency Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="{{ form.monto.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                            <span class="flex items-center">
+                                <span class="mr-2">💰</span>
+                                {{ form.monto.label }}
+                                <span class="text-expense ml-1">*</span>
+                            </span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">$</span>
+                            <input type="number" 
+                                   name="{{ form.monto.name }}" 
+                                   id="{{ form.monto.id_for_label }}"
+                                   class="w-full pl-8 pr-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200 font-numbers text-lg"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   {% if form.monto.value %}value="{{ form.monto.value }}"{% endif %}
+                                   required>
+                        </div>
+                        {% if form.monto.errors %}
+                            <p class="mt-1 text-sm text-expense">{{ form.monto.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.moneda.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                            <span class="flex items-center">
+                                <span class="mr-2">💱</span>
+                                <span class="hidden md:inline">{{ form.moneda.label }}</span>
+                                <span class="md:hidden">Moneda</span>
+                            </span>
+                        </label>
+                        <select name="{{ form.moneda.name }}" 
+                                id="{{ form.moneda.id_for_label }}"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200">
+                            {% for choice in form.moneda.field.queryset %}
+                                <option value="{{ choice.pk }}" {% if form.moneda.value == choice.pk %}selected{% endif %}>
+                                    {{ choice.codigo }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.moneda.errors %}
+                            <p class="mt-1 text-sm text-expense">{{ form.moneda.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Dates Fields -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="{{ form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                            <span class="flex items-center">
+                                <span class="mr-2">📅</span>
+                                Fecha de creación
+                            </span>
+                        </label>
+                        {{ form.fecha }}
+                        {% if form.fecha.errors %}
+                            <p class="mt-1 text-sm text-expense">{{ form.fecha.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.fecha_vencimiento.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                            <span class="flex items-center">
+                                <span class="mr-2">⏰</span>
+                                Vencimiento (opcional)
+                            </span>
+                        </label>
+                        <input type="date" 
+                               name="{{ form.fecha_vencimiento.name }}" 
+                               id="{{ form.fecha_vencimiento.id_for_label }}"
+                               class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200"
+                               {% if form.fecha_vencimiento.value %}value="{{ form.fecha_vencimiento.value }}"{% endif %}>
+                        {% if form.fecha_vencimiento.errors %}
+                            <p class="mt-1 text-sm text-expense">{{ form.fecha_vencimiento.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Description Field -->
+                <div>
+                    <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📝</span>
+                            Descripción (opcional)
+                        </span>
+                    </label>
+                    <textarea name="{{ form.descripcion.name }}" 
+                              id="{{ form.descripcion.id_for_label }}"
+                              rows="3"
+                              class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200"
+                              placeholder="Detalles adicionales sobre la deuda...">{{ form.descripcion.value|default:'' }}</textarea>
+                    {% if form.descripcion.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.descripcion.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Submit Button -->
+                <div class="space-y-4 pt-6">
+                    <button type="submit" 
+                            class="w-full bg-warning hover:bg-warning-dark text-gray-900 font-medium px-6 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md text-lg transform hover:scale-[1.02]">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-2">💾</span>
+                            <span class="hidden sm:inline">{% if object %}Guardar Cambios{% else %}Registrar Deuda{% endif %}</span>
+                            <span class="sm:hidden">Guardar</span>
+                        </span>
+                    </button>
+                    <p class="text-sm text-gray-500 text-center">
+                        {% if object %}Los cambios se guardarán inmediatamente{% else %}La deuda quedará registrada en tu historial{% endif %}
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-6">
+        <a href="{% url 'deudas:lista_deudas' %}" 
+           class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200 inline-flex items-center">
+            <span class="mr-2">←</span>
+            <span class="hidden sm:inline">Volver a la lista de deudas</span>
+            <span class="sm:hidden">Volver</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

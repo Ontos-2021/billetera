@@ -42,8 +42,13 @@
         
         <div class="p-6">
             <div class="flex justify-between items-center mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <span class="text-gray-600 font-medium">Saldo en Sistema:</span>
-                <span class="text-xl font-bold text-gray-900">{{ cuenta.moneda.simbolo }}{{ saldo_sistema|floatformat:2 }}</span>
+                <div>
+                    <span class="text-sm font-medium text-primary-dark">💰 Saldo en Sistema</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-2xl font-numbers font-bold text-primary">{{ cuenta.moneda.simbolo }}{{ saldo_sistema|floatformat:2 }}</span>
+                    <p class="text-xs text-gray-500">{{ cuenta.moneda.codigo }}</p>
+                </div>
             </div>
 
             <form method="post" class="space-y-6" novalidate>

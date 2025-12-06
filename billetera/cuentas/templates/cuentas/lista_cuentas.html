@@ -12,11 +12,11 @@
             <p class="text-gray-600">Administra tus fuentes de dinero</p>
         </div>
         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <a href="{% url 'cuentas:transferir_cuentas' %}" class="bg-white border border-primary text-primary hover:bg-primary-light hover:text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center justify-center">
+            <a href="{% url 'cuentas:transferir_cuentas' %}" class="bg-white border border-primary text-primary hover:bg-primary hover:text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center transform hover:scale-105">
                 <span class="mr-2">🔄</span>
                 Transferir
             </a>
-            <a href="{% url 'cuentas:crear_cuenta' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md flex items-center justify-center">
+            <a href="{% url 'cuentas:crear_cuenta' %}" class="bg-primary hover:bg-primary-dark text-white font-medium px-6 py-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center transform hover:scale-105">
                 <span class="mr-2 text-xl">+</span>
                 Nueva Cuenta
             </a>
@@ -26,14 +26,15 @@
     <!-- Accounts Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% for cuenta in cuentas %}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 card-hover">
             <div class="p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 text-2xl">
+                        <div class="w-12 h-12 bg-primary-light bg-opacity-20 rounded-full flex items-center justify-center mr-4 text-2xl">
                             {% if cuenta.tipo.nombre == 'Efectivo' %}💵
                             {% elif cuenta.tipo.nombre == 'Banco' %}🏦
                             {% elif cuenta.tipo.nombre == 'Billetera Virtual' %}📱
+                            {% elif cuenta.tipo.nombre == 'Crypto' %}🪙
                             {% else %}💳{% endif %}
                         </div>
                         <div>
@@ -42,20 +43,21 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <a href="{% url 'cuentas:editar_cuenta' cuenta.pk %}" class="text-gray-400 hover:text-blue-600 transition-colors p-1" title="Editar">
+                        <a href="{% url 'cuentas:editar_cuenta' cuenta.pk %}" class="text-gray-400 hover:text-primary transition-colors duration-200 p-1" title="Editar">
                             ✏️
                         </a>
-                        <a href="{% url 'cuentas:eliminar_cuenta' cuenta.pk %}" class="text-gray-400 hover:text-red-600 transition-colors p-1" title="Eliminar">
+                        <a href="{% url 'cuentas:eliminar_cuenta' cuenta.pk %}" class="text-gray-400 hover:text-expense transition-colors duration-200 p-1" title="Eliminar">
                             🗑️
                         </a>
                     </div>
                 </div>
                 
                 <div class="mt-4 pt-4 border-t border-gray-100">
-                    <p class="text-sm text-gray-500 mb-1">Saldo Inicial</p>
-                    <p class="text-2xl font-bold text-gray-900">
-                        {{ cuenta.moneda.simbolo }} {{ cuenta.saldo_inicial }}
+                    <p class="text-sm font-medium text-primary-dark mb-1">💰 Saldo Inicial</p>
+                    <p class="text-2xl font-numbers font-bold text-primary">
+                        {{ cuenta.moneda.simbolo }}{{ cuenta.saldo_inicial|floatformat:2 }}
                     </p>
+                    <p class="text-xs text-gray-500 mt-1">{{ cuenta.moneda.codigo }}</p>
                 </div>
             </div>
         </div>

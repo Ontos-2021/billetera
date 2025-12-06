@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Registrar Pago - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'inicio_usuarios' %}" class="hover:text-primary transition-colors duration-200">Inicio</a></li>
+            <li class="before:content-['/'] before:mx-2">
+                <a href="{% url 'deudas:lista_deudas' %}" class="hover:text-primary transition-colors duration-200">Deudas</a>
+            </li>
+            <li class="before:content-['/'] before:mx-2">
+                <a href="{% url 'deudas:detalle_deuda' deuda.pk %}" class="hover:text-primary transition-colors duration-200">{{ deuda.persona }}</a>
+            </li>
+            <li class="before:content-['/'] before:mx-2 text-gray-900">Registrar Pago</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">💵</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Registrar Pago</h1>
+        <p class="text-gray-600">Abono para la deuda con <strong class="text-primary">{{ deuda.persona }}</strong></p>
+    </div>
+
+    <!-- Debt Info Card -->
+    <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if deuda.tipo == 'POR_COBRAR' %}bg-success-light bg-opacity-20{% else %}bg-expense-light bg-opacity-20{% endif %}">
+                    <span class="text-xl">{% if deuda.tipo == 'POR_COBRAR' %}💵{% else %}💸{% endif %}</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">{{ deuda.get_tipo_display }}</p>
+                    <p class="font-semibold text-gray-900">{{ deuda.persona }}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-xs text-gray-500 mb-1">Saldo Pendiente</p>
+                <p class="text-xl font-numbers font-bold {% if deuda.tipo == 'POR_COBRAR' %}text-success{% else %}text-expense{% endif %}">
+                    {{ deuda.moneda.simbolo }}{{ deuda.saldo_pendiente|floatformat:2 }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover">
+        <div class="bg-success text-white p-6 text-center">
+            <h2 class="text-xl font-semibold">💵 Nuevo Pago</h2>
+        </div>
+        
+        <div class="p-6">
+            <form method="post" class="space-y-6" novalidate>
+                {% csrf_token %}
+                
+                <!-- Amount Field -->
+                <div>
+                    <label for="{{ form.monto.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">💰</span>
+                            Monto del Pago
+                            <span class="text-expense ml-1">*</span>
+                        </span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">{{ deuda.moneda.simbolo }}</span>
+                        <input type="number" 
+                               name="{{ form.monto.name }}" 
+                               id="{{ form.monto.id_for_label }}"
+                               class="w-full pl-10 pr-4 py-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-success focus:border-success transition-colors duration-200 font-numbers text-xl"
+                               placeholder="0.00"
+                               step="0.01"
+                               min="0"
+                               max="{{ deuda.saldo_pendiente }}"
+                               {% if form.monto.value %}value="{{ form.monto.value }}"{% endif %}
+                               required>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">Máximo: {{ deuda.moneda.simbolo }}{{ deuda.saldo_pendiente|floatformat:2 }}</p>
+                    {% if form.monto.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.monto.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Date Field -->
+                <div>
+                    <label for="{{ form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📅</span>
+                            Fecha del Pago
+                        </span>
+                    </label>
+                    {{ form.fecha }}
+                    {% if form.fecha.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.fecha.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Note Field -->
+                <div>
+                    <label for="{{ form.nota.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                        <span class="flex items-center">
+                            <span class="mr-2">📝</span>
+                            Nota (opcional)
+                        </span>
+                    </label>
+                    <textarea name="{{ form.nota.name }}" 
+                              id="{{ form.nota.id_for_label }}"
+                              rows="3"
+                              class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-success focus:border-success transition-colors duration-200"
+                              placeholder="Ej: Pago parcial, transferencia bancaria...">{{ form.nota.value|default:'' }}</textarea>
+                    {% if form.nota.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.nota.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Include in Finances Checkbox -->
+                <div class="flex items-start">
+                    <div class="flex items-center h-5">
+                        {{ form.incluir_en_finanzas }}
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="{{ form.incluir_en_finanzas.id_for_label }}" class="font-medium text-gray-700">
+                            {{ form.incluir_en_finanzas.label }}
+                        </label>
+                        <p class="text-gray-500">{{ form.incluir_en_finanzas.help_text }}</p>
+                    </div>
+                </div>
+
+                <!-- Quick Amount Buttons -->
+                <div>
+                    <p class="text-sm font-medium text-gray-700 mb-2">💡 Montos rápidos</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="setAmount({{ deuda.saldo_pendiente|stringformat:'f' }})" 
+                                class="px-4 py-2 bg-success-light bg-opacity-20 text-success-dark rounded-lg hover:bg-success-light hover:bg-opacity-40 transition-colors duration-200 text-sm font-medium">
+                            Total ({{ deuda.moneda.simbolo }}{{ deuda.saldo_pendiente|floatformat:2 }})
+                        </button>
+                        <button type="button" onclick="setAmount({{ deuda.saldo_pendiente|stringformat:'f' }} * 0.5)" 
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium">
+                            50%
+                        </button>
+                        <button type="button" onclick="setAmount({{ deuda.saldo_pendiente|stringformat:'f' }} * 0.25)" 
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm font-medium">
+                            25%
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="space-y-4 pt-6">
+                    <button type="submit" 
+                            class="w-full bg-success hover:bg-success-dark text-white font-medium px-6 py-4 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md text-lg transform hover:scale-[1.02]">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-2">✅</span>
+                            <span class="hidden sm:inline">Confirmar Pago</span>
+                            <span class="sm:hidden">Confirmar</span>
+                        </span>
+                    </button>
+                    <p class="text-sm text-gray-500 text-center">
+                        El saldo de la deuda se actualizará automáticamente
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-6">
+        <a href="{% url 'deudas:detalle_deuda' deuda.pk %}" 
+           class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200 inline-flex items-center">
+            <span class="mr-2">←</span>
+            <span class="hidden sm:inline">Volver al detalle</span>
+            <span class="sm:hidden">Volver</span>
+        </a>
+    </div>
+</div>
+
+<script>
+function setAmount(value) {
+    const input = document.getElementById('{{ form.monto.id_for_label }}');
+    input.value = parseFloat(value).toFixed(2);
+    input.focus();
+}
+</script>
+{% endblock %}

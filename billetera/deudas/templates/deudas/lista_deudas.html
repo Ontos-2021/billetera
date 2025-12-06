@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Deudas - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
+        <div class="mb-4 sm:mb-0">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">🤝 Mis Deudas</h1>
+            <p class="text-sm sm:text-base text-gray-600">Gestiona tus cuentas por cobrar y por pagar</p>
+        </div>
+        <div>
+            <a href="{% url 'deudas:crear_deuda' %}" class="bg-warning hover:bg-warning-dark text-gray-900 font-medium px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md inline-flex items-center transform hover:scale-105">
+                <span class="mr-2 text-xl">+</span>
+                <span class="hidden sm:inline">Nueva Deuda</span>
+                <span class="sm:hidden">Nueva</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mobile Cards View -->
+    <div class="block md:hidden space-y-4">
+        {% for deuda in deudas %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200 card-hover">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 {% if deuda.tipo == 'POR_COBRAR' %}bg-success-light bg-opacity-20{% else %}bg-expense-light bg-opacity-20{% endif %}">
+                        <span class="text-xl">{% if deuda.tipo == 'POR_COBRAR' %}💵{% else %}💸{% endif %}</span>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-900">{{ deuda.persona }}</p>
+                        <p class="text-xs {% if deuda.tipo == 'POR_COBRAR' %}text-success{% else %}text-expense{% endif %}">
+                            {{ deuda.get_tipo_display }}
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    {% if deuda.estado == 'PAGADA' %}
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-success-light bg-opacity-20 text-success-dark">✓ Pagada</span>
+                    {% else %}
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-warning bg-opacity-20 text-warning-dark">⏳ Pendiente</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">Monto Total</p>
+                    <p class="font-numbers font-bold text-gray-900">{{ deuda.moneda.simbolo }}{{ deuda.monto|floatformat:2 }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-xs text-gray-500">Pendiente</p>
+                    <p class="font-numbers font-bold {% if deuda.saldo_pendiente > 0 %}text-expense{% else %}text-success{% endif %}">
+                        {{ deuda.moneda.simbolo }}{{ deuda.saldo_pendiente|floatformat:2 }}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                <p class="text-xs text-gray-500">📅 {{ deuda.fecha|date:"d/m/Y" }}</p>
+                <div class="flex space-x-3">
+                    <a href="{% url 'deudas:detalle_deuda' deuda.pk %}" class="text-primary hover:text-primary-dark font-medium text-sm transition-colors duration-200">Ver</a>
+                    <a href="{% url 'deudas:editar_deuda' deuda.pk %}" class="text-gray-500 hover:text-gray-700 font-medium text-sm transition-colors duration-200">Editar</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+            <span class="text-4xl mb-4 block">🤝</span>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No tienes deudas registradas</h3>
+            <p class="text-gray-500 mb-4">Registra tus cuentas por cobrar y por pagar</p>
+            <a href="{% url 'deudas:crear_deuda' %}" class="text-warning hover:text-warning-dark font-medium">
+                Crear mi primera deuda →
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop Table View -->
+    <div class="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Persona</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo Pendiente</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for deuda in deudas %}
+                    <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center mr-3 {% if deuda.tipo == 'POR_COBRAR' %}bg-success-light bg-opacity-20{% else %}bg-expense-light bg-opacity-20{% endif %}">
+                                    <span>{% if deuda.tipo == 'POR_COBRAR' %}💵{% else %}💸{% endif %}</span>
+                                </div>
+                                <span class="font-medium text-gray-900">{{ deuda.persona }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% if deuda.tipo == 'POR_COBRAR' %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-success-light bg-opacity-20 text-success-dark">Por Cobrar</span>
+                            {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-expense-light bg-opacity-20 text-expense-dark">Por Pagar</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-numbers text-gray-700">{{ deuda.moneda.simbolo }}{{ deuda.monto|floatformat:2 }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="font-numbers font-bold {% if deuda.saldo_pendiente > 0 %}text-expense{% else %}text-success{% endif %}">
+                                {{ deuda.moneda.simbolo }}{{ deuda.saldo_pendiente|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% if deuda.estado == 'PAGADA' %}
+                                <span class="text-success font-bold flex items-center">✓ Pagada</span>
+                            {% else %}
+                                <span class="text-warning-dark font-bold flex items-center">⏳ Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ deuda.fecha|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{% url 'deudas:detalle_deuda' deuda.pk %}" class="text-primary hover:text-primary-dark mr-3 transition-colors duration-200">Ver</a>
+                            <a href="{% url 'deudas:editar_deuda' deuda.pk %}" class="text-gray-500 hover:text-gray-700 transition-colors duration-200">Editar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center">
+                            <span class="text-4xl mb-4 block">🤝</span>
+                            <p class="text-gray-500 mb-2">No tienes deudas registradas</p>
+                            <a href="{% url 'deudas:crear_deuda' %}" class="text-warning hover:text-warning-dark font-medium">
+                                Crear mi primera deuda →
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

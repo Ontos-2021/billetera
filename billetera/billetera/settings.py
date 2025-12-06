@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'usuarios',
     'ingresos',
     'cuentas',
+    'deudas',
 ]
 
 # Note: we reuse the existing `usuarios` app for auth/social functionality.
