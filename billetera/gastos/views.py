@@ -143,7 +143,7 @@ def compra_global(request):
     ItemFormSet = formset_factory(CompraGlobalItemForm, extra=1)
     
     if request.method == 'POST':
-        header_form = CompraGlobalHeaderForm(request.POST)
+        header_form = CompraGlobalHeaderForm(request.POST, user=request.user)
         item_formset = ItemFormSet(request.POST)
         
         if header_form.is_valid() and item_formset.is_valid():
@@ -191,7 +191,7 @@ def compra_global(request):
                 # Handle errors if needed
                 pass
     else:
-        header_form = CompraGlobalHeaderForm()
+        header_form = CompraGlobalHeaderForm(user=request.user)
         ItemFormSet = formset_factory(CompraGlobalItemForm, extra=1)
         item_formset = ItemFormSet()
         

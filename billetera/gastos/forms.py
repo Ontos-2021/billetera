@@ -132,7 +132,12 @@ class GastoForm(forms.ModelForm):
 
 class CompraGlobalHeaderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        
+        if self.user:
+            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=self.user)
+            
         if not self.initial.get('fecha'):
             self.initial['fecha'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%dT%H:%M')
         if not self.initial.get('moneda'):
