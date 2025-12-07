@@ -115,6 +115,8 @@ def eliminar_gasto(request, id):
         
         return redirect('gastos:lista_gastos')  # Redirige a la lista de gastos
 
+    return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
+
 
 @login_required
 def exportar_gastos_pdf(request):
@@ -134,7 +136,6 @@ def exportar_gastos_pdf(request):
 
     weasyprint.HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(response)
     return response
-    return render(request, 'gastos/eliminar_gasto.html', {'gasto': gasto})
 
 
 # Crear gasto global

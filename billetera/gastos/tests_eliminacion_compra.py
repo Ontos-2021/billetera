@@ -195,6 +195,27 @@ class EliminarItemCompraTest(TestCase):
         compra.refresh_from_db()
         self.assertEqual(compra.total, Decimal('200.00'))
 
+    def test_eliminar_gasto_get_request(self):
+        """
+        Verifica que la vista de eliminar gasto responda correctamente a una petición GET.
+        El bug reportado es que retorna None (ValueError).
+        """
+        gasto = Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Gasto para borrar',
+            monto=Decimal('100.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta
+        )
+        url = reverse('gastos:eliminar_gasto', args=[gasto.id])
+        try:
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertTemplateUsed(response, 'gastos/eliminar_gasto.html')
+        except ValueError as e:
+            self.fail(f"La vista lanzó ValueError: {e}")
+
 
 class EditarItemCompraTest(TestCase):
     """Tests para la edición de ítems de una compra."""
