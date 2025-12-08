@@ -205,6 +205,77 @@
         </div>
     </div>
 
+    <!-- Deudas Section -->
+    {% if deudas_por_cobrar or deudas_por_pagar %}
+    <div class="mb-6 sm:mb-8">
+        <div class="flex items-center justify-between mb-3 sm:mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-900">🤝 Deudas Pendientes</h2>
+            <a href="{% url 'deudas:lista_deudas' %}" class="text-sm text-primary hover:text-primary-dark font-medium">
+                Ver todas
+            </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+            <!-- Por Cobrar -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-5 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-success-light bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-xl">💵</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Por Cobrar</h3>
+                            <p class="text-xs text-gray-500">Dinero que te deben</p>
+                        </div>
+                    </div>
+                </div>
+                {% if deudas_por_cobrar %}
+                    <div class="space-y-2">
+                        {% for deuda in deudas_por_cobrar %}
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-600">{{ deuda.codigo }}</span>
+                            <span class="text-lg font-numbers font-bold text-success">
+                                +{{ deuda.simbolo }}{{ deuda.total|floatformat:2|intcomma }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-sm text-gray-400 italic">No tienes cobros pendientes</p>
+                {% endif %}
+            </div>
+
+            <!-- Por Pagar -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-5 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                            <span class="text-xl">💸</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Por Pagar</h3>
+                            <p class="text-xs text-gray-500">Dinero que debes</p>
+                        </div>
+                    </div>
+                </div>
+                {% if deudas_por_pagar %}
+                    <div class="space-y-2">
+                        {% for deuda in deudas_por_pagar %}
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-600">{{ deuda.codigo }}</span>
+                            <span class="text-lg font-numbers font-bold text-expense">
+                                -{{ deuda.simbolo }}{{ deuda.total|floatformat:2|intcomma }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-sm text-gray-400 italic">Estás al día con tus pagos</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Financial Summary Cards -->
     <div class="mb-6 sm:mb-8">
         <!-- Time Range Filter -->

@@ -8,11 +8,11 @@ class DeudaForm(forms.ModelForm):
         model = Deuda
         fields = ['persona', 'tipo', 'monto', 'moneda', 'fecha', 'fecha_vencimiento', 'descripcion']
         widgets = {
-            'fecha': forms.DateTimeInput(attrs={
+            'fecha': forms.DateTimeInput(format='%Y-%m-%dT%H:%M', attrs={
                 'type': 'datetime-local',
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200'
             }),
-            'fecha_vencimiento': forms.DateInput(attrs={
+            'fecha_vencimiento': forms.DateInput(format='%Y-%m-%d', attrs={
                 'type': 'date',
                 'class': 'w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-warning focus:border-warning transition-colors duration-200'
             }),
@@ -58,6 +58,30 @@ class PagoDeudaForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.deuda_context = kwargs.pop('deuda', None)
         super().__init__(*args, **kwargs)
         if not self.instance.pk:
             self.initial['fecha'] = timezone.now().strftime('%Y-%m-%dT%H:%M')
+
+    def clean_monto(self):
+        monto = self.cleaned_data.get('monto')
+        if monto is not None and monto <= 0:
+            raise forms.ValidationError("El monto debe ser mayor a cero.")
+        
+        # Validación de tope de monto
+        deuda = None
+        if self.instance.pk:
+            deuda = self.instance.deuda
+        elif self.deuda_context:
+            deuda = self.deuda_context
+            
+        if deuda:
+            saldo_pendiente = deuda.saldo_pendiente()
+            # Si estamos editando, sumamos el monto actual al saldo pendiente para saber el tope real
+            if self.instance.pk:
+                saldo_pendiente += self.instance.monto
+            
+            if monto > saldo_pendiente:
+                raise forms.ValidationError(f"El monto no puede superar el saldo pendiente ({deuda.moneda.simbolo}{saldo_pendiente}).")
+                
+        return monto

@@ -9,6 +9,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from gastos.models import Gasto, Compra
 from ingresos.models import Ingreso
+from deudas.models import Deuda
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseNotAllowed, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
@@ -197,6 +198,29 @@ def inicio(request):
         # Orden descendente por fecha y limitar a 10
         movimientos = sorted(movimientos, key=lambda x: x['fecha'], reverse=True)[:10]
 
+        # Calcular totales de deudas
+        deudas = Deuda.objects.filter(usuario=request.user)
+        totales_deudas = {
+            'POR_COBRAR': {},
+            'POR_PAGAR': {}
+        }
+        
+        for deuda in deudas:
+            saldo = deuda.saldo_pendiente()
+            if saldo > 0:
+                codigo = deuda.moneda.codigo
+                tipo = deuda.tipo
+                if codigo not in totales_deudas[tipo]:
+                    totales_deudas[tipo][codigo] = {
+                        'codigo': codigo,
+                        'simbolo': deuda.moneda.simbolo,
+                        'total': Decimal('0.00')
+                    }
+                totales_deudas[tipo][codigo]['total'] += saldo
+        
+        deudas_por_cobrar_list = sorted(totales_deudas['POR_COBRAR'].values(), key=lambda x: x['codigo'])
+        deudas_por_pagar_list = sorted(totales_deudas['POR_PAGAR'].values(), key=lambda x: x['codigo'])
+
         context = {
             'ingresos': ultimos_ingresos,  # Para mantener compatibilidad con el template
             'gastos': ultimos_gastos,  # Para mantener compatibilidad con el template
@@ -211,6 +235,8 @@ def inicio(request):
             'chart_labels': chart_labels,
             'chart_ingresos': chart_ingresos,
             'chart_gastos': chart_gastos,
+            'deudas_por_cobrar': deudas_por_cobrar_list,
+            'deudas_por_pagar': deudas_por_pagar_list,
         }
 
     return render(request, 'usuarios/inicio.html', context)

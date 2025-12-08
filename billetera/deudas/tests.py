@@ -6,7 +6,7 @@ from decimal import Decimal
 from .models import Deuda, PagoDeuda
 from .forms import DeudaForm, PagoDeudaForm
 from gastos.models import Moneda, Gasto, Categoria
-from ingresos.models import Ingreso, CategoriaIngreso
+from ingresos.models import Ingreso, CategoriaIngreso, Moneda as MonedaIngreso
 
 class DeudaTests(TestCase):
     def setUp(self):
@@ -391,3 +391,125 @@ class FormularioFechaTests(TestCase):
         form = PagoDeudaForm()
         rendered_widget = str(form['fecha'])
         self.assertIn('type="datetime-local"', rendered_widget)
+
+
+class PagoDeudaEdicionTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username='testuser_edit', password='password')
+        self.client.login(username='testuser_edit', password='password')
+        self.moneda, _ = Moneda.objects.get_or_create(codigo='USD', defaults={'nombre': 'Dolar', 'simbolo': '$'})
+        self.moneda_ingreso, _ = MonedaIngreso.objects.get_or_create(codigo='USD', defaults={'nombre': 'Dolar', 'simbolo': '$'})
+        self.categoria_gasto, _ = Categoria.objects.get_or_create(nombre='Deudas')
+        self.categoria_ingreso, _ = CategoriaIngreso.objects.get_or_create(nombre='Cobros')
+
+    def test_editar_pago_por_pagar(self):
+        deuda = Deuda.objects.create(
+            usuario=self.user, persona='Juan', tipo='POR_PAGAR',
+            monto=100, moneda=self.moneda
+        )
+        pago = PagoDeuda.objects.create(deuda=deuda, monto=50)
+        
+        # Manually create linked Gasto as the view would do
+        gasto = Gasto.objects.create(
+            usuario=self.user,
+            monto=50,
+            fecha=pago.fecha,
+            moneda=self.moneda,
+            categoria=self.categoria_gasto,
+            descripcion="Pago deuda"
+        )
+        pago.gasto_relacionado = gasto
+        pago.save()
+        
+        url = reverse('deudas:editar_pago', args=[pago.pk])
+        response = self.client.post(url, {
+            'monto': 80,
+            'fecha': pago.fecha.date(),
+            'nota': 'Editado',
+            'incluir_en_finanzas': True
+        })
+        
+        self.assertEqual(response.status_code, 302)
+        pago.refresh_from_db()
+        self.assertEqual(pago.monto, 80)
+        
+        # Reload gasto from the relationship to ensure we get the current one
+        gasto = pago.gasto_relacionado
+        self.assertIsNotNone(gasto)
+        self.assertEqual(gasto.monto, 80)
+        
+        deuda.refresh_from_db()
+        self.assertEqual(deuda.saldo_pendiente(), 20)
+
+    def test_editar_pago_por_cobrar(self):
+        deuda = Deuda.objects.create(
+            usuario=self.user, persona='Pedro', tipo='POR_COBRAR',
+            monto=100, moneda=self.moneda
+        )
+        pago = PagoDeuda.objects.create(deuda=deuda, monto=50)
+        
+        # Manually create linked Ingreso as the view would do
+        ingreso = Ingreso.objects.create(
+            usuario=self.user,
+            monto=50,
+            fecha=pago.fecha,
+            moneda=self.moneda_ingreso,
+            categoria=self.categoria_ingreso,
+            descripcion="Cobro deuda"
+        )
+        pago.ingreso_relacionado = ingreso
+        pago.save()
+        
+        url = reverse('deudas:editar_pago', args=[pago.pk])
+        response = self.client.post(url, {
+            'monto': 30,
+            'fecha': pago.fecha.date(),
+            'nota': 'Editado',
+            'incluir_en_finanzas': True
+        })
+        
+        self.assertEqual(response.status_code, 302)
+        pago.refresh_from_db()
+        self.assertEqual(pago.monto, 30)
+        
+        # Reload ingreso from the relationship
+        ingreso = pago.ingreso_relacionado
+        self.assertIsNotNone(ingreso)
+        self.assertEqual(ingreso.monto, 30)
+        
+        deuda.refresh_from_db()
+        self.assertEqual(deuda.saldo_pendiente(), 70)
+
+    def test_validacion_monto_negativo(self):
+        deuda = Deuda.objects.create(
+            usuario=self.user, persona='Juan', tipo='POR_PAGAR',
+            monto=100, moneda=self.moneda
+        )
+        pago = PagoDeuda.objects.create(deuda=deuda, monto=50)
+        
+        url = reverse('deudas:editar_pago', args=[pago.pk])
+        response = self.client.post(url, {
+            'monto': -10,
+            'fecha': pago.fecha.date()
+        })
+        
+        self.assertEqual(response.status_code, 200) # Form error
+        self.assertFormError(response, 'form', 'monto', 'El monto debe ser mayor a cero.')
+
+    def test_validacion_exceder_saldo(self):
+        deuda = Deuda.objects.create(
+            usuario=self.user, persona='Juan', tipo='POR_PAGAR',
+            monto=100, moneda=self.moneda
+        )
+        pago = PagoDeuda.objects.create(deuda=deuda, monto=50)
+        # Saldo pendiente actual: 50.
+        # Si edito el pago a 110, el nuevo saldo sería 100 - 110 = -10. No permitido.
+        
+        url = reverse('deudas:editar_pago', args=[pago.pk])
+        response = self.client.post(url, {
+            'monto': 110,
+            'fecha': pago.fecha.date()
+        })
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['form'].errors)

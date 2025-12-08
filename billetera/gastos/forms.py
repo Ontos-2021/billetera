@@ -59,6 +59,12 @@ class GastoForm(forms.ModelForm):
                 'class': 'form-select form-select-lg'
             }),
         }
+
+    def clean_monto(self):
+        monto = self.cleaned_data.get('monto')
+        if monto is not None and monto <= 0:
+            raise forms.ValidationError("El monto debe ser mayor a cero.")
+        return monto
         labels = {
             'descripcion': 'Descripción del gasto',
             'monto': 'Precio Unitario',
