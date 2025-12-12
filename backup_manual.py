@@ -22,7 +22,14 @@ from backup_postgres_local import run_postgres_backup_no_pgdump
 if __name__ == '__main__':
     # IMPORTANTE: Pega aquí tu External Database URL de Render
     # La encuentras en el dashboard de Render, sección "Connections" -> "External Database URL"
-    EXTERNAL_DB_URL = input("Pega la External Database URL de Render: ").strip()
+    
+    EXTERNAL_DB_URL = os.getenv('EXTERNAL_DB_URL')
+    
+    if len(sys.argv) > 1:
+        EXTERNAL_DB_URL = sys.argv[1]
+        
+    if not EXTERNAL_DB_URL:
+        EXTERNAL_DB_URL = input("Pega la External Database URL de Render: ").strip()
     
     if not EXTERNAL_DB_URL:
         print("❌ Error: Debes proporcionar la External Database URL")
