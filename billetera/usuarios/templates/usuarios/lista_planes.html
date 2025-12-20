@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h2 class="text-3xl font-bold text-center mb-8">Planes de Suscripción</h2>
+    
+    {% if suscripcion_actual and suscripcion_actual.es_valida %}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
+            <strong class="font-bold">Plan Actual:</strong>
+            <span class="block sm:inline">{{ suscripcion_actual.plan.nombre }} (Vence: {{ suscripcion_actual.fecha_fin|date:"d/m/Y" }})</span>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for plan in planes %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300">
+            <div class="p-6">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ plan.nombre }}</h3>
+                <p class="text-4xl font-bold text-primary mb-4">${{ plan.precio }}</p>
+                <p class="text-gray-600 mb-6">{{ plan.descripcion }}</p>
+                
+                <ul class="mb-6 space-y-2">
+                    {% if plan.nombre == 'FREE' %}
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Registro manual de gastos</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Reportes básicos</li>
+                    {% elif plan.nombre == 'PRO' %}
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Todo lo del plan Free</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Carga por voz (OpenAI)</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Soporte prioritario</li>
+                    {% elif plan.nombre == 'PREMIUM' %}
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Todo lo del plan Pro</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Análisis financiero con IA</li>
+                        <li class="flex items-center"><span class="text-green-500 mr-2">✓</span> Predicciones de gastos</li>
+                    {% endif %}
+                </ul>
+                
+                <a href="{% url 'usuarios:procesar_pago' plan.id %}" class="block w-full bg-primary hover:bg-primary-dark text-white text-center font-bold py-3 px-4 rounded transition duration-300">
+                    Suscribirse
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
