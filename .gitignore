@@ -9,3 +9,4 @@ billetera/imagenes_perfil
 media/".env"
 media/
 .env
+*.sql.enc
