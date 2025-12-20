@@ -53,6 +53,11 @@
                         {{ header_form.lugar.label }}
                     </label>
                     {{ header_form.lugar }}
+                    <datalist id="tiendas-list">
+                        {% for tienda in tiendas %}
+                            <option value="{{ tienda.nombre }}"></option>
+                        {% endfor %}
+                    </datalist>
                     {% if header_form.lugar.errors %}
                         <p class="mt-1 text-sm text-expense">{{ header_form.lugar.errors.0 }}</p>
                     {% endif %}

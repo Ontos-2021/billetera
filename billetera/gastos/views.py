@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Gasto, Compra, Tienda
-from .forms import GastoForm, CompraGlobalHeaderForm, CompraGlobalItemForm
+from .forms import GastoForm, CompraGlobalHeaderForm, CompraGlobalItemForm, CompraGlobalEditForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.forms import formset_factory
@@ -151,12 +151,25 @@ def compra_global(request):
             try:
                 with transaction.atomic():
                     header_data = header_form.cleaned_data
+
+                    # Resolver / crear Tienda (autocompletado de comercios)
+                    tienda = None
+                    lugar = (header_data.get('lugar') or '').strip()
+                    if lugar:
+                        tienda, _ = Tienda.objects.get_or_create(
+                            nombre__iexact=lugar,
+                            usuario=request.user,
+                            defaults={'nombre': lugar}
+                        )
+                        # Normalizar lugar con el nombre guardado
+                        lugar = tienda.nombre
                     
                     # Crear objeto Compra para agrupar los gastos
                     compra = Compra.objects.create(
                         usuario=request.user,
                         fecha=header_data['fecha'],
-                        lugar=header_data['lugar'] or '',
+                        lugar=lugar or '',
+                        tienda=tienda,
                         cuenta=header_data['cuenta'],
                         moneda=header_data['moneda'],
                     )
@@ -168,7 +181,8 @@ def compra_global(request):
                             gasto.usuario = request.user
                             # Assign header fields
                             gasto.fecha = header_data['fecha']
-                            gasto.lugar = header_data['lugar']
+                            gasto.lugar = lugar
+                            gasto.tienda = tienda
                             gasto.cuenta = header_data['cuenta']
                             gasto.moneda = header_data['moneda']
                             # Asociar a la compra
@@ -195,10 +209,62 @@ def compra_global(request):
         header_form = CompraGlobalHeaderForm(user=request.user)
         ItemFormSet = formset_factory(CompraGlobalItemForm, extra=1)
         item_formset = ItemFormSet()
+
+    tiendas = Tienda.objects.filter(usuario=request.user)
         
     return render(request, 'gastos/compra_global.html', {
         'header_form': header_form,
         'item_formset': item_formset
+        , 'tiendas': tiendas
+    })
+
+
+@login_required
+def editar_compra(request, pk):
+    compra = get_object_or_404(Compra, pk=pk)
+
+    if not request.user.is_superuser and compra.usuario != request.user:
+        return redirect('gastos:lista_gastos')
+
+    if request.method == 'POST':
+        form = CompraGlobalEditForm(request.POST, instance=compra, user=request.user)
+        if form.is_valid():
+            with transaction.atomic():
+                compra = form.save(commit=False)
+
+                # Resolver / crear Tienda desde lugar
+                tienda = None
+                lugar = (compra.lugar or '').strip()
+                if lugar:
+                    tienda, _ = Tienda.objects.get_or_create(
+                        nombre__iexact=lugar,
+                        usuario=compra.usuario,
+                        defaults={'nombre': lugar}
+                    )
+                    lugar = tienda.nombre
+
+                compra.tienda = tienda
+                compra.lugar = lugar
+                compra.save()
+
+                # Propagar cambios a todos los ítems de la compra
+                compra.items.all().update(
+                    fecha=compra.fecha,
+                    lugar=compra.lugar,
+                    tienda=compra.tienda,
+                    cuenta=compra.cuenta,
+                    moneda=compra.moneda,
+                )
+
+            return redirect('gastos:lista_gastos')
+    else:
+        form = CompraGlobalEditForm(instance=compra, user=request.user)
+
+    tiendas = Tienda.objects.filter(usuario=compra.usuario)
+    return render(request, 'gastos/editar_compra.html', {
+        'form': form,
+        'compra': compra,
+        'tiendas': tiendas,
     })
 
 

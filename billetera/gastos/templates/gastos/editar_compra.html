@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Editar Compra - MoneyFlow Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="breadcrumb">
+        <ol class="flex space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'inicio_usuarios' %}" class="hover:text-primary transition-colors duration-200">Inicio</a></li>
+            <li class="before:content-['/'] before:mx-2">
+                <a href="{% url 'gastos:lista_gastos' %}" class="hover:text-primary transition-colors duration-200">Gastos</a>
+            </li>
+            <li class="before:content-['/'] before:mx-2 text-gray-900">Editar Compra</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-expense-light bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-3xl">🛒</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Editar Compra Global</h1>
+        <p class="text-gray-600">Los cambios se aplican a la compra y a todos sus ítems.</p>
+    </div>
+
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <span class="mr-2">📋</span> Datos del Ticket
+                </h2>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Date -->
+                <div>
+                    <label for="{{ form.fecha.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.fecha.label }}</label>
+                    {{ form.fecha }}
+                    {% if form.fecha.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.fecha.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Place/Store -->
+                <div>
+                    <label for="{{ form.lugar.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.lugar.label }}</label>
+                    {{ form.lugar }}
+                    <datalist id="tiendas-list">
+                        {% for tienda in tiendas %}
+                            <option value="{{ tienda.nombre }}"></option>
+                        {% endfor %}
+                    </datalist>
+                    {% if form.lugar.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.lugar.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Account -->
+                <div>
+                    <label for="{{ form.cuenta.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.cuenta.label }}</label>
+                    {{ form.cuenta }}
+                    {% if form.cuenta.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.cuenta.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Currency -->
+                <div>
+                    <label for="{{ form.moneda.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">{{ form.moneda.label }}</label>
+                    {{ form.moneda }}
+                    {% if form.moneda.errors %}
+                        <p class="mt-1 text-sm text-expense">{{ form.moneda.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex space-x-3">
+            <button type="submit" class="flex-1 bg-expense hover:bg-expense-dark text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md inline-flex items-center justify-center">
+                <span class="mr-2">💾</span>
+                Guardar Cambios
+            </button>
+            <a href="{% url 'gastos:lista_gastos' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors duration-200 inline-flex items-center justify-center">
+                <span class="mr-2">↩️</span>
+                Cancelar
+            </a>
+        </div>
+    </form>
+
+    <div class="mt-6 text-xs text-gray-500">
+        <p>Compra: {{ compra.lugar|default:"(sin comercio)" }} · {{ compra.fecha|date:"d M Y" }} {{ compra.fecha|time:"H:i" }} · {{ compra.items_count }} ítems</p>
+    </div>
+</div>
+{% endblock %}

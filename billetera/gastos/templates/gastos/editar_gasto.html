@@ -26,6 +26,15 @@
         </div>
 
         <div class="p-6">
+            {% if gasto.compra_id %}
+                <div class="mb-6 p-4 rounded-lg bg-primary-light bg-opacity-10 border border-primary-light">
+                    <p class="text-sm text-gray-700">
+                        Este ítem pertenece a una compra global.
+                        <a href="{% url 'gastos:editar_compra' gasto.compra_id %}" class="text-primary font-medium hover:text-primary-dark underline">Editar la compra completa</a>
+                        (aplica fecha/hora/comercio/cuenta/moneda a todos los ítems).
+                    </p>
+                </div>
+            {% endif %}
             <form method="post" class="space-y-6">
                 {% csrf_token %}
                 

@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Gasto, Moneda, Tienda
+from .models import Gasto, Moneda, Tienda, Compra
 from cuentas.models import Cuenta
 
 
@@ -162,7 +162,9 @@ class CompraGlobalHeaderForm(forms.ModelForm):
             'lugar': forms.TextInput(attrs={
                 'class': 'form-control form-control-lg',
                 'placeholder': 'Ej: Supermercado, Shopping',
-                'maxlength': '120'
+                'maxlength': '120',
+                'list': 'tiendas-list',
+                'autocomplete': 'off'
             }),
             'cuenta': forms.Select(attrs={
                 'class': 'form-select form-select-lg'
@@ -173,7 +175,50 @@ class CompraGlobalHeaderForm(forms.ModelForm):
         }
         labels = {
             'fecha': 'Fecha y Hora',
-            'lugar': 'Lugar / Comercio',
+            'lugar': 'Tienda / Comercio',
+            'cuenta': 'Cuenta / Medio de Pago',
+            'moneda': 'Moneda',
+        }
+
+
+class CompraGlobalEditForm(forms.ModelForm):
+    """Edita el encabezado de una Compra (fecha/hora + comercio + cuenta + moneda)."""
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields['cuenta'].queryset = Cuenta.objects.filter(usuario=self.user)
+
+        if self.instance and self.instance.pk and self.instance.fecha:
+            # Asegura el formato datetime-local en el input
+            self.initial['fecha'] = timezone.localtime(self.instance.fecha).strftime('%Y-%m-%dT%H:%M')
+
+    class Meta:
+        model = Compra
+        fields = ['fecha', 'lugar', 'cuenta', 'moneda']
+        widgets = {
+            'fecha': forms.DateTimeInput(attrs={
+                'class': 'form-control form-control-lg',
+                'type': 'datetime-local'
+            }),
+            'lugar': forms.TextInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Ej: Supermercado, Shopping',
+                'maxlength': '120',
+                'list': 'tiendas-list',
+                'autocomplete': 'off'
+            }),
+            'cuenta': forms.Select(attrs={
+                'class': 'form-select form-select-lg'
+            }),
+            'moneda': forms.Select(attrs={
+                'class': 'form-select form-select-lg'
+            }),
+        }
+        labels = {
+            'fecha': 'Fecha y Hora',
+            'lugar': 'Tienda / Comercio',
             'cuenta': 'Cuenta / Medio de Pago',
             'moneda': 'Moneda',
         }

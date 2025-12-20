@@ -19,6 +19,7 @@ urlpatterns = [
     path('crear/', views.crear_gasto, name='crear_gasto'),
     path('compra-global/', views.compra_global, name='compra_global'),
     path('compra/<int:pk>/detalle/', views.detalle_compra, name='detalle_compra'),
+    path('compra/<int:pk>/editar/', views.editar_compra, name='editar_compra'),
     path('editar/<int:id>/', views.editar_gasto, name='editar_gasto'),
     path('eliminar/<int:id>/', views.eliminar_gasto, name='eliminar_gasto'),
     path('exportar-pdf/', views.exportar_gastos_pdf, name='exportar_gastos_pdf'),
