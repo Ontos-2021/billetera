@@ -223,6 +223,66 @@ class DashboardMovimientosAgrupados(TestCase):
         tipos = [m['tipo'] for m in movimientos]
         self.assertEqual(tipos.count('compra'), 1)
         self.assertEqual(tipos.count('gasto'), 0)
+
+    def test_movimientos_compra_muestra_cantidad_item_unico(self):
+        """Si una compra tiene 1 ítem con cantidad > 1, debe verse xN en la descripción."""
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=timezone.now(),
+            lugar='Kiosco',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Galletitas',
+            cantidad=2,
+            monto=Decimal('200.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        mov_compra = [m for m in movimientos if m['tipo'] == 'compra'][0]
+        self.assertIn('x2', mov_compra['descripcion'])
+
+    def test_movimientos_compra_muestra_cantidades_en_compra_multiple(self):
+        """Si una compra tiene varios ítems, mostrar xN para los que tengan cantidad > 1."""
+        compra = Compra.objects.create(
+            usuario=self.user,
+            fecha=timezone.now(),
+            lugar='Super',
+            cuenta=self.cuenta,
+            moneda=self.moneda
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Coca',
+            cantidad=3,
+            monto=Decimal('300.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+        Gasto.objects.create(
+            usuario=self.user,
+            descripcion='Pan',
+            cantidad=1,
+            monto=Decimal('100.00'),
+            categoria=self.categoria,
+            moneda=self.moneda,
+            cuenta=self.cuenta,
+            compra=compra
+        )
+
+        response = self.client.get(reverse('inicio_usuarios'))
+        movimientos = response.context['movimientos']
+        mov_compra = [m for m in movimientos if m['tipo'] == 'compra'][0]
+        self.assertIn('Coca x3', mov_compra['descripcion'])
     
     def test_movimientos_compra_muestra_total(self):
         """Test: Movimiento tipo compra muestra suma de ítems."""

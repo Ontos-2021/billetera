@@ -98,65 +98,191 @@
     </div>
     {% endif %}
 
-    <!-- Chart Section -->
+    <!-- Evolución Financiera: Suite de gráficos -->
     <div class="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Evolución Financiera (Últimos 6 meses)</h3>
-        <div class="relative h-64">
-            <canvas id="financeChart"></canvas>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+                <h3 class="text-lg font-bold text-gray-900">📊 Evolución Financiera</h3>
+                <p class="text-xs text-gray-500 mt-1">ARS · sin transferencias</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'inicio_usuarios' %}?rango=7d" class="px-3 py-1.5 rounded-lg text-xs font-medium border {% if rango_actual == '7d' %}bg-primary text-white border-primary{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %}">7d</a>
+                <a href="{% url 'inicio_usuarios' %}?rango=30d" class="px-3 py-1.5 rounded-lg text-xs font-medium border {% if rango_actual == '30d' %}bg-primary text-white border-primary{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %}">30d</a>
+                <a href="{% url 'inicio_usuarios' %}?rango=365d" class="px-3 py-1.5 rounded-lg text-xs font-medium border {% if rango_actual == '365d' %}bg-primary text-white border-primary{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %}">1 año</a>
+                <a href="{% url 'inicio_usuarios' %}?rango=todo" class="px-3 py-1.5 rounded-lg text-xs font-medium border {% if rango_actual == 'todo' %}bg-primary text-white border-primary{% else %}bg-white text-gray-700 border-gray-300 hover:bg-gray-50{% endif %}">Todo</a>
+            </div>
         </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Ingresos vs Gastos (día por día)</h4>
+                <div class="relative h-64">
+                    <div id="dailyFlowNoData" class="hidden absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-700">Sin datos para este rango</p>
+                            <p class="text-xs text-gray-500 mt-1">Probá con otro periodo</p>
+                        </div>
+                    </div>
+                    <canvas id="dailyFlowChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Gastos por categoría</h4>
+                <div class="relative h-64">
+                    <div id="categoryPieNoData" class="hidden absolute inset-0 flex items-center justify-center">
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-700">Sin datos para este rango</p>
+                            <p class="text-xs text-gray-500 mt-1">No hay gastos categorizados</p>
+                        </div>
+                    </div>
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{ daily_flow_chart|json_script:"daily-flow-chart-data" }}
+        {{ category_pie_chart|json_script:"category-pie-chart-data" }}
     </div>
 
     <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {{ chart_labels|safe }},
-                    datasets: [
-                        {
-                            label: 'Ingresos',
-                            data: {{ chart_ingresos|safe }},
-                            borderColor: '#34a853',
-                            backgroundColor: 'rgba(52, 168, 83, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Gastos',
-                            data: {{ chart_gastos|safe }},
-                            borderColor: '#ea4335',
-                            backgroundColor: 'rgba(234, 67, 53, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        }
+            const dailyNode = document.getElementById('daily-flow-chart-data');
+            const pieNode = document.getElementById('category-pie-chart-data');
+            if (!dailyNode || !pieNode) return;
+
+            const daily = JSON.parse(dailyNode.textContent || '{}');
+            const pie = JSON.parse(pieNode.textContent || '{}');
+
+            // Defensive: if a value is double-encoded as JSON string
+            const normalizePayload = (payload) => {
+                if (payload && typeof payload === 'string') {
+                    try { return JSON.parse(payload); } catch (e) { return {}; }
+                }
+                return payload || {};
+            };
+            const dailyData = normalizePayload(daily);
+            const pieData = normalizePayload(pie);
+
+            const setNoDataState = (canvasId, noDataId, hasData) => {
+                const canvas = document.getElementById(canvasId);
+                const noData = document.getElementById(noDataId);
+                if (!canvas || !noData) return;
+                if (hasData) {
+                    canvas.classList.remove('hidden');
+                    noData.classList.add('hidden');
+                } else {
+                    canvas.classList.add('hidden');
+                    noData.classList.remove('hidden');
+                }
+            };
+
+            // Determine if there is meaningful data
+            const dailyIngresos = Array.isArray(dailyData.ingresos) ? dailyData.ingresos : [];
+            const dailyGastos = Array.isArray(dailyData.gastos) ? dailyData.gastos : [];
+            const dailyHasData = dailyIngresos.some(v => Number(v || 0) !== 0) || dailyGastos.some(v => Number(v || 0) !== 0);
+
+            const pieValues = Array.isArray(pieData.values) ? pieData.values : [];
+            const pieHasData = pieValues.some(v => Number(v || 0) !== 0);
+
+            setNoDataState('dailyFlowChart', 'dailyFlowNoData', dailyHasData);
+            setNoDataState('categoryPieChart', 'categoryPieNoData', pieHasData);
+
+            if (!dailyHasData && !pieHasData) {
+                // If neither chart has data, avoid drawing empty charts.
+                return;
+            }
+
+            // Daily flow chart
+            if (dailyHasData) {
+                const dailyCtx = document.getElementById('dailyFlowChart').getContext('2d');
+                new Chart(dailyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: dailyData.labels || [],
+                        datasets: [
+                            {
+                                label: 'Ingresos',
+                                data: dailyData.ingresos || [],
+                                borderColor: '#34a853',
+                                backgroundColor: 'rgba(52, 168, 83, 0.12)',
+                                tension: 0.35,
+                                fill: true,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Gastos',
+                                data: dailyData.gastos || [],
+                                borderColor: '#ea4335',
+                                backgroundColor: 'rgba(234, 67, 53, 0.12)',
+                                tension: 0.35,
+                                fill: true,
+                                pointRadius: 0
+                            }
+                        ]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                borderDash: [2, 4]
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = Number(context.raw || 0);
+                                        return `${context.dataset.label}: $${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                    }
+                                }
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
-                            }
+                        scales: {
+                            y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                            x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            // Category pie chart
+            const pieColors = [
+                '#4285f4', '#6ba6f6', '#3367d6',
+                '#34a853', '#81c995', '#2d7d32',
+                '#ea4335', '#f07470', '#d23025',
+                '#fbbc04', '#fdd663', '#f29900'
+            ];
+            if (pieHasData) {
+                const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+                new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: pieData.labels || [],
+                        datasets: [
+                            {
+                                data: pieData.values || [],
+                                backgroundColor: (pieData.labels || []).map((_, idx) => pieColors[idx % pieColors.length]),
+                                borderWidth: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = Number(context.raw || 0);
+                                        return `${context.label}: $${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
         });
     </script>
 

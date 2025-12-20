@@ -18,6 +18,7 @@ from datetime import timedelta
 from django.urls import reverse
 from django.template.loader import render_to_string
 # import weasyprint  <-- Moved inside function to avoid crash on Windows dev env
+from django.db.models.functions import TruncDate
 
 from usuarios.backup import run_database_backup
 from cuentas.models import Cuenta
@@ -111,6 +112,81 @@ def inicio(request):
 
         # --- Fin Lógica de Filtrado ---
 
+        # --- Suite de gráficos (rango variable) ---
+        # Nota: mantenemos coherencia con el dashboard: ARS + sin transferencias.
+        chart_start = fecha_inicio
+        if chart_start is None:
+            # Evitar rangos enormes en "todo" para gráficos diarios.
+            chart_start = ahora - timedelta(days=365)
+        start_date = timezone.localtime(chart_start).date()
+        end_date = timezone.localtime(ahora).date()
+        if (end_date - start_date).days > 365:
+            start_date = end_date - timedelta(days=365)
+
+        ingresos_qs = Ingreso.objects.filter(**filtros_ingresos)
+        gastos_qs = Gasto.objects.filter(**filtros_gastos)
+
+        ingresos_diarios = (
+            ingresos_qs
+            .annotate(dia=TruncDate('fecha'))
+            .values('dia')
+            .annotate(total=Sum('monto'))
+            .order_by('dia')
+        )
+        gastos_diarios = (
+            gastos_qs
+            .annotate(dia=TruncDate('fecha'))
+            .values('dia')
+            .annotate(total=Sum('monto'))
+            .order_by('dia')
+        )
+
+        ingresos_map = {row['dia']: float(row['total'] or 0) for row in ingresos_diarios}
+        gastos_map = {row['dia']: float(row['total'] or 0) for row in gastos_diarios}
+
+        daily_labels = []
+        daily_ingresos = []
+        daily_gastos = []
+        for i in range((end_date - start_date).days + 1):
+            d = start_date + timedelta(days=i)
+            daily_labels.append(d.strftime('%d/%m'))
+            daily_ingresos.append(ingresos_map.get(d, 0))
+            daily_gastos.append(gastos_map.get(d, 0))
+
+        categorias_qs = (
+            gastos_qs
+            .values('categoria__nombre')
+            .annotate(total=Sum('monto'))
+            .order_by('-total')
+        )
+        pie_labels = []
+        pie_values = []
+        otros_total = 0.0
+        max_slices = 8
+        for idx, row in enumerate(categorias_qs):
+            label = row['categoria__nombre'] or 'Sin categoría'
+            value = float(row['total'] or 0)
+            if idx < max_slices:
+                pie_labels.append(label)
+                pie_values.append(value)
+            else:
+                otros_total += value
+        if otros_total > 0:
+            pie_labels.append('Otros')
+            pie_values.append(otros_total)
+
+        daily_flow_chart = {
+            'labels': daily_labels,
+            'ingresos': daily_ingresos,
+            'gastos': daily_gastos,
+            'range': rango,
+        }
+        category_pie_chart = {
+            'labels': pie_labels,
+            'values': pie_values,
+            'range': rango,
+        }
+
         # Últimos 5 registros para la lista del inicio (Legacy, se puede mantener o quitar si no se usa)
         ultimos_ingresos = Ingreso.objects.filter(usuario=request.user).order_by('-fecha')[:5]
         ultimos_gastos = Gasto.objects.filter(usuario=request.user).order_by('-fecha')[:5]
@@ -150,7 +226,7 @@ def inicio(request):
         # Gastos individuales (sin compra asociada)
         gastos_individuales = Gasto.objects.filter(usuario=request.user, compra__isnull=True).order_by('-fecha')[:10]
         # Compras (agrupan gastos)
-        compras_para_mezcla = Compra.objects.filter(usuario=request.user).order_by('-fecha')[:10]
+        compras_para_mezcla = Compra.objects.filter(usuario=request.user).prefetch_related('items').order_by('-fecha')[:10]
 
         movimientos = []
         for ing in ingresos_para_mezcla:
@@ -167,9 +243,12 @@ def inicio(request):
                 'url': reverse('ingresos:editar_ingreso', args=[ing.id]),
             })
         for gas in gastos_individuales:
+            descripcion = gas.descripcion
+            if gas.cantidad > 1:
+                descripcion += f" x{gas.cantidad}"
             movimientos.append({
                 'tipo': 'gasto',
-                'descripcion': gas.descripcion,
+                'descripcion': descripcion,
                 'categoria': getattr(gas, 'categoria', ''),
                 'monto': gas.monto,
                 'fecha': gas.fecha,
@@ -180,17 +259,32 @@ def inicio(request):
                 'url': reverse('gastos:editar_gasto', args=[gas.id]),
             })
         for compra in compras_para_mezcla:
+            items = list(compra.items.all())
+            total_compra = sum(item.monto for item in items)
+            items_count = len(items)
+
+            if items_count == 1:
+                item = items[0]
+                descripcion = item.descripcion
+                if item.cantidad > 1:
+                    descripcion += f" x{item.cantidad}"
+            else:
+                descripcion = f"Compra en {compra.lugar}" if compra.lugar else "Compra"
+                items_con_cantidad = [f"{item.descripcion} x{item.cantidad}" for item in items if item.cantidad > 1]
+                if items_con_cantidad:
+                    descripcion += f" ({', '.join(items_con_cantidad)})"
+
             movimientos.append({
                 'tipo': 'compra',
-                'descripcion': f"Compra en {compra.lugar}" if compra.lugar else "Compra",
+                'descripcion': descripcion,
                 'categoria': '',  # Las compras agrupan varias categorías
-                'monto': compra.total,
+                'monto': total_compra,
                 'fecha': compra.fecha,
                 'obj': compra,
                 'cuenta_nombre': compra.cuenta.nombre if compra.cuenta else None,
                 'moneda_codigo': compra.moneda.codigo if compra.moneda else 'ARS',
                 'moneda_simbolo': compra.moneda.simbolo if compra.moneda else '$',
-                'items_count': compra.items_count,
+                'items_count': items_count,
                 'compra_id': compra.id,
                 'url': '#',  # No navega directamente, abre modal
             })
@@ -235,6 +329,8 @@ def inicio(request):
             'chart_labels': chart_labels,
             'chart_ingresos': chart_ingresos,
             'chart_gastos': chart_gastos,
+            'daily_flow_chart': daily_flow_chart,
+            'category_pie_chart': category_pie_chart,
             'deudas_por_cobrar': deudas_por_cobrar_list,
             'deudas_por_pagar': deudas_por_pagar_list,
         }
@@ -391,7 +487,7 @@ def exportar_reporte_pdf(request):
     # Movimientos
     ingresos = Ingreso.objects.filter(**filtros_ingresos).order_by('-fecha')
     gastos_individuales = Gasto.objects.filter(**filtros_gastos, compra__isnull=True).order_by('-fecha')
-    compras = Compra.objects.filter(**filtros_compras).order_by('-fecha')
+    compras = Compra.objects.filter(**filtros_compras).prefetch_related('items').order_by('-fecha')
 
     movimientos = []
     for ing in ingresos:
@@ -405,9 +501,12 @@ def exportar_reporte_pdf(request):
             'moneda_simbolo': ing.moneda.simbolo if ing.moneda else '$',
         })
     for gas in gastos_individuales:
+        descripcion = gas.descripcion
+        if gas.cantidad > 1:
+            descripcion += f" x{gas.cantidad}"
         movimientos.append({
             'tipo': 'gasto',
-            'descripcion': gas.descripcion,
+            'descripcion': descripcion,
             'categoria': getattr(gas, 'categoria', ''),
             'monto': gas.monto,
             'fecha': gas.fecha,
@@ -415,15 +514,30 @@ def exportar_reporte_pdf(request):
             'moneda_simbolo': gas.moneda.simbolo if gas.moneda else '$',
         })
     for compra in compras:
+        items = list(compra.items.all())
+        total_compra = sum(item.monto for item in items)
+        items_count = len(items)
+
+        if items_count == 1:
+            item = items[0]
+            descripcion = item.descripcion
+            if item.cantidad > 1:
+                descripcion += f" x{item.cantidad}"
+        else:
+            descripcion = f"Compra en {compra.lugar}" if compra.lugar else "Compra"
+            items_con_cantidad = [f"{item.descripcion} x{item.cantidad}" for item in items if item.cantidad > 1]
+            if items_con_cantidad:
+                descripcion += f" ({', '.join(items_con_cantidad)})"
+
         movimientos.append({
             'tipo': 'compra',
-            'descripcion': f"Compra en {compra.lugar}" if compra.lugar else "Compra",
+            'descripcion': descripcion,
             'categoria': '',
-            'monto': compra.total,
+            'monto': total_compra,
             'fecha': compra.fecha,
             'cuenta_nombre': compra.cuenta.nombre if compra.cuenta else None,
             'moneda_simbolo': compra.moneda.simbolo if compra.moneda else '$',
-            'items_count': compra.items_count,
+            'items_count': items_count,
         })
 
     # Ordenar y limitar (opcional, para PDF quizás queremos todos o un límite razonable)
