@@ -58,6 +58,51 @@
 
         <!-- Details Cards -->
         <div class="lg:col-span-2 space-y-6">
+            <!-- Subscription Status -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <span class="mr-2">⭐</span>
+                        Suscripción
+                    </h3>
+                    {% if user.suscripcion and user.suscripcion.es_valida %}
+                        <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Activa</span>
+                    {% else %}
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Gratuita</span>
+                    {% endif %}
+                </div>
+                
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Plan Actual</p>
+                            <p class="text-xl font-bold text-primary">
+                                {% if user.suscripcion and user.suscripcion.es_valida %}
+                                    {{ user.suscripcion.plan.nombre }}
+                                {% else %}
+                                    Free
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% if user.suscripcion and user.suscripcion.es_valida %}
+                            <div class="text-right">
+                                <p class="text-sm text-gray-500 mb-1">Vence el</p>
+                                <p class="text-gray-900 font-medium">{{ user.suscripcion.fecha_fin|date:"d/m/Y" }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <a href="{% url 'usuarios:lista_planes' %}" 
+                       class="block w-full bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary text-white text-center font-bold py-2 px-4 rounded transition duration-300">
+                        {% if user.suscripcion and user.suscripcion.es_valida %}
+                            Cambiar Plan
+                        {% else %}
+                            Mejorar a Premium
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+
             <!-- Personal Information -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
