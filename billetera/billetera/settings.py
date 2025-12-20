@@ -319,8 +319,6 @@ if IS_PRODUCTION:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     # Respect forwarded host header from the platform (Render, Railway, etc.)
     USE_X_FORWARDED_HOST = True
-<<<<<<< Updated upstream
-=======
 
 # Mercado Pago
 MERCADOPAGO_ACCESS_TOKEN = os.getenv('MERCADOPAGO_ACCESS_TOKEN')
@@ -329,4 +327,3 @@ MERCADOPAGO_WEBHOOK_SECRET = os.getenv('MERCADOPAGO_WEBHOOK_SECRET')
 
 # OpenAI
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
->>>>>>> Stashed changes

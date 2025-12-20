@@ -2,8 +2,13 @@ from decimal import Decimal
 
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import PerfilUsuario
+from .models import PerfilUsuario, Plan, Suscripcion
+try:
+    import mercadopago
+except ImportError:
+    mercadopago = None
 from .forms import PerfilUsuarioForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -565,3 +570,96 @@ def exportar_reporte_pdf(request):
     response['Content-Disposition'] = f'inline; filename="reporte_{rango}.pdf"'
     response.write(result)
     return response
+
+
+@login_required
+def lista_planes(request):
+    planes = Plan.objects.all().order_by('precio')
+    suscripcion_actual = getattr(request.user, 'suscripcion', None)
+    return render(request, 'usuarios/lista_planes.html', {
+        'planes': planes,
+        'suscripcion_actual': suscripcion_actual
+    })
+
+
+@login_required
+def procesar_pago(request, plan_id):
+    if not mercadopago:
+        return HttpResponse("MercadoPago library not installed", status=500)
+
+    plan = get_object_or_404(Plan, id=plan_id)
+    
+    # Configurar SDK de Mercado Pago
+    sdk = mercadopago.SDK(os.getenv("MERCADOPAGO_ACCESS_TOKEN"))
+    
+    preference_data = {
+        "items": [
+            {
+                "title": f"Suscripción {plan.nombre}",
+                "quantity": 1,
+                "unit_price": float(plan.precio),
+            }
+        ],
+        "payer": {
+            "email": request.user.email
+        },
+        "back_urls": {
+            "success": request.build_absolute_uri(reverse('usuarios:pago_exitoso')),
+            "failure": request.build_absolute_uri(reverse('usuarios:pago_fallido')),
+            "pending": request.build_absolute_uri(reverse('usuarios:pago_fallido'))
+        },
+        "auto_return": "approved",
+        "external_reference": f"{request.user.id}_{plan.id}"
+    }
+    
+    preference_response = sdk.preference().create(preference_data)
+    preference = preference_response["response"]
+    
+    return redirect(preference["init_point"])
+
+
+@login_required
+def pago_exitoso(request):
+    return render(request, 'usuarios/pago_exitoso.html')
+
+
+@login_required
+def pago_fallido(request):
+    return render(request, 'usuarios/pago_fallido.html')
+
+
+@csrf_exempt
+def webhook_mercadopago(request):
+    if not mercadopago:
+        return HttpResponse("MercadoPago library not installed", status=500)
+
+    if request.method == 'POST':
+        topic = request.GET.get('topic') or request.GET.get('type')
+        if topic == 'payment':
+            payment_id = request.GET.get('id') or request.GET.get('data.id')
+            sdk = mercadopago.SDK(os.getenv("MERCADOPAGO_ACCESS_TOKEN"))
+            payment_info = sdk.payment().get(payment_id)
+            payment = payment_info['response']
+            
+            if payment['status'] == 'approved':
+                external_ref = payment['external_reference']
+                try:
+                    user_id, plan_id = external_ref.split('_')
+                    user = User.objects.get(id=user_id)
+                    plan = Plan.objects.get(id=plan_id)
+                    
+                    Suscripcion.objects.update_or_create(
+                        usuario=user,
+                        defaults={
+                            'plan': plan,
+                            'activo': True,
+                            'fecha_inicio': timezone.now(),
+                            'fecha_fin': timezone.now() + timedelta(days=30),
+                            'external_id': str(payment_id)
+                        }
+                    )
+                except (ValueError, User.DoesNotExist, Plan.DoesNotExist):
+                    pass
+                    
+        return HttpResponse(status=200)
+    return HttpResponse(status=400)

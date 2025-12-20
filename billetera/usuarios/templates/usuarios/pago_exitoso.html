@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16 text-center">
+    <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+        <div class="text-green-500 text-6xl mb-4">✓</div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">¡Pago Exitoso!</h2>
+        <p class="text-gray-600 mb-8">Tu suscripción se ha activado correctamente. Disfruta de las nuevas funciones.</p>
+        <a href="{% url 'inicio_usuarios' %}" class="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded transition duration-300">
+            Ir al Inicio
+        </a>
+    </div>
+</div>
+{% endblock %}
