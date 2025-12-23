@@ -19,6 +19,7 @@ from django.urls import path, include, re_path
 from django.views.static import serve
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
 
 from usuarios import views as usuarios_views
 from django.urls import include, path as dj_path
@@ -41,6 +42,15 @@ urlpatterns = [
     # Social code exchange for Google (PKCE code flow)
     path('auth/social/google/', GoogleLogin.as_view(), name='google_login'),
     path('gastos/', include('gastos.urls')),  # Incluye las URLs de la app 'gastos' para las vistas HTML
+
+    # Backwards-compatible global URL names (templates/tests may reverse without namespace)
+    path('usuarios/perfil/', usuarios_views.perfil_usuario, name='perfil_usuario'),
+    path('usuarios/perfil/editar', usuarios_views.editar_perfil, name='editar_perfil'),
+    path('usuarios/reporte/pdf/', usuarios_views.exportar_reporte_pdf, name='exportar_reporte_pdf'),
+    path('usuarios/login/', auth_views.LoginView.as_view(template_name='usuarios/login.html'), name='login'),
+    path('usuarios/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('usuarios/registro/', usuarios_views.registro, name='registro'),
+
     path('usuarios/', include('usuarios.urls')),
     path('ingresos/', include('ingresos.urls')),
     path('cuentas/', include('cuentas.urls')),
