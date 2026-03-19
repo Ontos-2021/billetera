@@ -5,6 +5,10 @@ set -e
 echo "Checking project integrity..."
 python manage.py check
 
+# Fallar rápido si hay cambios de modelos sin migraciones versionadas
+echo "Checking migration consistency..."
+python manage.py makemigrations --check --dry-run
+
 # Esperar a que la base de datos esté disponible (retry)
 echo "Waiting for database..."
 until python manage.py migrate --noinput; do

@@ -6,6 +6,14 @@ Este documento convierte la auditoria en una lista de issues concretos, prioriza
 
 Meta realista: pasar de MVP funcional a despliegue confiable sin reescribir el producto.
 
+## Avance actual
+
+Implementado el 2026-03-19:
+
+- P0.1 Eliminar `makemigrations` del runtime de produccion.
+- P0.2 Cerrar permisos inseguros por defecto en DRF.
+- P0.3 Endurecer el webhook de Mercado Pago.
+
 Estado actual resumido:
 
 - La base funcional existe y no esta rota: 153 tests pasan.

@@ -4,12 +4,14 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.models import SocialAccount
 from django.http import JsonResponse
+from rest_framework.permissions import AllowAny
 
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
     callback_url = getattr(settings, 'GOOGLE_REDIRECT_URI', None)
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         """

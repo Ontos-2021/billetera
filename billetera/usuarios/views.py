@@ -1,4 +1,7 @@
 from decimal import Decimal
+import hashlib
+import hmac
+import json
 
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
@@ -628,38 +631,121 @@ def pago_fallido(request):
     return render(request, 'usuarios/pago_fallido.html')
 
 
+def _mercadopago_notification_payload(request):
+    if not request.body:
+        return {}
+    try:
+        return json.loads(request.body.decode('utf-8'))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return {}
+
+
+def _mercadopago_signature_parts(signature_header):
+    parts = {}
+    if not signature_header:
+        return parts
+
+    for chunk in signature_header.split(','):
+        key, separator, value = chunk.strip().partition('=')
+        if separator and key and value:
+            parts[key.strip()] = value.strip()
+    return parts
+
+
+def _mercadopago_notification_id(request, payload):
+    data = payload.get('data') or {}
+    return (
+        request.GET.get('data.id')
+        or request.GET.get('id')
+        or data.get('id')
+        or payload.get('id')
+    )
+
+
+def _mercadopago_notification_topic(request, payload):
+    return (
+        request.GET.get('topic')
+        or request.GET.get('type')
+        or payload.get('type')
+        or payload.get('topic')
+    )
+
+
+def _mercadopago_signature_is_valid(request, payload):
+    secret = os.getenv('MERCADOPAGO_WEBHOOK_SECRET')
+    if not secret:
+        return False
+
+    signature_header = request.headers.get('x-signature')
+    request_id = request.headers.get('x-request-id')
+    signature_parts = _mercadopago_signature_parts(signature_header)
+    ts = signature_parts.get('ts')
+    signature = signature_parts.get('v1')
+    notification_id = _mercadopago_notification_id(request, payload)
+
+    if not (request_id and ts and signature and notification_id):
+        return False
+
+    manifest = f"id:{str(notification_id).lower()};request-id:{request_id};ts:{ts};"
+    expected = hmac.new(secret.encode('utf-8'), manifest.encode('utf-8'), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, signature)
+
+
 @csrf_exempt
 def webhook_mercadopago(request):
+    if request.method != 'POST':
+        return HttpResponse(status=400)
+
+    payload = _mercadopago_notification_payload(request)
+    if not _mercadopago_signature_is_valid(request, payload):
+        return HttpResponse("Invalid Mercado Pago signature", status=403)
+
+    topic = _mercadopago_notification_topic(request, payload)
+    if topic != 'payment':
+        return HttpResponse(status=200)
+
+    payment_id = _mercadopago_notification_id(request, payload)
+    if not payment_id:
+        return HttpResponse(status=400)
+
     if not mercadopago:
         return HttpResponse("MercadoPago library not installed", status=500)
 
-    if request.method == 'POST':
-        topic = request.GET.get('topic') or request.GET.get('type')
-        if topic == 'payment':
-            payment_id = request.GET.get('id') or request.GET.get('data.id')
-            sdk = mercadopago.SDK(os.getenv("MERCADOPAGO_ACCESS_TOKEN"))
-            payment_info = sdk.payment().get(payment_id)
-            payment = payment_info['response']
-            
-            if payment['status'] == 'approved':
-                external_ref = payment['external_reference']
-                try:
-                    user_id, plan_id = external_ref.split('_')
-                    user = User.objects.get(id=user_id)
-                    plan = Plan.objects.get(id=plan_id)
-                    
-                    Suscripcion.objects.update_or_create(
-                        usuario=user,
-                        defaults={
-                            'plan': plan,
-                            'activo': True,
-                            'fecha_inicio': timezone.now(),
-                            'fecha_fin': timezone.now() + timedelta(days=30),
-                            'external_id': str(payment_id)
-                        }
-                    )
-                except (ValueError, User.DoesNotExist, Plan.DoesNotExist):
-                    pass
-                    
+    sdk = mercadopago.SDK(os.getenv("MERCADOPAGO_ACCESS_TOKEN"))
+    payment_info = sdk.payment().get(payment_id)
+    payment = payment_info.get('response') or {}
+
+    if payment.get('status') != 'approved':
         return HttpResponse(status=200)
-    return HttpResponse(status=400)
+
+    external_ref = payment.get('external_reference', '')
+    try:
+        user_id, plan_id = external_ref.split('_')
+        user = User.objects.get(id=user_id)
+        plan = Plan.objects.get(id=plan_id)
+    except (ValueError, User.DoesNotExist, Plan.DoesNotExist):
+        return HttpResponse(status=200)
+
+    payment_id = str(payment_id)
+    existing_subscription = Suscripcion.objects.filter(
+        usuario=user,
+        plan=plan,
+        external_id=payment_id,
+        activo=True,
+    ).first()
+    if existing_subscription:
+        return HttpResponse(status=200)
+
+    now = timezone.now()
+    Suscripcion.objects.update_or_create(
+        usuario=user,
+        defaults={
+            'plan': plan,
+            'activo': True,
+            'fecha_inicio': now,
+            'fecha_fin': now + timedelta(days=30),
+            'external_id': payment_id,
+        }
+    )
+
+    return HttpResponse(status=200)

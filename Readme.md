@@ -36,6 +36,22 @@
 
 ## 🔧 Configuración del Entorno
 
+## 🛡️ Endurecimiento Reciente
+
+Se aplicaron cambios de hardening para reducir drift de despliegue y cerrar superficies obvias de abuso:
+
+- **Deploy determinista**: el arranque de producción ya no genera migraciones. Ahora falla rápido si hay cambios de modelos sin migraciones versionadas mediante `python manage.py makemigrations --check --dry-run`.
+- **API cerrada por defecto**: Django REST Framework quedó con permisos autenticados por defecto. Los endpoints públicos se declaran explícitamente.
+- **JWT y login social explícitos**: los endpoints `/api/token/` y `/auth/social/google/` siguen siendo públicos, pero por configuración explícita y no por un default inseguro.
+- **Webhook de Mercado Pago endurecido**: ahora valida firma con `x-signature` + `x-request-id` usando `MERCADOPAGO_WEBHOOK_SECRET`, y evita reprocesar el mismo `payment_id` aprobado.
+- **Cobertura de regresión ampliada**: se añadieron tests para seguridad de API y webhook de Mercado Pago.
+
+Estado validado localmente:
+
+- `python manage.py check` OK
+- `python manage.py test` OK
+- Suite actual: `159 tests`
+
 ### 🔒 Variables de Entorno
 
 **⚠️ IMPORTANTE**: Nunca subas archivos `.env` con credenciales reales al repositorio.
@@ -66,6 +82,7 @@
 | `BACKUP_FERNET_KEY` | Clave Fernet para cifrar respaldos | `gAAAAABk...` |
 | `BACKUP_WEBHOOK_TOKEN` | Token para endpoint /admin/tools/backup | `mi-token-backup` |
 | `BACKUP_RETENTION_COUNT` | Cantidad de backups a conservar | `7` |
+| `MERCADOPAGO_WEBHOOK_SECRET` | Clave secreta para validar la firma de Webhooks de Mercado Pago | `your-webhook-secret` |
 
 - 🐍 Python 3.x ([Documentación oficial](https://www.python.org/doc/))
 - 🐍 Django 4.2 (se instala junto con las dependencias del entorno virtual 🌐) ([Documentación oficial](https://docs.djangoproject.com/en/stable/))
@@ -105,6 +122,12 @@
 
    ```
    python manage.py migrate
+   ```
+
+   Verificación opcional pero recomendada antes de desplegar:
+
+   ```
+   python manage.py makemigrations --check --dry-run
    ```
 
    > **Nota:** Si encuentras problemas durante la migración (como errores de permisos), verifica que tengas las dependencias correctamente instaladas y permisos adecuados para ejecutar comandos de Django.
@@ -237,4 +260,33 @@ python manage.py bootstrap_google_socialapp
 ```
 
 Más detalles y ejemplos de cliente en `billetera/usuarios/README.md`.
+
+## 🔐 Seguridad API y Webhooks
+
+### API REST
+
+- El permiso por defecto de DRF es autenticado.
+- Los endpoints públicos deben declararse explícitamente.
+- Endpoints propios públicos actuales:
+   - `/api/token/`
+   - `/auth/social/google/`
+- Endpoint protegido de perfil:
+   - `/api/me/`
+
+### Webhook de Mercado Pago
+
+El endpoint `usuarios/webhook/mercadopago/` ahora exige validación de origen antes de procesar pagos.
+
+Requisitos:
+
+- Variable `MERCADOPAGO_WEBHOOK_SECRET` configurada.
+- Headers `x-signature` y `x-request-id` enviados por Mercado Pago.
+- `data.id` presente en query string o payload JSON.
+
+Comportamiento:
+
+- Si la firma es inválida, responde `403`.
+- Si el tópico no es `payment`, responde `200` sin efectos.
+- Si el pago no está `approved`, responde `200` sin activar suscripción.
+- Si el mismo `payment_id` ya fue procesado, no duplica ni extiende la suscripción.
 
