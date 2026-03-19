@@ -166,6 +166,40 @@ Notas:
 - Para instancias gratuitas (Render/Koyeb) puedes programar un GitHub Action que haga `curl` al endpoint.
 - Política de retención elimina automáticamente los backups más antiguos bajo el prefijo `backups/db/<ENV>/`.
 
+#### Backup manual desde tu PC contra Postgres externo
+
+El script `backup_manual.py` permite conectarte a una base Postgres externa, generar el dump, cifrarlo y subirlo a R2.
+
+Formatos de entrada aceptados:
+- URL completa: `postgresql://usuario:password@host:puerto/dbname`
+- DSN libpq: `host=... port=... dbname=... user=... password=...`
+- Host simple: `host:puerto` o `host:puerto/dbname`
+
+Variables soportadas para ejecución no interactiva:
+- `EXTERNAL_DB_URL`
+- `EXTERNAL_DB_HOST`, `EXTERNAL_DB_PORT`, `EXTERNAL_DB_NAME` o `EXTERNAL_DB_DBNAME`, `EXTERNAL_DB_USER`, `EXTERNAL_DB_PASSWORD`
+- Equivalentes de libpq: `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, `PGPASSWORD`
+
+Validar la configuración sin ejecutar el backup:
+```powershell
+c:/Users/Kotelo/PycharmProjects/billetera/env/Scripts/python.exe .\backup_manual.py --check
+```
+
+Ejecutar el backup manual:
+```powershell
+c:/Users/Kotelo/PycharmProjects/billetera/env/Scripts/python.exe .\backup_manual.py
+```
+
+Ejecutar pasando la conexión por argumento:
+```powershell
+c:/Users/Kotelo/PycharmProjects/billetera/env/Scripts/python.exe .\backup_manual.py "postgresql://usuario:password@host:puerto/dbname"
+```
+
+Notas del flujo manual:
+- Si sólo pasas `host:puerto` o `host:puerto/dbname`, el script pedirá `user` y `password` si no están en variables de entorno.
+- Si `pg_dump` no está instalado o falla, el script intenta un dump SQL manual con `psycopg2`.
+- La contraseña no se imprime: para `pg_dump` se pasa mediante `PGPASSWORD`.
+
 ## 🤝 Contribuciones 💪
 
 Si deseas contribuir a este proyecto, serás bienvenido 🤗. Puedes abrir **issues** para reportar problemas ⚠️ o sugerencias 💡 y realizar **pull requests** con mejoras ✨ o nuevas funcionalidades 🚀.

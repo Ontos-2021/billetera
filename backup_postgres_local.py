@@ -11,6 +11,7 @@ import boto3
 import psycopg2
 from cryptography.fernet import Fernet
 from django.conf import settings
+from urllib.parse import urlparse, unquote
 
 
 def _timestamp() -> str:
@@ -87,17 +88,86 @@ def run_postgres_backup_no_pgdump(external_db_url: str) -> dict:
         dump_path = os.path.join(tmp, f'pg-{ts}.sql')
         
         print(f"📊 Conectando a la base de datos...")
+        # Prepare a libpq connection string and environment for pg_dump
+        def _make_libpq_and_env(url: str):
+            env = os.environ.copy()
+            # If already libpq key=value pairs
+            if '=' in url and not url.startswith('postgres://') and not url.startswith('postgresql://'):
+                # extract password into PGPASSWORD env var (optional)
+                parts = url.split()
+                kept = []
+                pwd = None
+                for p in parts:
+                    if p.startswith('password='):
+                        pwd = p.split('=', 1)[1]
+                    else:
+                        kept.append(p)
+                if pwd:
+                    env['PGPASSWORD'] = pwd
+                return (' '.join(kept) or url, env)
+
+            # If URI (postgresql://user:pass@host:port/db)
+            if url.startswith('postgres://') or url.startswith('postgresql://'):
+                parsed = urlparse(url)
+                host = parsed.hostname
+                port = parsed.port
+                db = parsed.path.lstrip('/') if parsed.path else ''
+                user = parsed.username
+                pwd = parsed.password
+
+                parts = []
+                if host:
+                    parts.append(f'host={host}')
+                if port:
+                    parts.append(f'port={port}')
+                if db:
+                    parts.append(f'dbname={db}')
+                if user:
+                    parts.append(f'user={user}')
+                if pwd:
+                    env['PGPASSWORD'] = unquote(pwd)
+
+                return (' '.join(parts), env)
+
+            # Otherwise try host[:port][/dbname]
+            parsed = urlparse('//' + url)
+            host = parsed.hostname
+            port = parsed.port
+            db = parsed.path.lstrip('/') if parsed.path else ''
+            parts = []
+            if host:
+                parts.append(f'host={host}')
+            if port:
+                parts.append(f'port={port}')
+            if db:
+                parts.append(f'dbname={db}')
+            return (' '.join(parts), env)
+
+        libpq, env_for_dump = _make_libpq_and_env(external_db_url)
+
         # Usar pg_dump via subprocess si está disponible en PATH
         # Si no, usar psycopg2 para dump básico
         try:
-            # Intentar con pg_dump primero
-            cmd = ['pg_dump', external_db_url, '-f', dump_path]
-            subprocess.check_call(cmd)
+            # Intentar con pg_dump primero. Usar --dbname with libpq string.
+            if libpq:
+                cmd = ['pg_dump', f'--dbname={libpq}', '-f', dump_path]
+            else:
+                cmd = ['pg_dump', external_db_url, '-f', dump_path]
+            subprocess.check_call(cmd, env=env_for_dump)
             print(f"✅ Dump generado con pg_dump")
         except (subprocess.CalledProcessError, FileNotFoundError):
             # Fallback: dump manual con psycopg2
-            print(f"⚠️  pg_dump no disponible, usando dump SQL manual...")
-            conn = psycopg2.connect(external_db_url)
+            print(f"⚠️  pg_dump no disponible o falló, usando dump SQL manual...")
+            # For psycopg2.connect, prefer passing URI or libpq string
+            conn_info = external_db_url
+            if not (external_db_url.startswith('postgres://') or external_db_url.startswith('postgresql://') or ('=' in external_db_url)):
+                # use libpq string
+                conn_info = libpq
+                # ensure PGPASSWORD is available to client libraries
+                if 'PGPASSWORD' in env_for_dump:
+                    os.environ['PGPASSWORD'] = env_for_dump['PGPASSWORD']
+
+            conn = psycopg2.connect(conn_info)
             
             with open(dump_path, 'w', encoding='utf-8') as f:
                 # Header
