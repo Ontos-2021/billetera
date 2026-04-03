@@ -14,9 +14,16 @@ Implementado el 2026-03-19:
 - P0.2 Cerrar permisos inseguros por defecto en DRF.
 - P0.3 Endurecer el webhook de Mercado Pago.
 
+Implementado el 2026-04-03:
+
+- P0.4 Endurecer el endpoint de backup remoto.
+- P0.5 Agregar CI minima obligatoria.
+- P1.6 Unificar Railway como plataforma soportada.
+- P1.7 Agregar observabilidad minima (`/health/` + logging a consola).
+
 Estado actual resumido:
 
-- La base funcional existe y no esta rota: 153 tests pasan.
+- La base funcional existe y no esta rota: 165 tests pasan.
 - El mayor problema no es feature gap sino disciplina operativa, seguridad perimetral y consistencia de despliegue.
 - El repo esta mas cerca de un MVP serio que de una app production-ready.
 

@@ -9,7 +9,7 @@
 ## Architecture & Patterns
 
 - **App Structure:** Each domain (`gastos`, `ingresos`, `usuarios`) is a Django app with its own models, views, templates, and tests.
-- **Settings:** Environment-driven via `.env` (use `python-dotenv`). Production settings (Koyeb) use PostgreSQL and R2; local defaults to SQLite and local media.
+- **Settings:** Environment-driven via `.env` (use `python-dotenv`). Production settings target Railway with PostgreSQL and R2; local defaults to SQLite and local media.
 - **Static/Media:** Static files are served via WhiteNoise in production. Media files use Cloudflare R2 in production, local filesystem in dev.
 - **API:** REST endpoints via `djangorestframework` (see `api_views.py` in each app).
 - **Forms:** User profile image uploads are handled via forms and tested for R2 integration (`test_app_features.py`).
@@ -28,10 +28,10 @@
     `python manage.py runserver`
 - **Testing R2 Integration:**  
   - Run `test_app_features.py` to verify image upload and CSRF protection.
-- **Docker/Koyeb Deployment:**  
+- **Docker/Railway Deployment:**  
   - Build via Dockerfile; entrypoint runs migrations, collects static, starts Gunicorn.
-  - Use `deploy-koyeb.sh` for scripted deployment (requires Koyeb CLI).
-  - Environment variables are set via Koyeb dashboard or secrets.
+  - Use Railway variables and the canonical startup flow in `entrypoint.sh`.
+  - Environment variables are set via Railway dashboard.
 
 ## Conventions
 
@@ -49,9 +49,9 @@
 - **Cloudflare R2:**  
   - Configured via `django-storages` in `settings.py`.
   - Bucket, keys, and endpoint set via env vars.
-- **Koyeb:**  
-  - Auto-builds from GitHub using Dockerfile.
-  - PostgreSQL provisioned via Koyeb CLI or dashboard.
+- **Railway:**  
+  - Can build from GitHub using the Dockerfile.
+  - PostgreSQL is configured via `DATABASE_URL` in Railway.
 
 ## Key Files
 
@@ -59,7 +59,7 @@
 - `Dockerfile`, `entrypoint.sh`: Container build/run steps.
 - `requirements.txt`: All dependencies.
 - `test_app_features.py`: Example integration test for R2.
-- `deploy-koyeb.sh`: Automated deployment script.
+- `docs/RAILWAY_DEPLOY.md`: Operational Railway deployment guide.
 
 ## Example Patterns
 

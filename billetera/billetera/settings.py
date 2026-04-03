@@ -32,6 +32,18 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ['true', '1', 'yes']
 from urllib.parse import urlparse
 from typing import Optional
 
+
+def _normalize_origin(value: str) -> Optional[str]:
+    v = (value or '').strip().rstrip('/')
+    if not v:
+        return None
+    if not v.startswith('http://') and not v.startswith('https://'):
+        v = 'https://' + v
+    parsed = urlparse(v)
+    if not parsed.netloc:
+        return None
+    return f'{parsed.scheme}://{parsed.netloc}'
+
 def _normalize_host(value: str) -> Optional[str]:
     v = (value or '').strip()
     if not v:
@@ -43,15 +55,25 @@ def _normalize_host(value: str) -> Optional[str]:
     # otherwise assume it's already a host
     return v
 
+
+PUBLIC_BASE_URL = (
+    _normalize_origin(os.getenv('APP_BASE_URL'))
+    or _normalize_origin(os.getenv('EXTERNAL_URL'))
+    or _normalize_origin(os.getenv('RAILWAY_PUBLIC_DOMAIN'))
+)
+PUBLIC_HOST = _normalize_host(PUBLIC_BASE_URL) if PUBLIC_BASE_URL else None
+
 env_hosts = os.getenv('ALLOWED_HOSTS', '')
 if env_hosts:
     ALLOWED_HOSTS = [h for h in (_normalize_host(x) for x in env_hosts.split(',')) if h]
 else:
     # Valores por defecto según entorno
     if IS_PRODUCTION:
-        ALLOWED_HOSTS = ['classic-pippy-ontos-b4c068be.koyeb.app', '.koyeb.app']
+        if not PUBLIC_HOST:
+            raise ValueError('En producción define ALLOWED_HOSTS, APP_BASE_URL o RAILWAY_PUBLIC_DOMAIN.')
+        ALLOWED_HOSTS = [PUBLIC_HOST]
     else:
-        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'testserver']
 
 # Application definition
 INSTALLED_APPS = [
@@ -152,29 +174,8 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.getenv(
 
 # If GOOGLE_REDIRECT_URI is not provided, try to derive it from platform URL/envs
 if not GOOGLE_REDIRECT_URI:
-    ext_url = os.getenv('EXTERNAL_URL') or os.getenv('RENDER_EXTERNAL_URL') or os.getenv('KOYEB_APP_URL')
-    scheme = 'https' if IS_PRODUCTION else 'http'
-    host = None
-    if ext_url:
-        try:
-            from urllib.parse import urlparse
-            parsed = urlparse(ext_url)
-            if parsed.scheme:
-                scheme = parsed.scheme
-            host = parsed.netloc
-        except Exception:
-            host = None
-    if not host:
-        # fall back to first allowed host in production
-        try:
-            host = (ALLOWED_HOSTS[0] if ALLOWED_HOSTS else None)
-            if host and (host.startswith('http://') or host.startswith('https://')):
-                from urllib.parse import urlparse
-                host = urlparse(host).netloc or host
-        except Exception:
-            host = None
-    if host:
-        GOOGLE_REDIRECT_URI = f"{scheme}://{host}/accounts/google/login/callback/"
+    if PUBLIC_BASE_URL:
+        GOOGLE_REDIRECT_URI = f"{PUBLIC_BASE_URL}/accounts/google/login/callback/"
 
 # CORS (optional)
 if 'corsheaders' in INSTALLED_APPS:
@@ -283,17 +284,18 @@ else:
 # CSRF Trusted Origins — normalizar entradas de entorno
 if IS_PRODUCTION:
     env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-    default_origins = ['https://billetera-production.up.railway.app', 'https://classic-pippy-ontos-b4c068be.koyeb.app']
     if env_csrf_origins:
         parsed = []
         for o in [p.strip() for p in env_csrf_origins.split(',') if p.strip()]:
             # Ensure scheme is present; default to https
-            if not o.startswith('http://') and not o.startswith('https://'):
-                o = 'https://' + o
-            parsed.append(o)
-        CSRF_TRUSTED_ORIGINS = parsed + default_origins
+            normalized = _normalize_origin(o)
+            if normalized:
+                parsed.append(normalized)
+        CSRF_TRUSTED_ORIGINS = parsed
+    elif PUBLIC_BASE_URL:
+        CSRF_TRUSTED_ORIGINS = [PUBLIC_BASE_URL]
     else:
-        CSRF_TRUSTED_ORIGINS = default_origins
+        raise ValueError('En producción define CSRF_TRUSTED_ORIGINS, APP_BASE_URL o RAILWAY_PUBLIC_DOMAIN.')
 else:
     CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1:8000']
 
@@ -315,10 +317,49 @@ if IS_PRODUCTION:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
-    # Allow Django to detect HTTPS when behind a proxy (Railway/Koyeb/etc.)
+    # Allow Django to detect HTTPS when behind Railway proxying.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    # Respect forwarded host header from the platform (Render, Railway, etc.)
+    # Respect forwarded host header from Railway proxying
     USE_X_FORWARDED_HOST = True
+
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'railway': {
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'railway',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'usuarios': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'gastos': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+    },
+}
 
 # Mercado Pago
 MERCADOPAGO_ACCESS_TOKEN = os.getenv('MERCADOPAGO_ACCESS_TOKEN')

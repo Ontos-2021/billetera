@@ -2,6 +2,8 @@ from decimal import Decimal
 import hashlib
 import hmac
 import json
+import logging
+import time
 
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
@@ -30,6 +32,9 @@ from django.db.models.functions import TruncDate
 
 from usuarios.backup import run_database_backup
 from cuentas.models import Cuenta
+
+
+logger = logging.getLogger(__name__)
 
 
 def inicio(request):
@@ -430,23 +435,51 @@ def trigger_backup(request):
     """
     Endpoint protegido para disparar el backup.
     Seguridad:
-      - Acepta GET/POST.
-      - Si el header X-Backup-Token o ?token= coincide con BACKUP_WEBHOOK_TOKEN => permitido.
+      - Solo acepta POST.
+      - Si el header X-Backup-Token coincide con BACKUP_WEBHOOK_TOKEN => permitido.
       - En caso contrario, requiere usuario autenticado STAFF.
     """
-    if request.method not in ("GET", "POST"):
-        return HttpResponseNotAllowed(["GET", "POST"])
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    start = time.monotonic()
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    client_ip = forwarded_for.split(',')[0].strip() if forwarded_for else request.META.get('REMOTE_ADDR', '')
+
+    if request.GET.get('token') or request.POST.get('token'):
+        logger.warning('Backup denied: token provided outside header ip=%s', client_ip)
+        return HttpResponseForbidden('No autorizado')
 
     token_env = os.getenv('BACKUP_WEBHOOK_TOKEN')
-    token_req = request.headers.get('X-Backup-Token') or request.GET.get('token') or request.POST.get('token')
+    token_req = request.headers.get('X-Backup-Token')
+    actor = None
 
-    if not (token_env and token_req and token_req == token_env):
-        # Fallback a staff
+    if token_env and token_req and token_req == token_env:
+        actor = 'token'
+    else:
         user = getattr(request, 'user', None)
-        if not (user and user.is_authenticated and user.is_staff):
+        if user and user.is_authenticated and user.is_staff:
+            actor = f'staff:{user.username}'
+        else:
+            logger.warning('Backup denied: unauthorized caller ip=%s', client_ip)
             return HttpResponseForbidden('No autorizado')
 
-    result = run_database_backup()
+    logger.info('Backup requested actor=%s ip=%s', actor, client_ip)
+
+    try:
+        result = run_database_backup()
+    except Exception:
+        logger.exception('Backup failed actor=%s ip=%s', actor, client_ip)
+        return JsonResponse({'status': 'error'}, status=500)
+
+    duration_ms = int((time.monotonic() - start) * 1000)
+    logger.info(
+        'Backup completed actor=%s ip=%s object_key=%s duration_ms=%s',
+        actor,
+        client_ip,
+        result.get('object_key'),
+        duration_ms,
+    )
     return JsonResponse({'status': 'ok', **result})
 
 

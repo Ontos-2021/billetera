@@ -79,7 +79,7 @@ def _normalize_db_url(url: str) -> str:
     if not host:
         return url
 
-    dbname = path or _env_first('EXTERNAL_DB_NAME', 'EXTERNAL_DB_DBNAME', 'PGDATABASE') or input('Nombre de la base de datos (dbname) en Render: ').strip()
+    dbname = path or _env_first('EXTERNAL_DB_NAME', 'EXTERNAL_DB_DBNAME', 'PGDATABASE') or input('Nombre de la base de datos (dbname): ').strip()
     user = _env_first('EXTERNAL_DB_USER', 'PGUSER') or input('Usuario de la base de datos (user): ').strip()
     while not user:
         user = input('Usuario (no vacío): ').strip()
@@ -114,8 +114,7 @@ def _describe_target(url: str) -> str:
     return f'{host}{port} | db={dbname} | user={user}'
 
 if __name__ == '__main__':
-    # IMPORTANTE: Pega aquí tu External Database URL de Render
-    # La encuentras en el dashboard de Render, sección "Connections" -> "External Database URL"
+    # IMPORTANTE: Pega aquí tu External Database URL del proveedor donde corre Postgres.
 
     parser = argparse.ArgumentParser(description='Backup manual de Postgres con cifrado y subida a R2.')
     parser.add_argument('external_db_url', nargs='?', help='External Database URL, DSN libpq o host:port[/dbname]')
@@ -125,7 +124,7 @@ if __name__ == '__main__':
     EXTERNAL_DB_URL = args.external_db_url or _build_db_url_from_env()
 
     if not EXTERNAL_DB_URL:
-        EXTERNAL_DB_URL = input("Pega la External Database URL de Render: ").strip()
+        EXTERNAL_DB_URL = input("Pega la External Database URL: ").strip()
 
     if not EXTERNAL_DB_URL:
         print("❌ Error: Debes proporcionar la External Database URL")
@@ -138,7 +137,7 @@ if __name__ == '__main__':
         print(f"📡 Destino: {_describe_target(EXTERNAL_DB_URL)}")
         sys.exit(0)
 
-    print("🔐 Iniciando backup cifrado de la base de datos de Render...")
+    print("🔐 Iniciando backup cifrado de la base de datos...")
     try:
         display = _describe_target(EXTERNAL_DB_URL)
     except Exception:

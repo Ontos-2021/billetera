@@ -12,7 +12,7 @@ class Command(BaseCommand):
         """
         Decide the Site.domain to use:
         1) SITE_DOMAIN env (host or URL)
-        2) RENDER_EXTERNAL_URL / EXTERNAL_URL / KOYEB_APP_URL (URL)
+        2) APP_BASE_URL / EXTERNAL_URL / RAILWAY_PUBLIC_DOMAIN
         3) First host from ALLOWED_HOSTS
         4) Fallback: 'localhost'
         Returns host without scheme.
@@ -25,8 +25,11 @@ class Command(BaseCommand):
                 return urlparse(site_domain).netloc
             return site_domain
 
-        # 2) Provider specific external URL envs
-        ext = os.environ.get('RENDER_EXTERNAL_URL') or os.environ.get('EXTERNAL_URL') or os.environ.get('KOYEB_APP_URL')
+        # 2) Railway-oriented external URL envs
+        ext = os.environ.get('APP_BASE_URL') or os.environ.get('EXTERNAL_URL')
+        railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+        if not ext and railway_domain:
+            ext = f'https://{railway_domain}'
         if ext:
             parsed = urlparse(ext)
             if parsed.netloc:

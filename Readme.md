@@ -44,13 +44,16 @@ Se aplicaron cambios de hardening para reducir drift de despliegue y cerrar supe
 - **API cerrada por defecto**: Django REST Framework quedó con permisos autenticados por defecto. Los endpoints públicos se declaran explícitamente.
 - **JWT y login social explícitos**: los endpoints `/api/token/` y `/auth/social/google/` siguen siendo públicos, pero por configuración explícita y no por un default inseguro.
 - **Webhook de Mercado Pago endurecido**: ahora valida firma con `x-signature` + `x-request-id` usando `MERCADOPAGO_WEBHOOK_SECRET`, y evita reprocesar el mismo `payment_id` aprobado.
+- **Backup remoto endurecido**: el endpoint de backup ahora acepta solo `POST`, usa solo `X-Backup-Token` por header y registra eventos útiles en logs.
+- **Railway como plataforma única**: se removió el drift Koyeb/Render del setup y la configuración ahora se centra en Railway.
+- **Observabilidad mínima**: existe `/health/` con chequeo de base de datos y configuración de logging para consola.
 - **Cobertura de regresión ampliada**: se añadieron tests para seguridad de API y webhook de Mercado Pago.
 
 Estado validado localmente:
 
 - `python manage.py check` OK
 - `python manage.py test` OK
-- Suite actual: `159 tests`
+- Suite actual: `165 tests`
 
 ### 🔒 Variables de Entorno
 
@@ -62,9 +65,9 @@ Estado validado localmente:
    # Edita .env con tus credenciales reales
    ```
 
-2. **Para producción (Koyeb)**:
-   - Configura las variables en el panel de Koyeb
-   - Usa `.env.koyeb.example` como referencia
+2. **Para producción (Railway)**:
+   - Configura las variables en el panel de Railway
+   - Usa `.env.railway.example` como referencia
 
 ### 📋 Variables Requeridas
 
@@ -74,7 +77,8 @@ Estado validado localmente:
 | `DEBUG` | Modo debug (0/1) | `0` |
 | `SECRET_KEY` | Clave secreta de Django | `your-secret-key` |
 | `DATABASE_URL` | URL de la base de datos | `postgresql://...` |
-| `ALLOWED_HOSTS` | Hosts permitidos | `localhost,your-app.koyeb.app` |
+| `ALLOWED_HOSTS` | Hosts permitidos | `localhost,your-app.up.railway.app` |
+| `APP_BASE_URL` | URL pública base de la app para Railway | `https://your-app.up.railway.app` |
 | `AWS_ACCESS_KEY_ID` | Clave de acceso R2 | `your-r2-access-key` |
 | `AWS_SECRET_ACCESS_KEY` | Clave secreta R2 | `your-r2-secret-key` |
 | `AWS_STORAGE_BUCKET_NAME` | Nombre del bucket | `your-bucket-name` |
@@ -175,9 +179,9 @@ Se añadió un sistema de respaldo cifrado que genera un dump (Postgres) o copia
    ```bash
    python manage.py backup_db
    ```
-4. Disparar vía endpoint protegido (requiere header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o usuario staff autenticado):
+4. Disparar vía endpoint protegido con `POST` (requiere header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o usuario staff autenticado):
    ```bash
-   curl -H "X-Backup-Token: $BACKUP_WEBHOOK_TOKEN" https://tu-dominio/admin/tools/backup
+   curl -X POST -H "X-Backup-Token: $BACKUP_WEBHOOK_TOKEN" https://tu-dominio/admin/tools/backup
    ```
 5. Respuesta JSON ejemplo:
    ```json
@@ -186,7 +190,7 @@ Se añadió un sistema de respaldo cifrado que genera un dump (Postgres) o copia
 
 Notas:
 - Asegúrate de que la imagen Docker tenga `postgresql-client` instalado para usar `pg_dump`.
-- Para instancias gratuitas (Render/Koyeb) puedes programar un GitHub Action que haga `curl` al endpoint.
+- Para Railway puedes programar un GitHub Action o job externo que haga `curl` al endpoint.
 - Política de retención elimina automáticamente los backups más antiguos bajo el prefijo `backups/db/<ENV>/`.
 
 #### Backup manual desde tu PC contra Postgres externo
@@ -289,4 +293,26 @@ Comportamiento:
 - Si el tópico no es `payment`, responde `200` sin efectos.
 - Si el pago no está `approved`, responde `200` sin activar suscripción.
 - Si el mismo `payment_id` ya fue procesado, no duplica ni extiende la suscripción.
+
+### Endpoint de health
+
+- `GET /health/` responde el estado básico de la aplicación.
+- Verifica conectividad a base de datos.
+- Devuelve `503` si la base no está disponible.
+
+## 🚂 Despliegue Railway
+
+- Plataforma objetivo actual: Railway.
+- Ruta canónica de arranque: [entrypoint.sh](entrypoint.sh).
+- [Procfile](Procfile) queda alineado al mismo entrypoint para evitar drift.
+- Variables recomendadas en producción:
+   - `ENV=production`
+   - `DEBUG=0`
+   - `SECRET_KEY`
+   - `DATABASE_URL`
+   - `APP_BASE_URL=https://your-app.up.railway.app`
+   - `CSRF_TRUSTED_ORIGINS=https://your-app.up.railway.app` o derivado equivalente
+   - `ALLOWED_HOSTS=your-app.up.railway.app` o derivado equivalente
+
+Guía operativa breve en [docs/RAILWAY_DEPLOY.md](docs/RAILWAY_DEPLOY.md).
 

@@ -1,1 +1,1 @@
-web: cd billetera && python manage.py makemigrations --check --dry-run && python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn billetera.wsgi --bind 0.0.0.0:$PORT
+web: cd billetera && bash ../entrypoint.sh

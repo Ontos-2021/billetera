@@ -27,8 +27,10 @@ from usuarios.views import ProfileMe
 from usuarios.social import GoogleLogin
 from usuarios.jwt_views import WalletTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
+from .health import health
 
 urlpatterns = [
+    path('health/', health, name='health'),
     # Backup manual (token o staff)
     path('admin/tools/backup', usuarios_views.trigger_backup, name='admin_backup'),
     path('admin/', admin.site.urls),

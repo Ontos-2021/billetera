@@ -2,6 +2,34 @@
 
 Todos los cambios relevantes del proyecto deberían registrarse acá.
 
+## 2026-04-03
+
+### Added
+
+- Endpoint de health básico para verificación de DB.
+- Workflow de CI mínimo para `check`, `makemigrations --check --dry-run` y `test`.
+- Guía operativa de Railway en [docs/RAILWAY_DEPLOY.md](docs/RAILWAY_DEPLOY.md).
+- Archivo de ejemplo de entorno para Railway.
+
+### Changed
+
+- El endpoint de backup ahora acepta solo `POST`.
+- El token del backup se acepta solo por header `X-Backup-Token`.
+- `Procfile` quedó alineado a [entrypoint.sh](entrypoint.sh) para usar un único startup flow.
+- La configuración de producción deja de mezclar Koyeb y Render, y pasa a centrarse en Railway.
+- Se agregó configuración mínima de logging para operar en Railway.
+
+### Removed
+
+- Artefactos de despliegue específicos de Koyeb.
+
+### Validation
+
+- `python manage.py check` OK.
+- `python manage.py makemigrations --check --dry-run` OK.
+- `python manage.py test` OK.
+- Suite validada localmente con `165` tests.
+
 ## 2026-03-19
 
 ### Added
