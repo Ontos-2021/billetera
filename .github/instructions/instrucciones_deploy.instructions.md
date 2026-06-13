@@ -2,10 +2,10 @@
 
 ## Contexto del proyecto
 - Framework: Django 4.x, Python 3.12
-- DB: Postgres (DATABASE_URL), entorno producción en Render (reverse proxy, HTTPS)
+- DB: Postgres (DATABASE_URL), entorno producción en Koyeb / Render (reverse proxy, HTTPS)
 - Static files: WhiteNoise + `collectstatic`
 - Media: S3/R2 opcional
-- Objetivo: App de gastos/ingresos con auth estándar
+- Objetivo: App de gastos/ingresos/deudas con auth estándar y multimoneda
 
 ## Cómo quiero que trabajes
 - Cuando te pida diagnosticar errores (500/400/403), seguí este orden:
