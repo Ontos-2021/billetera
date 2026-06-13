@@ -23,7 +23,12 @@ class BackupEndpointTests(TestCase):
             'retention_kept': 3,
         }
         os.environ['BACKUP_WEBHOOK_TOKEN'] = 'secret'
-        resp = self.client.get(self.url, {'token': 'secret'})
+        # El token en formato query string ya no debe ser permitido (da 403)
+        resp_query = self.client.get(self.url, {'token': 'secret'})
+        self.assertEqual(resp_query.status_code, 403)
+
+        # Solo debe permitir el acceso si viene en el header 'X-Backup-Token'
+        resp = self.client.get(self.url, HTTP_X_BACKUP_TOKEN='secret')
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json().get('status'), 'ok')
 

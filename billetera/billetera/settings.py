@@ -47,9 +47,9 @@ env_hosts = os.getenv('ALLOWED_HOSTS', '')
 if env_hosts:
     ALLOWED_HOSTS = [h for h in (_normalize_host(x) for x in env_hosts.split(',')) if h]
 else:
-    # Valores por defecto según entorno
+    # Valores por defecto según entorno (Priorizando Railway y Coolify)
     if IS_PRODUCTION:
-        ALLOWED_HOSTS = ['classic-pippy-ontos-b4c068be.koyeb.app', '.koyeb.app']
+        ALLOWED_HOSTS = ['billetera-production.up.railway.app', '.railway.app']
     else:
         ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
@@ -152,7 +152,7 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = os.getenv(
 
 # If GOOGLE_REDIRECT_URI is not provided, try to derive it from platform URL/envs
 if not GOOGLE_REDIRECT_URI:
-    ext_url = os.getenv('EXTERNAL_URL') or os.getenv('RENDER_EXTERNAL_URL') or os.getenv('KOYEB_APP_URL')
+    ext_url = os.getenv('EXTERNAL_URL') or os.getenv('RAILWAY_STATIC_URL') or os.getenv('RAILWAY_PUBLIC_DOMAIN')
     scheme = 'https' if IS_PRODUCTION else 'http'
     host = None
     if ext_url:
@@ -283,7 +283,7 @@ else:
 # CSRF Trusted Origins — normalizar entradas de entorno
 if IS_PRODUCTION:
     env_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-    default_origins = ['https://billetera-production.up.railway.app', 'https://classic-pippy-ontos-b4c068be.koyeb.app']
+    default_origins = ['https://billetera-production.up.railway.app']
     if env_csrf_origins:
         parsed = []
         for o in [p.strip() for p in env_csrf_origins.split(',') if p.strip()]:

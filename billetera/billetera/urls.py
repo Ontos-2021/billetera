@@ -29,6 +29,9 @@ from usuarios.jwt_views import WalletTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 urlpatterns = [
+    # Health checks públicos (Coolify / Railway / uptime monitors)
+    path('healthz', usuarios_views.health_check, name='health_check_healthz'),
+    path('health/', usuarios_views.health_check, name='health_check'),
     # Backup manual (token o staff)
     path('admin/tools/backup', usuarios_views.trigger_backup, name='admin_backup'),
     path('admin/', admin.site.urls),
