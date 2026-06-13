@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-- **Stack:** Django 4, Gunicorn, PostgreSQL, Cloudflare R2 (via `django-storages`), Docker
-- **Main Apps:** `gastos` (expenses), `ingresos` (income), `usuarios` (users)
-- **Purpose:** Personal finance management—track, categorize, and visualize income/expenses.
+- **Stack:** Django 4, Gunicorn, Python 3.12, PostgreSQL, Cloudflare R2 (via `django-storages`), Docker
+- **Main Apps:** `gastos` (expenses), `ingresos` (income), `usuarios` (users), `cuentas` (accounts), `deudas` (debts)
+- **Purpose:** Personal finance management—track, categorize, and visualize income, expenses, bank accounts, bank/peer-to-peer transfers, and debts.
 
 ## Architecture & Patterns
 
-- **App Structure:** Each domain (`gastos`, `ingresos`, `usuarios`) is a Django app with its own models, views, templates, and tests.
+- **App Structure:** Each domain (`gastos`, `ingresos`, `usuarios`, `cuentas`, `deudas`) is a Django app with its own models, views, templates, and tests.
 - **Settings:** Environment-driven via `.env` (use `python-dotenv`). Production settings (Koyeb) use PostgreSQL and R2; local defaults to SQLite and local media.
 - **Static/Media:** Static files are served via WhiteNoise in production. Media files use Cloudflare R2 in production, local filesystem in dev.
 - **API:** REST endpoints via `djangorestframework` (see `api_views.py` in each app).

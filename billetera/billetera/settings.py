@@ -315,6 +315,12 @@ if IS_PRODUCTION:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
+    # Redireccionar todo el tráfico HTTP a HTTPS en producción
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True').lower() in ['true', '1', 'yes']
+    # HTTP Strict Transport Security (HSTS)
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))  # 1 año por defecto
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True').lower() in ['true', '1', 'yes']
+    SECURE_HSTS_PRELOAD = os.getenv('SECURE_HSTS_PRELOAD', 'True').lower() in ['true', '1', 'yes']
     # Allow Django to detect HTTPS when behind a proxy (Railway/Koyeb/etc.)
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     # Respect forwarded host header from the platform (Render, Railway, etc.)

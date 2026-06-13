@@ -1,38 +1,47 @@
 # 💸 Billetera Virtual - Proyecto Django 🐍💻
 
-💸 **Billetera Virtual** es una aplicación 🌐 desarrollada con Django 🐍 que permite a los usuarios 👥 gestionar sus finanzas 💰 personales. Los usuarios pueden realizar un seguimiento 📊 de sus ingresos 📈 y gastos 💸, categorizar sus movimientos 📁 y mantener un control eficiente de su presupuesto (En desarrollo 🚧).
+💸 **Billetera Virtual** es una aplicación 🌐 desarrollada con Django 🐍 que permite a los usuarios 👥 gestionar sus finanzas 💰 personales de manera centralizada. Los usuarios pueden realizar un seguimiento 📊 de sus ingresos 📈 y gastos 💸, categorizar sus movimientos 📁, simular y saldar deudas 🤝, gestionar múltiples cuentas y monedas 💱, y analizar de forma interactiva el estado de su presupuesto mediante gráficos y reportes exportables.
 
 ## ⚙️ Funcionalidades Principales 🔧
 
 - **💸 Gastos**:
-
   - 📋 Lista de Gastos: Visualiza 👀 todos los gastos registrados.
-  - ➕ Crear Gasto: Agrega nuevos gastos, especificando descripción 📝, monto 💲, moneda 💵 y categoría 📊.
-  - ✏️ Editar Gasto: Modifica los detalles de un gasto existente.
-  - 🗑️ Eliminar Gasto: Elimina gastos registrados.
+  - 🛍️ Compras Globales: Agrupa múltiples ítems bajo un mismo consumo global indicando cantidades (xN) y tiendas asociadas con autocompletado inteligente.
+  - ➕ Crear Gasto: Agrega nuevos gastos independientes o agrupados, especificando descripción 📝, monto 💲, moneda 💵 y categoría 📊.
+  - ✏️ Editar Gasto: Modifica los detalles de un gasto o de una compra global existente en bloque.
+  - 🗑️ Eliminar Gasto: Elimina gastos registrados de forma segura recalculando balances.
 
 - **📈 Ingresos**:
-
   - 📋 Lista de Ingresos: Visualiza todos los ingresos registrados.
-  - ➕ Crear Ingreso: Registra nuevos ingresos, especificando detalles como monto 💲 y categoría 📊.
+  - ➕ Crear Ingreso: Registra nuevos ingresos, especificando detalles como monto 💲, medio de cobro y categoría 📊.
   - ✏️ Editar Ingreso: Actualiza los detalles de ingresos existentes.
   - 🗑️ Eliminar Ingreso: Permite eliminar ingresos si es necesario.
 
-- **💱 Monedas y Categorías**:
+- **🏦 Cuentas y Transferencias**:
+  - 💳 Gestión de Cuentas: Permite configurar múltiples cuentas bancarias o billeteras con saldos iniciales independientes.
+  - 🔄 Transferencias: Facilita el movimiento de saldos entre cuentas propias con registros transparentes y validaciones de fondos disponibles.
 
+- **🤝 Control de Deudas**:
+  - 📝 Registro de Deudores y Acreedores: Registra deudas activas indicando las fechas límites, conceptos financieros y personas involucradas.
+  - 💵 Flujo de Pago: Salda deudas parcial o totalmente impactando los balances generales de forma coherente.
+
+- **💱 Monedas y Categorías**:
   - 💵 Monedas: Permite utilizar diferentes monedas 💰 para ingresos 📈 y gastos 💸.
   - 📊 Categorías: Organiza ingresos 📈 y gastos 💸 con categorías para un mejor seguimiento.
 
-- **👤 Perfil de Usuario**:
+- **📊 Dashboard & Reportería**:
+  - 📈 Gráficos Interactivos: Análisis visual e intuitivo de consumos, distribución por rubros y balances temporales en el dashboard principal con filtros avanzados.
+  - 📄 Exportación PDF: Generación de reportes limpios listos para imprimir usando WeasyPrint.
 
-  - 🔐 Registro y Autenticación: Los usuarios pueden registrarse ✍️, iniciar sesión 🔑 y gestionar su perfil 🖋️.
+- **👤 Perfil de Usuario**:
+  - 🔐 Registro y Autenticación: Los usuarios pueden registrarse ✍️, iniciar sesión 🔑 y gestionar su perfil 🖋️ bajo un control estricto de privacidad de datos donde cada usuario solo accede a sus propios registros.
 
 ## ⚙️ Requisitos 📋
 
-- 🐍 Python 3.11+
-- 🐳 Docker y Docker Compose (para desarrollo local)
+- 🐍 Python 3.12+ (Recomendado)
+- 🐳 Docker y Docker Compose (para desarrollo local y soporte de bibliotecas de diagramación como WeasyPrint)
 - 🗄️ PostgreSQL (incluido en Docker)
-- ☁️ Cloudflare R2 (para almacenamiento de archivos)
+- ☁️ Cloudflare R2 (para almacenamiento de archivos de medios)
 
 ## 🔧 Configuración del Entorno
 
@@ -84,7 +93,7 @@ Estado validado localmente:
 | `BACKUP_RETENTION_COUNT` | Cantidad de backups a conservar | `7` |
 | `MERCADOPAGO_WEBHOOK_SECRET` | Clave secreta para validar la firma de Webhooks de Mercado Pago | `your-webhook-secret` |
 
-- 🐍 Python 3.x ([Documentación oficial](https://www.python.org/doc/))
+- 🐍 Python 3.12+ ([Documentación oficial](https://www.python.org/doc/))
 - 🐍 Django 4.2 (se instala junto con las dependencias del entorno virtual 🌐) ([Documentación oficial](https://docs.djangoproject.com/en/stable/))
 
 ## 🚀 Instalación y Configuración ⚙️
