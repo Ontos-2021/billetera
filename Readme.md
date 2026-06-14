@@ -184,10 +184,11 @@ Se añadió un sistema de respaldo cifrado que genera un dump (Postgres) o copia
    ```bash
    python manage.py backup_db
    ```
-4. Disparar vía endpoint protegido (requiere header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o usuario staff autenticado):
+4. Disparar vía endpoint protegido de forma segura (requiere de forma estricta enviar el header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o iniciar sesión con un usuario staff autenticado):
    ```bash
    curl -H "X-Backup-Token: $BACKUP_WEBHOOK_TOKEN" https://tu-dominio/admin/tools/backup
    ```
+   *Nota: Por motivos de seguridad de logs, ya no se admite el paso del token mediante query string (`?token=`).*
 5. Respuesta JSON ejemplo:
    ```json
    {"status":"ok","engine":"django.db.backends.postgresql","object_key":"backups/db/production/postgres-20250101-120000.dump.enc","r2_url":"s3://bucket/backups/db/production/postgres-20250101-120000.dump.enc","retention_kept":7}
@@ -298,4 +299,35 @@ Comportamiento:
 - Si el tópico no es `payment`, responde `200` sin efectos.
 - Si el pago no está `approved`, responde `200` sin activar suscripción.
 - Si el mismo `payment_id` ya fue procesado, no duplica ni extiende la suscripción.
+
+## 📈 Orquestación, Estado de Salud y CI/CD
+
+### 🔄 Integración Continua (GitHub Actions)
+
+El repositorio incorpora una rutina automatizada de compilación y control de calidad bajo [GitHub Actions](.github/workflows/ci.yml). 
+Ante cada `push` o `pull request` en las ramas `main` o `dev`, el pipeline realiza los siguientes pasos:
+1. Configura un entorno aislado en **Python 3.12**.
+2. Instala dependencias claves del sistema operativo necesarias para generar y exportar gráficos o PDF dinámicos via **WeasyPrint** y **Cairo**.
+3. Resuelve la lista unificada de librerías del proyecto.
+4. Ejecuta pruebas de consistencia lógica mediante el comando `python manage.py check`.
+5. Valida la integridad del software corriendo nuestra suite de tests (`python manage.py test`) usando una base de datos local temporal.
+
+### 🩺 Endpoint de Estado de Salud (Health Check)
+
+Soportado nativamente por orquestadores como **Coolify** o balanceadores de carga como **Railway**, el proyecto ofrece dos endpoints de estado de salud públicos:
+- `/healthz`
+- `/health/`
+
+Ambos devuelven una estructura JSON de diagnóstico. En lugar de simular una respuesta, los endpoints validan la conexión activa e integridad de lecto-escritura con la base de datos Postgres/SQLite en runtime:
+
+```json
+{
+  "status": "healthy",
+  "database": "healthy",
+  "timestamp": "2026-06-13T18:50:00.000000+00:00"
+}
+```
+
+En caso de que el motor SQL se congestione o experimente problemas operativos catastróficos, el microservicio responderá automáticamente con un código de respuesta **`503 Service Unavailable`** y su campo `database: unhealthy`, lo que permite que el balanceador de Coolify relance de inmediato una nueva instancia saludable de la billetera.
+
 
