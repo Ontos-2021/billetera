@@ -1,38 +1,47 @@
 # 💸 Billetera Virtual - Proyecto Django 🐍💻
 
-💸 **Billetera Virtual** es una aplicación 🌐 desarrollada con Django 🐍 que permite a los usuarios 👥 gestionar sus finanzas 💰 personales. Los usuarios pueden realizar un seguimiento 📊 de sus ingresos 📈 y gastos 💸, categorizar sus movimientos 📁 y mantener un control eficiente de su presupuesto (En desarrollo 🚧).
+💸 **Billetera Virtual** es una aplicación 🌐 desarrollada con Django 🐍 que permite a los usuarios 👥 gestionar sus finanzas 💰 personales de manera centralizada. Los usuarios pueden realizar un seguimiento 📊 de sus ingresos 📈 y gastos 💸, categorizar sus movimientos 📁, simular y saldar deudas 🤝, gestionar múltiples cuentas y monedas 💱, y analizar de forma interactiva el estado de su presupuesto mediante gráficos y reportes exportables.
 
 ## ⚙️ Funcionalidades Principales 🔧
 
 - **💸 Gastos**:
-
   - 📋 Lista de Gastos: Visualiza 👀 todos los gastos registrados.
-  - ➕ Crear Gasto: Agrega nuevos gastos, especificando descripción 📝, monto 💲, moneda 💵 y categoría 📊.
-  - ✏️ Editar Gasto: Modifica los detalles de un gasto existente.
-  - 🗑️ Eliminar Gasto: Elimina gastos registrados.
+  - 🛍️ Compras Globales: Agrupa múltiples ítems bajo un mismo consumo global indicando cantidades (xN) y tiendas asociadas con autocompletado inteligente.
+  - ➕ Crear Gasto: Agrega nuevos gastos independientes o agrupados, especificando descripción 📝, monto 💲, moneda 💵 y categoría 📊.
+  - ✏️ Editar Gasto: Modifica los detalles de un gasto o de una compra global existente en bloque.
+  - 🗑️ Eliminar Gasto: Elimina gastos registrados de forma segura recalculando balances.
 
 - **📈 Ingresos**:
-
   - 📋 Lista de Ingresos: Visualiza todos los ingresos registrados.
-  - ➕ Crear Ingreso: Registra nuevos ingresos, especificando detalles como monto 💲 y categoría 📊.
+  - ➕ Crear Ingreso: Registra nuevos ingresos, especificando detalles como monto 💲, medio de cobro y categoría 📊.
   - ✏️ Editar Ingreso: Actualiza los detalles de ingresos existentes.
   - 🗑️ Eliminar Ingreso: Permite eliminar ingresos si es necesario.
 
-- **💱 Monedas y Categorías**:
+- **🏦 Cuentas y Transferencias**:
+  - 💳 Gestión de Cuentas: Permite configurar múltiples cuentas bancarias o billeteras con saldos iniciales independientes.
+  - 🔄 Transferencias: Facilita el movimiento de saldos entre cuentas propias con registros transparentes y validaciones de fondos disponibles.
 
+- **🤝 Control de Deudas**:
+  - 📝 Registro de Deudores y Acreedores: Registra deudas activas indicando las fechas límites, conceptos financieros y personas involucradas.
+  - 💵 Flujo de Pago: Salda deudas parcial o totalmente impactando los balances generales de forma coherente.
+
+- **💱 Monedas y Categorías**:
   - 💵 Monedas: Permite utilizar diferentes monedas 💰 para ingresos 📈 y gastos 💸.
   - 📊 Categorías: Organiza ingresos 📈 y gastos 💸 con categorías para un mejor seguimiento.
 
-- **👤 Perfil de Usuario**:
+- **📊 Dashboard & Reportería**:
+  - 📈 Gráficos Interactivos: Análisis visual e intuitivo de consumos, distribución por rubros y balances temporales en el dashboard principal con filtros avanzados.
+  - 📄 Exportación PDF: Generación de reportes limpios listos para imprimir usando WeasyPrint.
 
-  - 🔐 Registro y Autenticación: Los usuarios pueden registrarse ✍️, iniciar sesión 🔑 y gestionar su perfil 🖋️.
+- **👤 Perfil de Usuario**:
+  - 🔐 Registro y Autenticación: Los usuarios pueden registrarse ✍️, iniciar sesión 🔑 y gestionar su perfil 🖋️ bajo un control estricto de privacidad de datos donde cada usuario solo accede a sus propios registros.
 
 ## ⚙️ Requisitos 📋
 
-- 🐍 Python 3.11+
-- 🐳 Docker y Docker Compose (para desarrollo local)
+- 🐍 Python 3.12+ (Recomendado)
+- 🐳 Docker y Docker Compose (para desarrollo local y soporte de bibliotecas de diagramación como WeasyPrint)
 - 🗄️ PostgreSQL (incluido en Docker)
-- ☁️ Cloudflare R2 (para almacenamiento de archivos)
+- ☁️ Cloudflare R2 (para almacenamiento de archivos de medios)
 
 ## 🔧 Configuración del Entorno
 
@@ -44,16 +53,13 @@ Se aplicaron cambios de hardening para reducir drift de despliegue y cerrar supe
 - **API cerrada por defecto**: Django REST Framework quedó con permisos autenticados por defecto. Los endpoints públicos se declaran explícitamente.
 - **JWT y login social explícitos**: los endpoints `/api/token/` y `/auth/social/google/` siguen siendo públicos, pero por configuración explícita y no por un default inseguro.
 - **Webhook de Mercado Pago endurecido**: ahora valida firma con `x-signature` + `x-request-id` usando `MERCADOPAGO_WEBHOOK_SECRET`, y evita reprocesar el mismo `payment_id` aprobado.
-- **Backup remoto endurecido**: el endpoint de backup ahora acepta solo `POST`, usa solo `X-Backup-Token` por header y registra eventos útiles en logs.
-- **Railway como plataforma única**: se removió el drift Koyeb/Render del setup y la configuración ahora se centra en Railway.
-- **Observabilidad mínima**: existe `/health/` con chequeo de base de datos y configuración de logging para consola.
 - **Cobertura de regresión ampliada**: se añadieron tests para seguridad de API y webhook de Mercado Pago.
 
 Estado validado localmente:
 
 - `python manage.py check` OK
 - `python manage.py test` OK
-- Suite actual: `165 tests`
+- Suite actual: `159 tests`
 
 ### 🔒 Variables de Entorno
 
@@ -65,9 +71,9 @@ Estado validado localmente:
    # Edita .env con tus credenciales reales
    ```
 
-2. **Para producción (Railway)**:
-   - Configura las variables en el panel de Railway
-   - Usa `.env.railway.example` como referencia
+2. **Para producción (Koyeb)**:
+   - Configura las variables en el panel de Koyeb
+   - Usa `.env.koyeb.example` como referencia
 
 ### 📋 Variables Requeridas
 
@@ -77,8 +83,7 @@ Estado validado localmente:
 | `DEBUG` | Modo debug (0/1) | `0` |
 | `SECRET_KEY` | Clave secreta de Django | `your-secret-key` |
 | `DATABASE_URL` | URL de la base de datos | `postgresql://...` |
-| `ALLOWED_HOSTS` | Hosts permitidos | `localhost,your-app.up.railway.app` |
-| `APP_BASE_URL` | URL pública base de la app para Railway | `https://your-app.up.railway.app` |
+| `ALLOWED_HOSTS` | Hosts permitidos | `localhost,your-app.koyeb.app` |
 | `AWS_ACCESS_KEY_ID` | Clave de acceso R2 | `your-r2-access-key` |
 | `AWS_SECRET_ACCESS_KEY` | Clave secreta R2 | `your-r2-secret-key` |
 | `AWS_STORAGE_BUCKET_NAME` | Nombre del bucket | `your-bucket-name` |
@@ -88,7 +93,7 @@ Estado validado localmente:
 | `BACKUP_RETENTION_COUNT` | Cantidad de backups a conservar | `7` |
 | `MERCADOPAGO_WEBHOOK_SECRET` | Clave secreta para validar la firma de Webhooks de Mercado Pago | `your-webhook-secret` |
 
-- 🐍 Python 3.x ([Documentación oficial](https://www.python.org/doc/))
+- 🐍 Python 3.12+ ([Documentación oficial](https://www.python.org/doc/))
 - 🐍 Django 4.2 (se instala junto con las dependencias del entorno virtual 🌐) ([Documentación oficial](https://docs.djangoproject.com/en/stable/))
 
 ## 🚀 Instalación y Configuración ⚙️
@@ -179,10 +184,11 @@ Se añadió un sistema de respaldo cifrado que genera un dump (Postgres) o copia
    ```bash
    python manage.py backup_db
    ```
-4. Disparar vía endpoint protegido con `POST` (requiere header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o usuario staff autenticado):
+4. Disparar vía endpoint protegido de forma segura (requiere de forma estricta enviar el header `X-Backup-Token` igual a `BACKUP_WEBHOOK_TOKEN` o iniciar sesión con un usuario staff autenticado):
    ```bash
-   curl -X POST -H "X-Backup-Token: $BACKUP_WEBHOOK_TOKEN" https://tu-dominio/admin/tools/backup
+   curl -H "X-Backup-Token: $BACKUP_WEBHOOK_TOKEN" https://tu-dominio/admin/tools/backup
    ```
+   *Nota: Por motivos de seguridad de logs, ya no se admite el paso del token mediante query string (`?token=`).*
 5. Respuesta JSON ejemplo:
    ```json
    {"status":"ok","engine":"django.db.backends.postgresql","object_key":"backups/db/production/postgres-20250101-120000.dump.enc","r2_url":"s3://bucket/backups/db/production/postgres-20250101-120000.dump.enc","retention_kept":7}
@@ -190,7 +196,7 @@ Se añadió un sistema de respaldo cifrado que genera un dump (Postgres) o copia
 
 Notas:
 - Asegúrate de que la imagen Docker tenga `postgresql-client` instalado para usar `pg_dump`.
-- Para Railway puedes programar un GitHub Action o job externo que haga `curl` al endpoint.
+- Para instancias gratuitas (Render/Koyeb) puedes programar un GitHub Action que haga `curl` al endpoint.
 - Política de retención elimina automáticamente los backups más antiguos bajo el prefijo `backups/db/<ENV>/`.
 
 #### Backup manual desde tu PC contra Postgres externo
@@ -294,25 +300,34 @@ Comportamiento:
 - Si el pago no está `approved`, responde `200` sin activar suscripción.
 - Si el mismo `payment_id` ya fue procesado, no duplica ni extiende la suscripción.
 
-### Endpoint de health
+## 📈 Orquestación, Estado de Salud y CI/CD
 
-- `GET /health/` responde el estado básico de la aplicación.
-- Verifica conectividad a base de datos.
-- Devuelve `503` si la base no está disponible.
+### 🔄 Integración Continua (GitHub Actions)
 
-## 🚂 Despliegue Railway
+El repositorio incorpora una rutina automatizada de compilación y control de calidad bajo [GitHub Actions](.github/workflows/ci.yml). 
+Ante cada `push` o `pull request` en las ramas `main` o `dev`, el pipeline realiza los siguientes pasos:
+1. Configura un entorno aislado en **Python 3.12**.
+2. Instala dependencias claves del sistema operativo necesarias para generar y exportar gráficos o PDF dinámicos via **WeasyPrint** y **Cairo**.
+3. Resuelve la lista unificada de librerías del proyecto.
+4. Ejecuta pruebas de consistencia lógica mediante el comando `python manage.py check`.
+5. Valida la integridad del software corriendo nuestra suite de tests (`python manage.py test`) usando una base de datos local temporal.
 
-- Plataforma objetivo actual: Railway.
-- Ruta canónica de arranque: [entrypoint.sh](entrypoint.sh).
-- [Procfile](Procfile) queda alineado al mismo entrypoint para evitar drift.
-- Variables recomendadas en producción:
-   - `ENV=production`
-   - `DEBUG=0`
-   - `SECRET_KEY`
-   - `DATABASE_URL`
-   - `APP_BASE_URL=https://your-app.up.railway.app`
-   - `CSRF_TRUSTED_ORIGINS=https://your-app.up.railway.app` o derivado equivalente
-   - `ALLOWED_HOSTS=your-app.up.railway.app` o derivado equivalente
+### 🩺 Endpoint de Estado de Salud (Health Check)
 
-Guía operativa breve en [docs/RAILWAY_DEPLOY.md](docs/RAILWAY_DEPLOY.md).
+Soportado nativamente por orquestadores como **Coolify** o balanceadores de carga como **Railway**, el proyecto ofrece dos endpoints de estado de salud públicos:
+- `/healthz`
+- `/health/`
+
+Ambos devuelven una estructura JSON de diagnóstico. En lugar de simular una respuesta, los endpoints validan la conexión activa e integridad de lecto-escritura con la base de datos Postgres/SQLite en runtime:
+
+```json
+{
+  "status": "healthy",
+  "database": "healthy",
+  "timestamp": "2026-06-13T18:50:00.000000+00:00"
+}
+```
+
+En caso de que el motor SQL se congestione o experimente problemas operativos catastróficos, el microservicio responderá automáticamente con un código de respuesta **`503 Service Unavailable`** y su campo `database: unhealthy`, lo que permite que el balanceador de Coolify relance de inmediato una nueva instancia saludable de la billetera.
+
 

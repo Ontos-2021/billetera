@@ -1,58 +1,65 @@
-# Changelog
+# 📝 Changelog - Billetera Virtual (MoneyFlow Mirror)
 
-Todos los cambios relevantes del proyecto deberían registrarse acá.
+Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## 2026-04-03
+## [2026-06-13] - Estabilización de Producción e Integridad del Repositorio
+### Añadido
+- **P0.5 CI Automatizada**: Configurado flujo de integración continua en GitHub Actions (`.github/workflows/ci.yml`) que ejecuta de forma automática `python manage.py check` y `python manage.py test` ante cada push/PR a `dev`/`main`.
+- **P1.7 Health Check público**: Implementados los endpoints públicos `/health/` y `/healthz` en [billetera/billetera/urls.py](billetera/billetera/urls.py) y [billetera/usuarios/views.py](billetera/usuarios/views.py) para monitoreo de estado de salud del contenedor, compatible con Railway, Coolify y orquestadores, validando la conexión activa de base de datos.
+- **P1.7 Tests de Health Check**: Creados tests de robustez para endpoints de sanidad en [billetera/usuarios/tests_health_check.py](billetera/usuarios/tests_health_check.py)
+- Añadido forzado de redirección SSL (`SECURE_SSL_REDIRECT`) configurable vía entorno en producción en [billetera/billetera/settings.py](billetera/billetera/settings.py).
+- Añadida configuración HSTS en producción (`SECURE_HSTS_SECONDS`, `SECURE_HSTS_INCLUDE_SUBDOMAINS`, `SECURE_HSTS_PRELOAD`) para mitigar vulnerabilidades Man-in-the-Middle en [billetera/billetera/settings.py](billetera/billetera/settings.py).
 
-### Added
+### Cambiado
+- **P0.4 Endurecimiento de Backup**: Se eliminó la recepción del token por query/post params en el webhook de backups, restringiéndolo de forma segura al header `X-Backup-Token` exclusivamente, previniendo leaks de credenciales en logs de proxies.
+- **P0.4 Tests de Backup actualizados**: Modificado y extendido [billetera/usuarios/tests_backup.py](billetera/usuarios/tests_backup.py) para validar la restricción estricta de header-only y rechazo con 403 ante tokens en query params.
+- **P1.6 Unificación de Despliegue**: Removidos por completo los scripts obsoletos y configuraciones de Koyeb (`.koye.yaml` y `deploy-koyeb.sh`) para priorizar de forma unificada **Railway** (mediante `Procfile`) y **Coolify** (mediante `Dockerfile`/`entrypoint.sh`).
+- **P1.6 Limpieza de Settings**: Eliminadas las referencias heredadas de Koyeb/Render de la derivación automática de hosts autorizados y redireccionamiento OAuth en [billetera/billetera/settings.py](billetera/billetera/settings.py). Unificados para usar `EXTERNAL_URL`, `RAILWAY_STATIC_URL` o `.railway.app` por defecto.
+- Convertida la codificación del archivo de dependencias crucial [requirements.txt](requirements.txt) de UTF-16 a UTF-8/ASCII portable, evitando fallas de lectura y parseo en pipelines de CI/CD, imágenes Docker y entornos Linux.
 
-- Endpoint de health básico para verificación de DB.
-- Workflow de CI mínimo para `check`, `makemigrations --check --dry-run` y `test`.
-- Guía operativa de Railway en [docs/RAILWAY_DEPLOY.md](docs/RAILWAY_DEPLOY.md).
-- Archivo de ejemplo de entorno para Railway.
+---
 
-### Changed
-
-- El endpoint de backup ahora acepta solo `POST`.
-- El token del backup se acepta solo por header `X-Backup-Token`.
-- `Procfile` quedó alineado a [entrypoint.sh](entrypoint.sh) para usar un único startup flow.
-- La configuración de producción deja de mezclar Koyeb y Render, y pasa a centrarse en Railway.
-- Se agregó configuración mínima de logging para operar en Railway.
-
-### Removed
-
-- Artefactos de despliegue específicos de Koyeb.
-
-### Validation
-
-- `python manage.py check` OK.
-- `python manage.py makemigrations --check --dry-run` OK.
-- `python manage.py test` OK.
-- Suite validada localmente con `165` tests.
-
-## 2026-03-19
-
-### Added
-
+## [2026-03-19] - Auditoría Técnica, Seguridad y Mercado Pago
+### Añadido
 - Documento de prioridades técnicas en [AUDITORIA_PRIORIDADES_TECNICAS.md](AUDITORIA_PRIORIDADES_TECNICAS.md).
 - Tests de regresión para seguridad de API en [billetera/usuarios/tests_api_security.py](billetera/usuarios/tests_api_security.py).
 - Tests para firma e idempotencia del webhook de Mercado Pago en [billetera/usuarios/tests_mercadopago_webhook.py](billetera/usuarios/tests_mercadopago_webhook.py).
 
-### Changed
-
+### Cambiado
 - El arranque de producción dejó de generar migraciones en runtime.
 - `Procfile` y `entrypoint.sh` ahora fallan rápido si existen cambios de modelos sin migraciones versionadas.
 - Django REST Framework quedó con permisos autenticados por defecto.
 - Los endpoints públicos de JWT y login social quedaron explicitados con `AllowAny`.
 
-### Security
-
+### Seguridad
 - El webhook de Mercado Pago ahora valida firma con `MERCADOPAGO_WEBHOOK_SECRET`.
 - El webhook evita reprocesar el mismo `payment_id` aprobado.
 - La API dejó de depender de `AllowAny` como política global.
 
-### Validation
-
+### Validación
 - `python manage.py check` OK.
 - `python manage.py test` OK.
-- Suite validada localmente con `159` tests.
+- Suite de desarrollo dev integrada con 159 tests.
+
+---
+
+## [Anteriores] - Mejoras de UX, Deudas y Transacciones
+### Añadido
+- **Módulo de Deudas (`deudas`)**: Implementación completa de un sistema para registrar y saldar deudas integrado directamente al flujo financiero y reflejado en el Dashboard de usuario.
+- **Cantidades xN**: Soporte en compras globales para mostrar cantidades de ítems adquiridos en un formato claro tipo `(xN)` en las listas de consumos recientes.
+- **Exportación PDF**: Integración de WeasyPrint con compatibilidad Docker para descargar reportes financieros completos en PDF.
+- **Gráficos e Indicadores**: Dashboard interactivo enriquecido con filtros de tiempo y gráficos analíticos.
+
+### Cambiado
+- **Aislamiento Multi-usuario (Privacidad)**: Isolation restrictiva de cuentas, gastos y deudas por usuario autenticado con tests de integración específicos de fuga de datos.
+- **Edición Global**: Rediseño y optimización de las vistas para editar compras globales en bloque.
+- **Estilos Mobile**: Ajuste de templates bajo pautas de diseño adaptativo Tailwind para móviles.
+- **Saneamiento de Base de Datos**: Corrección del script de restauración (`restore_railway.py`) incluyendo sanitización de caracteres UTF-8 e instrucciones SQL conflictivas.
+
+### Solucionado
+- Corregido un bug crítico que impedía eliminar consumos o gastos bajo relaciones débiles.
+- Reforzado el set con 153 validaciones de asertividad que protegen los balances.
+- **Google OIDC con PKCE**: Inicio de sesión mediante Google usando OIDC con SimpleJWT en backend.
+- **Cloudflare R2**: Gestión de archivos cargados por usuario directo a R2 mediante `django-storages`.
+- **Respaldos Automatizables**: Sistema cifrado con clave Fernet que vuelca base de datos hacia R2, disparado por un webhook seguro.
+

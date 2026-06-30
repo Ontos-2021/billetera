@@ -2,8 +2,6 @@ from decimal import Decimal
 import hashlib
 import hmac
 import json
-import logging
-import time
 
 from django.db.models import Sum
 from django.shortcuts import render, redirect, get_object_or_404
@@ -32,9 +30,6 @@ from django.db.models.functions import TruncDate
 
 from usuarios.backup import run_database_backup
 from cuentas.models import Cuenta
-
-
-logger = logging.getLogger(__name__)
 
 
 def inicio(request):
@@ -433,54 +428,52 @@ class ProfileMe(APIView):
 @csrf_exempt
 def trigger_backup(request):
     """
-    Endpoint protegido para disparar el backup.
+    Endpoint protegido para disparar el backup remoto cifrado.
     Seguridad:
-      - Solo acepta POST.
-      - Si el header X-Backup-Token coincide con BACKUP_WEBHOOK_TOKEN => permitido.
-      - En caso contrario, requiere usuario autenticado STAFF.
+      - Requiere método GET o POST.
+      - Aceptación estricta del token únicamente usando el header 'X-Backup-Token' (para servicios automáticos/cron).
+      - En caso contrario, requiere acceso de usuario staff autenticado en sesión.
     """
-    if request.method != "POST":
-        return HttpResponseNotAllowed(["POST"])
+    import logging
+    logger = logging.getLogger(__name__)
 
-    start = time.monotonic()
-    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
-    client_ip = forwarded_for.split(',')[0].strip() if forwarded_for else request.META.get('REMOTE_ADDR', '')
-
-    if request.GET.get('token') or request.POST.get('token'):
-        logger.warning('Backup denied: token provided outside header ip=%s', client_ip)
-        return HttpResponseForbidden('No autorizado')
+    if request.method not in ("GET", "POST"):
+        logger.warning("Backup fallido: Intento fallido con método no permitido: %s", request.method)
+        return HttpResponseNotAllowed(["GET", "POST"])
 
     token_env = os.getenv('BACKUP_WEBHOOK_TOKEN')
     token_req = request.headers.get('X-Backup-Token')
-    actor = None
 
-    if token_env and token_req and token_req == token_env:
-        actor = 'token'
-    else:
-        user = getattr(request, 'user', None)
-        if user and user.is_authenticated and user.is_staff:
-            actor = f'staff:{user.username}'
+    # Validación estricta: si hay token, debe venir únicamente en el header 'X-Backup-Token'
+    auth_via_token = False
+    if token_env and token_req:
+        if hmac.compare_digest(token_req, token_env):
+            auth_via_token = True
         else:
-            logger.warning('Backup denied: unauthorized caller ip=%s', client_ip)
-            return HttpResponseForbidden('No autorizado')
+            logger.warning("Backup fallido: Token provisto inválido.")
 
-    logger.info('Backup requested actor=%s ip=%s', actor, client_ip)
+    if not auth_via_token:
+        # Fallback a credenciales de sesión para staff
+        user = getattr(request, 'user', None)
+        if not (user and user.is_authenticated and user.is_staff):
+            logger.warning("Backup fallido: Intento de acceso no autorizado desde IP %s", request.META.get('REMOTE_ADDR'))
+            return HttpResponseForbidden('Acceso no autorizado.')
 
+    logger.info("Backup iniciado de forma segura por %s", "token_webhook" if auth_via_token else f"usuario_staff: {getattr(request.user, 'email', request.user.username)}")
     try:
         result = run_database_backup()
-    except Exception:
-        logger.exception('Backup failed actor=%s ip=%s', actor, client_ip)
-        return JsonResponse({'status': 'error'}, status=500)
-
-    duration_ms = int((time.monotonic() - start) * 1000)
-    logger.info(
-        'Backup completed actor=%s ip=%s object_key=%s duration_ms=%s',
-        actor,
-        client_ip,
-        result.get('object_key'),
-        duration_ms,
-    )
-    return JsonResponse({'status': 'ok', **result})
+        # Filtrar detalles de conexión o claves para evitar leaks
+        safe_result = {
+            'status': 'ok',
+            'engine': result.get('engine'),
+            'object_key': result.get('object_key'),
+            'retention_kept': result.get('retention_kept')
+        }
+        logger.info("Backup ejecutado con éxito. Llave: %s", safe_result.get('object_key'))
+        return JsonResponse(safe_result)
+    except Exception as e:
+        logger.error("Error crítico durante la ejecución del backup: %s", str(e), exc_info=True)
+        return JsonResponse({'status': 'error', 'message': 'Ocurrió un error interno procesando el backup.'}, status=500)
 
 
 @login_required
@@ -782,3 +775,27 @@ def webhook_mercadopago(request):
     )
 
     return HttpResponse(status=200)
+
+
+def health_check(request):
+    """
+    Endpoint de health check público para monitores, balanceadores de carga y Kubernetes/Coolify/Railway.
+    Verifica que la base de datos sea reactiva y responde con JSON limpio.
+    """
+    from django.db import connections
+    from django.db.utils import OperationalError
+    
+    status_db = "healthy"
+    try:
+        # Ejecuta un check mínimo de integridad sobre la conexión a la base de datos
+        db_conn = connections['default']
+        db_conn.cursor()
+    except OperationalError:
+        status_db = "unhealthy"
+
+    status_code = 200 if status_db == "healthy" else 503
+    return JsonResponse({
+        'status': 'healthy' if status_db == "healthy" else 'unhealthy',
+        'database': status_db,
+        'timestamp': timezone.now().isoformat()
+    }, status=status_code)

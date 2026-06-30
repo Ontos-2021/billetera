@@ -2,14 +2,14 @@
 
 ## Project Overview
 
-- **Stack:** Django 4, Gunicorn, PostgreSQL, Cloudflare R2 (via `django-storages`), Docker
-- **Main Apps:** `gastos` (expenses), `ingresos` (income), `usuarios` (users)
-- **Purpose:** Personal finance management—track, categorize, and visualize income/expenses.
+- **Stack:** Django 4, Gunicorn, Python 3.12, PostgreSQL, Cloudflare R2 (via `django-storages`), Docker
+- **Main Apps:** `gastos` (expenses), `ingresos` (income), `usuarios` (users), `cuentas` (accounts), `deudas` (debts)
+- **Purpose:** Personal finance management—track, categorize, and visualize income, expenses, bank accounts, bank/peer-to-peer transfers, and debts.
 
 ## Architecture & Patterns
 
-- **App Structure:** Each domain (`gastos`, `ingresos`, `usuarios`) is a Django app with its own models, views, templates, and tests.
-- **Settings:** Environment-driven via `.env` (use `python-dotenv`). Production settings target Railway with PostgreSQL and R2; local defaults to SQLite and local media.
+- **App Structure:** Each domain (`gastos`, `ingresos`, `usuarios`, `cuentas`, `deudas`) is a Django app with its own models, views, templates, and tests.
+- **Settings:** Environment-driven via `.env` (use `python-dotenv`). Production settings (Koyeb) use PostgreSQL and R2; local defaults to SQLite and local media.
 - **Static/Media:** Static files are served via WhiteNoise in production. Media files use Cloudflare R2 in production, local filesystem in dev.
 - **API:** REST endpoints via `djangorestframework` (see `api_views.py` in each app).
 - **Forms:** User profile image uploads are handled via forms and tested for R2 integration (`test_app_features.py`).
@@ -28,10 +28,10 @@
     `python manage.py runserver`
 - **Testing R2 Integration:**  
   - Run `test_app_features.py` to verify image upload and CSRF protection.
-- **Docker/Railway Deployment:**  
+- **Docker/Koyeb Deployment:**  
   - Build via Dockerfile; entrypoint runs migrations, collects static, starts Gunicorn.
-  - Use Railway variables and the canonical startup flow in `entrypoint.sh`.
-  - Environment variables are set via Railway dashboard.
+  - Use `deploy-koyeb.sh` for scripted deployment (requires Koyeb CLI).
+  - Environment variables are set via Koyeb dashboard or secrets.
 
 ## Conventions
 
@@ -49,9 +49,9 @@
 - **Cloudflare R2:**  
   - Configured via `django-storages` in `settings.py`.
   - Bucket, keys, and endpoint set via env vars.
-- **Railway:**  
-  - Can build from GitHub using the Dockerfile.
-  - PostgreSQL is configured via `DATABASE_URL` in Railway.
+- **Koyeb:**  
+  - Auto-builds from GitHub using Dockerfile.
+  - PostgreSQL provisioned via Koyeb CLI or dashboard.
 
 ## Key Files
 
@@ -59,7 +59,7 @@
 - `Dockerfile`, `entrypoint.sh`: Container build/run steps.
 - `requirements.txt`: All dependencies.
 - `test_app_features.py`: Example integration test for R2.
-- `docs/RAILWAY_DEPLOY.md`: Operational Railway deployment guide.
+- `deploy-koyeb.sh`: Automated deployment script.
 
 ## Example Patterns
 
